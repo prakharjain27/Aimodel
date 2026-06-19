@@ -5,6 +5,8 @@ create table if not exists public.profiles (
   id uuid references auth.users on delete cascade primary key,
   email text not null,
   credits integer not null default 10,
+  full_name text,
+  username text,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
@@ -20,8 +22,14 @@ create policy "Allow users to view their own profile"
 create or replace function public.handle_new_user()
 returns trigger as $$
 begin
-  insert into public.profiles (id, email, credits)
-  values (new.id, new.email, 10);
+  insert into public.profiles (id, email, credits, full_name, username)
+  values (
+    new.id,
+    new.email,
+    10,
+    coalesce(new.raw_user_meta_data->>'full_name', ''),
+    coalesce(new.raw_user_meta_data->>'username', '')
+  );
   return new;
 end;
 $$ language plpgsql security definer;

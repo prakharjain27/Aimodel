@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
 import { Sparkles, Plus, Image as ImageIcon, Coins, LogOut, ArrowRight, UserCircle, Download, Clock } from 'lucide-react'
 import CharacterActions from '@/components/CharacterActions'
 
@@ -18,7 +19,17 @@ export default async function DashboardPage() {
   let generations: any[] | null = []
 
   if (isDemoMode) {
-    user = { email: 'demo-user@studio.ai' }
+    const cookieStore = await cookies()
+    const demoSessionStr = cookieStore.get('demo_session')?.value
+    let demoUser = { email: 'demo-user@studio.ai', fullName: 'Demo User', username: 'demouser' }
+    if (demoSessionStr) {
+      try {
+        demoUser = JSON.parse(decodeURIComponent(demoSessionStr))
+      } catch (e) {
+        console.error("Failed to parse demo session cookie:", e)
+      }
+    }
+    user = demoUser
     credits = 10
   } else {
     // Verify authentication
@@ -32,10 +43,23 @@ export default async function DashboardPage() {
     // Fetch user profile (credits)
     const { data: profile } = await supabase
       .from('profiles')
-      .select('credits')
+      .select('credits, full_name, username')
       .single()
 
     credits = profile?.credits ?? 0
+    if (profile) {
+      user = {
+        ...user,
+        fullName: profile.full_name || user.user_metadata?.full_name || 'User',
+        username: profile.username || user.user_metadata?.username || user.email?.split('@')[0] || 'user'
+      }
+    } else {
+      user = {
+        ...user,
+        fullName: user.user_metadata?.full_name || 'User',
+        username: user.user_metadata?.username || user.email?.split('@')[0] || 'user'
+      }
+    }
 
     // Fetch user characters
     const { data: chars } = await supabase
@@ -55,8 +79,14 @@ export default async function DashboardPage() {
   // Logout action handler
   async function signOut() {
     'use server'
-    const supabase = await createClient()
-    await supabase.auth.signOut()
+    const isDemoMode = !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'your-supabase-project-url'
+    if (isDemoMode) {
+      const cookieStore = await cookies()
+      cookieStore.delete('demo_session')
+    } else {
+      const supabase = await createClient()
+      await supabase.auth.signOut()
+    }
     redirect('/')
   }
 
@@ -86,9 +116,13 @@ export default async function DashboardPage() {
             </div>
 
             {/* User Profile */}
-            <div className="hidden sm:flex items-center space-x-2 text-slate-400 text-sm bg-slate-900/40 border border-slate-900 px-3.5 py-1.5 rounded-full">
-              <UserCircle className="h-4 w-4 text-slate-500" />
-              <span className="max-w-[120px] truncate">{user.email}</span>
+            <div className="hidden sm:flex flex-col items-end text-xs mr-1">
+              <span className="font-bold text-slate-200">{user.fullName}</span>
+              <span className="text-slate-500 font-medium">@{user.username}</span>
+            </div>
+            <div className="hidden sm:flex items-center space-x-2 text-slate-400 text-sm bg-slate-900/40 border border-slate-900 px-3.5 py-1.5 rounded-full" title={user.email}>
+              <UserCircle className="h-4.5 w-4.5 text-violet-500" />
+              <span className="max-w-[120px] truncate text-slate-300 font-semibold">{user.email}</span>
             </div>
 
             {/* Logout Button */}

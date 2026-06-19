@@ -5,10 +5,12 @@ export const dynamic = 'force-dynamic'
 import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
-import { Sparkles, User, Lock, Mail, CheckCircle, ArrowRight, ShieldCheck, Zap } from 'lucide-react'
+import { Sparkles, User, Lock, Mail, CheckCircle, ArrowRight, ShieldCheck, Zap, AtSign } from 'lucide-react'
 
 export default function Home() {
   const [isSignUp, setIsSignUp] = useState(false)
+  const [fullName, setFullName] = useState('')
+  const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -23,6 +25,37 @@ export default function Home() {
     setErrorMsg(null)
     setSuccessMsg(null)
 
+    // Form Client-side Validations
+    if (isSignUp) {
+      if (!fullName.trim()) {
+        setErrorMsg("Full name is required.")
+        setLoading(false)
+        return
+      }
+      const cleanUsername = username.trim().replace(/^@/, '')
+      if (!cleanUsername) {
+        setErrorMsg("Username is required.")
+        setLoading(false)
+        return
+      }
+      if (cleanUsername.length < 3 || cleanUsername.length > 15) {
+        setErrorMsg("Username must be between 3 and 15 characters.")
+        setLoading(false)
+        return
+      }
+      if (!/^[a-zA-Z0-9_]+$/.test(cleanUsername)) {
+        setErrorMsg("Username can only contain letters, numbers, and underscores.")
+        setLoading(false)
+        return
+      }
+    }
+
+    if (password.length < 6) {
+      setErrorMsg("Password must be at least 6 characters.")
+      setLoading(false)
+      return
+    }
+
     try {
       // --- DEMO MODE BYPASS ---
       // If the URL is still the placeholder or undefined, bypass auth for testing.
@@ -31,17 +64,32 @@ export default function Home() {
       if (isDemoMode) {
         console.warn("Running in DEMO MODE. Bypassing real authentication.")
         await new Promise(res => setTimeout(res, 800)) // Simulate network delay
+        
+        const cleanUsername = username.trim().replace(/^@/, '')
+        const demoUser = {
+          email,
+          fullName: isSignUp ? fullName.trim() : (email.split('@')[0] || 'Demo User'),
+          username: isSignUp ? cleanUsername : (email.split('@')[0] || 'demouser')
+        }
+        
+        document.cookie = `demo_session=${encodeURIComponent(JSON.stringify(demoUser))}; path=/; max-age=86400`
         router.push('/dashboard')
+        router.refresh()
         return
       }
       // -------------------------
 
       if (isSignUp) {
+        const cleanUsername = username.trim().replace(/^@/, '')
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
             emailRedirectTo: `${window.location.origin}/api/auth/callback`,
+            data: {
+              full_name: fullName.trim(),
+              username: cleanUsername,
+            }
           },
         })
 
@@ -51,6 +99,8 @@ export default function Home() {
           setSuccessMsg("Check your inbox to verify your email address and claim your 10 free credits!")
           setEmail('')
           setPassword('')
+          setFullName('')
+          setUsername('')
         } else if (data?.user && data.session) {
           router.push('/dashboard')
         }
@@ -187,6 +237,53 @@ export default function Home() {
                   <span className="font-semibold">Registration Successful!</span>
                   <span>{successMsg}</span>
                 </div>
+              )}
+
+              {isSignUp && (
+                <>
+                  <div className="space-y-1.5 transition-all">
+                    <label className="text-xs font-semibold text-slate-300 tracking-wide uppercase">Full Name</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                        <User className="h-5 w-5" />
+                      </div>
+                      <input
+                        type="text"
+                        required
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        placeholder="John Doe"
+                        className="w-full pl-11 pr-4 py-3 bg-slate-950/80 border border-slate-800 rounded-2xl text-slate-100 placeholder-slate-600 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5 transition-all">
+                    <label className="text-xs font-semibold text-slate-300 tracking-wide uppercase">Username</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                        <AtSign className="h-5 w-5" />
+                      </div>
+                      <input
+                        type="text"
+                        required
+                        value={username}
+                        onChange={(e) => {
+                          let val = e.target.value
+                          if (val === '@') {
+                            setUsername('')
+                          } else if (val && !val.startsWith('@')) {
+                            setUsername('@' + val.replace(/\s+/g, ''))
+                          } else {
+                            setUsername(val.replace(/\s+/g, ''))
+                          }
+                        }}
+                        placeholder="@username"
+                        className="w-full pl-11 pr-4 py-3 bg-slate-950/80 border border-slate-800 rounded-2xl text-slate-100 placeholder-slate-600 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all"
+                      />
+                    </div>
+                  </div>
+                </>
               )}
 
               <div className="space-y-1.5">
