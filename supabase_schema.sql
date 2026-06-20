@@ -18,6 +18,11 @@ create policy "Allow users to view their own profile"
   on public.profiles for select 
   using (auth.uid() = id);
 
+create policy "Allow users to update their own profile"
+  on public.profiles for update
+  using (auth.uid() = id)
+  with check (auth.uid() = id);
+
 -- 2. Create trigger to automatically create a profile on new user signup
 create or replace function public.handle_new_user()
 returns trigger as $$
@@ -66,10 +71,22 @@ create table if not exists public.characters (
 alter table public.characters enable row level security;
 
 -- Policies for characters
-create policy "Allow users to manage their own characters"
-  on public.characters for all
+create policy "Allow users to view their own characters"
+  on public.characters for select
+  using (auth.uid() = user_id);
+
+create policy "Allow users to insert their own characters"
+  on public.characters for insert
+  with check (auth.uid() = user_id);
+
+create policy "Allow users to update their own characters"
+  on public.characters for update
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
+
+create policy "Allow users to delete their own characters"
+  on public.characters for delete
+  using (auth.uid() = user_id);
 
 -- 4. Create generations table
 create table if not exists public.generations (
@@ -86,23 +103,65 @@ create table if not exists public.generations (
 alter table public.generations enable row level security;
 
 -- Policies for generations
-create policy "Allow users to manage their own generations"
-  on public.generations for all
+create policy "Allow users to view their own generations"
+  on public.generations for select
+  using (auth.uid() = user_id);
+
+create policy "Allow users to insert their own generations"
+  on public.generations for insert
+  with check (auth.uid() = user_id);
+
+create policy "Allow users to update their own generations"
+  on public.generations for update
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
 
+create policy "Allow users to delete their own generations"
+  on public.generations for delete
+  using (auth.uid() = user_id);
+
 -- Storage bucket configurations:
--- Note: Make sure to create a public storage bucket named "influencer-studio" in your Supabase Dashboard under Storage.
--- Then execute the following policies to enable access:
---
+-- Create a public storage bucket named "influencer-studio" if it doesn't exist
+insert into storage.buckets (id, name, public)
+values ('influencer-studio', 'influencer-studio', true)
+on conflict (id) do nothing;
+
+-- Enable RLS on storage.objects
+alter table storage.objects enable row level security;
+
 -- Policy for inserting files:
--- create policy "Allow authenticated users to upload files"
---   on storage.objects for insert
---   to authenticated
---   with check (bucket_id = 'influencer-studio');
---
+create policy "Allow authenticated users to upload files"
+  on storage.objects for insert
+  to authenticated
+  with check (
+    bucket_id = 'influencer-studio'
+    and split_part(name, '/', 2) = auth.uid()::text
+  );
+
+-- Policy for updating/overwriting files:
+create policy "Allow authenticated users to update their own files"
+  on storage.objects for update
+  to authenticated
+  using (
+    bucket_id = 'influencer-studio'
+    and split_part(name, '/', 2) = auth.uid()::text
+  )
+  with check (
+    bucket_id = 'influencer-studio'
+    and split_part(name, '/', 2) = auth.uid()::text
+  );
+
+-- Policy for deleting files:
+create policy "Allow authenticated users to delete their own files"
+  on storage.objects for delete
+  to authenticated
+  using (
+    bucket_id = 'influencer-studio'
+    and split_part(name, '/', 2) = auth.uid()::text
+  );
+
 -- Policy for reading files:
--- create policy "Allow public to read files"
---   on storage.objects for select
---   to public
---   using (bucket_id = 'influencer-studio');
+create policy "Allow public to read files"
+  on storage.objects for select
+  to public
+  using (bucket_id = 'influencer-studio');
