@@ -88,11 +88,16 @@ export async function POST(request: Request) {
                 Target Scene/Action: ${scenePrompt}
                 The character has these properties:
                 - Name: ${character.name}
+                - Gender: ${character.gender || 'Female'}
                 - Age: ${character.age} years old
+                - Height: ${character.height || 170} cm tall
                 - Skin Tone: ${character.skin_tone}
                 - Body Type: ${character.body_type}
-                - Hair Color & Style: ${character.hair_color_style}
-                - Eye Color: ${character.eye_color}
+                - Face Shape: ${character.face_shape || 'Oval'}
+                - Face Features: ${character.face_features || 'symmetrical'}
+                - Hair Style & Color: ${character.hair_color_style}
+                - Eye Color & Shape: ${character.eye_color} ${character.eye_shape ? `(${character.eye_shape} shape)` : ''}
+                - Tattoos: ${character.tattoos || 'None'}
                 - Default Vibe: ${character.style_vibe}
                 
                 Analyze the face details in the attached image (expression, face shape, features) and blend them with the properties above. Describe the final character in the target scene with realistic pose, clothing matching the vibe, lighting (cinematic/natural), and photorealistic quality.`,
@@ -116,7 +121,7 @@ export async function POST(request: Request) {
     } catch (visionErr) {
       console.error('OpenAI Vision prompt enhancement failed, falling back to raw prompt:', visionErr)
       // Fallback: build a simple prompt text manually if GPT Vision fails
-      generatedPrompt = `A photorealistic image of a person, ${character.age} years old, skin tone: ${character.skin_tone}, body type: ${character.body_type}, hair style: ${character.hair_color_style}, eye color: ${character.eye_color}, style vibe: ${character.style_vibe}, in the following scene: ${scenePrompt}`
+      generatedPrompt = `A photorealistic image of a person, ${character.gender || 'Female'}, ${character.age} years old, height ${character.height || 170}cm, skin tone: ${character.skin_tone}, body type: ${character.body_type}, face shape: ${character.face_shape || 'Oval'}, hair style: ${character.hair_color_style}, eye color: ${character.eye_color}, tattoos: ${character.tattoos || 'None'}, style vibe: ${character.style_vibe}, in the following scene: ${scenePrompt}`
     }
 
     // 7. Call Replicate Flux-Schnell to generate the body-morph target image
