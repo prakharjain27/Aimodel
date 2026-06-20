@@ -194,10 +194,11 @@ export async function POST(request: Request) {
       }
 
       const dalleResponse = await openai.images.generate({
-        model: 'dall-e-3',
+        model: "dall-e-3",
         prompt: generatedPrompt,
         n: 1,
         size: dalleSize,
+        quality: "standard",
       })
 
       finalImageUrl = dalleResponse.data?.[0]?.url || ''
