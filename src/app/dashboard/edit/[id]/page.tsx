@@ -4,79 +4,42 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
-import { Sparkles, ArrowLeft, Upload, Loader2, HelpCircle, Coins, Heart, ChevronRight } from 'lucide-react'
+import { Sparkles, ArrowLeft, Upload, Loader2, HelpCircle, Coins, Check } from 'lucide-react'
 import { use } from 'react'
 
 // Options Constants
 const GENDERS = [
-  { id: 'Male', name: 'Male', image: '/male_avatar.png' },
-  { id: 'Female', name: 'Female', image: '/female_avatar.png' }
-]
-
-const BODY_TYPES = [
-  { id: 'Slim/Athletic', label: 'Slim / Athletic', desc: 'Lean and toned silhouette' },
-  { id: 'Curvy', label: 'Curvy', desc: 'Soft curves with defined lines' },
-  { id: 'Muscular/Fit', label: 'Muscular / Fit', desc: 'Highly defined athletic build' },
-  { id: 'Petite', label: 'Petite', desc: 'Shorter and compact frame' },
-  { id: 'Average', label: 'Average', desc: 'Standard proportioned build' }
+  { id: 'Male', name: 'Male AI Model', image: '/male_face.png' },
+  { id: 'Female', name: 'Female AI Model', image: '/female_face.png' }
 ]
 
 const SKIN_TONES = [
-  { name: 'Fair', color: '#FDF0D5', class: 'bg-[#FDF0D5]' },
-  { name: 'Peach', color: '#F2C6A3', class: 'bg-[#F2C6A3]' },
-  { name: 'Olive', color: '#D5A982', class: 'bg-[#D5A982]' },
-  { name: 'Bronze/Tan', color: '#9C6644', class: 'bg-[#9C6644]' },
-  { name: 'Dark', color: '#472F22', class: 'bg-[#472F22]' }
-]
-
-const FACE_SHAPES = [
-  { id: 'Oval', label: 'Oval', desc: 'Symmetric, classic proportions' },
-  { id: 'Round', label: 'Round', desc: 'Soft angles, equal width/length' },
-  { id: 'Square', label: 'Square', desc: 'Strong, defined jawline' },
-  { id: 'Heart', label: 'Heart', desc: 'Wide forehead, pointed chin' },
-  { id: 'Chiseled', label: 'Chiseled', desc: 'Sharp, angular model bone structure' }
-]
-
-const HAIR_STYLES = [
-  { id: 'Long Wavy', label: 'Long Wavy' },
-  { id: 'Sleek Bob', label: 'Sleek Bob' },
-  { id: 'Classic Crop', label: 'Classic Crop' },
-  { id: 'Pixie Cut', label: 'Pixie Cut' },
-  { id: 'Messy Shag', label: 'Messy Shag' },
-  { id: 'Undercut', label: 'Undercut' }
+  { name: 'Fair', hex: '#FDF0D5' },
+  { name: 'Pale/Peach', hex: '#F3C6A3' },
+  { name: 'Olive', hex: '#D5A982' },
+  { name: 'Bronze', hex: '#BA8E68' },
+  { name: 'Tan/Brown', hex: '#9C6644' },
+  { name: 'Deep', hex: '#472F22' }
 ]
 
 const HAIR_COLORS = [
   { name: 'Black', hex: '#09090b' },
-  { name: 'Blonde', hex: '#fef08a' },
-  { name: 'Chestnut Brown', hex: '#78350f' },
-  { name: 'Auburn Red', hex: '#991b1b' },
-  { name: 'Platinum Grey', hex: '#cbd5e1' },
-  { name: 'Neon Blue', hex: '#06b6d4' }
-]
-
-const EYE_SHAPES = [
-  { id: 'Almond', label: 'Almond' },
-  { id: 'Round', label: 'Round' },
-  { id: 'Hooded', label: 'Hooded' },
-  { id: 'Monolid', label: 'Monolid' },
-  { id: 'Upturned', label: 'Upturned' }
+  { name: 'Brown', hex: '#5c3d2e' },
+  { name: 'Blonde', hex: '#ecd599' },
+  { name: 'Red', hex: '#b83b1d' },
+  { name: 'Auburn', hex: '#843b2b' },
+  { name: 'White', hex: '#e2e8f0' },
+  { name: 'Pink', hex: '#f472b6' },
+  { name: 'Blue', hex: '#2563eb' }
 ]
 
 const EYE_COLORS = [
-  { name: 'Deep Blue', class: 'bg-blue-600' },
-  { name: 'Emerald Green', class: 'bg-emerald-600' },
-  { name: 'Warm Brown', class: 'bg-amber-800' },
-  { name: 'Amber Hazel', class: 'bg-amber-600' },
-  { name: 'Steel Grey', class: 'bg-slate-550' }
-]
-
-const TATTOOS = [
-  { id: 'None', label: 'No Tattoos' },
-  { id: 'Full Sleeve', label: 'Full Sleeve Ink' },
-  { id: 'Minimalist Geometry', label: 'Minimalist Geometric' },
-  { id: 'Cybernetic Glow', label: 'Cybernetic Glow Lines' },
-  { id: 'Chest Piece', label: 'Artistic Chest Piece' }
+  { name: 'Brown', gradient: 'radial-gradient(circle at 35% 35%, #78350f 0%, #451a03 70%, #000 100%)' },
+  { name: 'Black', gradient: 'radial-gradient(circle at 35% 35%, #1e293b 0%, #0f172a 70%, #000 100%)' },
+  { name: 'Blue', gradient: 'radial-gradient(circle at 35% 35%, #3b82f6 0%, #1d4ed8 70%, #000 100%)' },
+  { name: 'Green', gradient: 'radial-gradient(circle at 35% 35%, #10b981 0%, #047857 70%, #000 100%)' },
+  { name: 'Hazel', gradient: 'radial-gradient(circle at 35% 35%, #d97706 0%, #78350f 70%, #000 100%)' },
+  { name: 'Grey', gradient: 'radial-gradient(circle at 35% 35%, #94a3b8 0%, #475569 70%, #000 100%)' }
 ]
 
 const STYLE_VIBES = [
@@ -101,12 +64,12 @@ export default function EditCharacterPage({ params }: { params: Promise<{ id: st
   const [age, setAge] = useState(24)
   const [height, setHeight] = useState(170)
   const [skinTone, setSkinTone] = useState('Olive')
-  const [bodyType, setBodyType] = useState('Slim/Athletic')
-  const [faceShape, setFaceShape] = useState('Chiseled')
-  const [hairStyle, setHairStyle] = useState('Long Wavy')
+  const [bodyType, setBodyType] = useState('Slim')
+  const [faceShape, setFaceShape] = useState('Oval')
+  const [hairStyle, setHairStyle] = useState('Straight')
   const [hairColor, setHairColor] = useState('Blonde')
   const [eyeShape, setEyeShape] = useState('Almond')
-  const [eyeColor, setEyeColor] = useState('Deep Blue')
+  const [eyeColor, setEyeColor] = useState('Blue')
   const [tattoos, setTattoos] = useState('None')
   const [faceFeatures, setFaceFeatures] = useState('Sharp jawline, dimples')
   const [birthmarks, setBirthmarks] = useState('Light freckles')
@@ -134,23 +97,23 @@ export default function EditCharacterPage({ params }: { params: Promise<{ id: st
         setUser({ id: 'demo-user-123', email: 'demo-user@studio.ai' })
         setCredits(10)
         
-        // Mock existing character data for editing
+        // Mock existing character data
         setName('Mia Jenkins')
         setGender('Female')
         setAge(24)
         setHeight(168)
         setSkinTone('Olive')
-        setBodyType('Slim/Athletic')
-        setFaceShape('Chiseled')
-        setHairStyle('Long Wavy')
+        setBodyType('Slim')
+        setFaceShape('Oval')
+        setHairStyle('Straight')
         setHairColor('Blonde')
         setEyeShape('Almond')
-        setEyeColor('Deep Blue')
-        setTattoos('Cybernetic Glow')
+        setEyeColor('Blue')
+        setTattoos('None')
         setFaceFeatures('Sharp jawline, dimples')
         setBirthmarks('Light freckles across the nose bridge')
         setSignaturePose('Looking over shoulder with a soft smile')
-        setStyleVibe('Cyberpunk Techwear')
+        setStyleVibe('High-Fashion Streetwear')
         setPreviewUrl('https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=800&q=80')
         
         setInitialLoading(false)
@@ -184,8 +147,8 @@ export default function EditCharacterPage({ params }: { params: Promise<{ id: st
       setAge(char.age)
       setHeight(char.height || 170)
       setSkinTone(char.skin_tone)
-      setBodyType(char.body_type)
-      setFaceShape(char.face_shape || 'Chiseled')
+      setBodyType(char.body_type || 'Slim')
+      setFaceShape(char.face_shape || 'Oval')
       
       // Parse hair_color_style (e.g. "Blonde / Long Wavy")
       if (char.hair_color_style.includes('/')) {
@@ -307,8 +270,8 @@ export default function EditCharacterPage({ params }: { params: Promise<{ id: st
   return (
     <div className="flex-1 min-h-screen bg-[#0A0F1E] text-slate-100 flex flex-col relative overflow-hidden">
       {/* Background decoration */}
-      <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-violet-900/10 blur-[130px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-cyan-900/10 blur-[130px] pointer-events-none" />
+      <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-violet-955/15 blur-[130px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-cyan-955/10 blur-[130px] pointer-events-none" />
 
       {/* Header */}
       <header className="border-b border-violet-900/20 bg-[#0A0F1E]/80 backdrop-blur-md sticky top-0 z-50 px-6 py-4">
@@ -331,7 +294,7 @@ export default function EditCharacterPage({ params }: { params: Promise<{ id: st
         </div>
       </header>
 
-      {/* Form Content */}
+      {/* Creator Interface */}
       <main className="max-w-7xl mx-auto w-full px-6 py-10 space-y-8 relative z-10 flex-1">
         
         {/* Back Link */}
@@ -346,14 +309,14 @@ export default function EditCharacterPage({ params }: { params: Promise<{ id: st
         {/* Title */}
         <div>
           <h1 className="text-3xl font-extrabold text-white tracking-tight" style={{ fontFamily: "'Syne', sans-serif" }}>Edit Character</h1>
-          <p className="text-sm text-slate-400">Modify the physical features and characteristics of your virtual model.</p>
+          <p className="text-sm text-slate-400">Modify your virtual AI model with detailed physical traits in a game-like creator.</p>
         </div>
 
         {/* Form Container */}
         <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
           {/* Left Column: Visual Options (7 cols) */}
-          <div className="lg:col-span-7 space-y-8 bg-[#0F1629]/40 border border-violet-900/10 p-6 sm:p-8 rounded-3xl backdrop-blur-xl">
+          <div className="lg:col-span-7 space-y-8 bg-[#0F1629]/45 border border-violet-900/10 p-6 sm:p-8 rounded-3xl backdrop-blur-xl">
             {errorMsg && (
               <div className="p-4 rounded-xl bg-rose-950/40 border border-rose-900/60 text-rose-200 text-sm">
                 {errorMsg}
@@ -362,7 +325,7 @@ export default function EditCharacterPage({ params }: { params: Promise<{ id: st
 
             {/* Custom Name */}
             <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-300 tracking-wide uppercase">Character Name</label>
+              <label className="text-xs font-bold text-slate-300 tracking-wide uppercase">AI Influencer Name</label>
               <input
                 type="text"
                 required
@@ -373,10 +336,10 @@ export default function EditCharacterPage({ params }: { params: Promise<{ id: st
               />
             </div>
 
-            {/* Gender Selection Cards */}
+            {/* GENDER SELECTION (Clean Cards with Soft Glow, Realistic Images, No Neon) */}
             <div className="space-y-3">
-              <label className="text-xs font-bold text-slate-300 tracking-wide uppercase">1. Gender Identity</label>
-              <div className="grid grid-cols-2 gap-4">
+              <label className="text-xs font-bold text-slate-350 tracking-wide uppercase">1. Gender Selection</label>
+              <div className="grid grid-cols-2 gap-5">
                 {GENDERS.map((g) => {
                   const isSelected = gender === g.id
                   return (
@@ -384,18 +347,18 @@ export default function EditCharacterPage({ params }: { params: Promise<{ id: st
                       key={g.id}
                       type="button"
                       onClick={() => setGender(g.id)}
-                      className={`relative rounded-2xl overflow-hidden aspect-[4/3] border transition-all duration-300 ${
+                      className={`relative rounded-3xl overflow-hidden aspect-[4/3] border transition-all duration-300 ${
                         isSelected 
-                          ? 'border-violet-500 ring-2 ring-violet-500 shadow-lg shadow-violet-500/10' 
-                          : 'border-violet-900/20 opacity-70 hover:opacity-100'
+                          ? 'border-violet-500/80 shadow-[0_0_20px_rgba(139,92,246,0.3)] ring-2 ring-violet-500/50' 
+                          : 'border-violet-900/10 opacity-70 hover:opacity-100 hover:border-violet-900/30'
                       }`}
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={g.image} alt={g.name} className="w-full h-full object-cover object-top" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent" />
-                      <div className="absolute bottom-3 left-3 flex items-center space-x-2">
-                        <span className="text-sm font-bold text-white">{g.name}</span>
-                        {isSelected && <Sparkles className="h-4 w-4 text-violet-400 animate-pulse" />}
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent" />
+                      <div className="absolute bottom-3 left-4 right-4 flex justify-between items-center">
+                        <span className="text-sm font-bold text-white tracking-wide">{g.name}</span>
+                        {isSelected && <div className="bg-violet-500 p-1 rounded-full"><Check className="h-3 w-3 text-white" /></div>}
                       </div>
                     </button>
                   )
@@ -403,69 +366,83 @@ export default function EditCharacterPage({ params }: { params: Promise<{ id: st
               </div>
             </div>
 
-            {/* Body Type Cards */}
+            {/* FACE SHAPE (6 Options with actual face outline illustrations) */}
             <div className="space-y-3">
-              <label className="text-xs font-bold text-slate-300 tracking-wide uppercase">2. Body Type</label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {BODY_TYPES.map((b) => {
-                  const isSelected = bodyType === b.id
+              <label className="text-xs font-bold text-slate-355 tracking-wide uppercase">2. Face Shape Outline</label>
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+                {[
+                  {
+                    id: 'Oval',
+                    svg: (
+                      <svg viewBox="0 0 100 100" className="w-12 h-14 stroke-current fill-none" strokeWidth="2.5">
+                        <path d="M50,15 C28,15 28,45 28,68 C28,84 38,86 50,86 C62,86 72,84 72,68 C72,45 72,15 50,15 Z" />
+                      </svg>
+                    )
+                  },
+                  {
+                    id: 'Round',
+                    svg: (
+                      <svg viewBox="0 0 100 100" className="w-12 h-14 stroke-current fill-none" strokeWidth="2.5">
+                        <path d="M50,16 C31,16 30,34 30,52 C30,70 38,80 50,80 C62,80 70,70 70,52 C70,34 69,16 50,16 Z" />
+                      </svg>
+                    )
+                  },
+                  {
+                    id: 'Square',
+                    svg: (
+                      <svg viewBox="0 0 100 100" className="w-12 h-14 stroke-current fill-none" strokeWidth="2.5">
+                        <path d="M50,16 C31,16 29,26 29,66 C29,81 36,82 50,82 C64,82 71,81 71,66 C71,26 69,16 50,16 Z" />
+                      </svg>
+                    )
+                  },
+                  {
+                    id: 'Heart',
+                    svg: (
+                      <svg viewBox="0 0 100 100" className="w-12 h-14 stroke-current fill-none" strokeWidth="2.5">
+                        <path d="M50,16 C27,13 25,34 25,54 C25,68 38,79 50,85 C62,79 75,68 75,54 C75,34 73,13 50,16 Z" />
+                      </svg>
+                    )
+                  },
+                  {
+                    id: 'Diamond',
+                    svg: (
+                      <svg viewBox="0 0 100 100" className="w-12 h-14 stroke-current fill-none" strokeWidth="2.5">
+                        <path d="M50,16 C33,34 26,48 26,60 C26,73 38,83 50,85 C62,83 74,73 74,60 C74,48 67,34 50,16 Z" />
+                      </svg>
+                    )
+                  },
+                  {
+                    id: 'Oblong',
+                    svg: (
+                      <svg viewBox="0 0 100 100" className="w-12 h-14 stroke-current fill-none" strokeWidth="2.5">
+                        <path d="M50,10 C32,10 32,24 32,74 C32,87 40,89 50,89 C60,89 68,87 68,74 C68,24 68,10 50,10 Z" />
+                      </svg>
+                    )
+                  }
+                ].map((f) => {
+                  const isSelected = faceShape === f.id
                   return (
                     <button
-                      key={b.id}
+                      key={f.id}
                       type="button"
-                      onClick={() => setBodyType(b.id)}
-                      className={`flex flex-col text-left p-4 rounded-2xl border transition-all ${
+                      onClick={() => setFaceShape(f.id)}
+                      className={`group flex flex-col items-center justify-between p-3 rounded-2xl border transition-all ${
                         isSelected 
-                          ? 'bg-violet-950/20 border-violet-500 shadow-md' 
-                          : 'bg-[#0A0F1E]/60 border-violet-900/10 hover:border-violet-850'
+                          ? 'border-violet-500 bg-violet-950/20 text-violet-400' 
+                          : 'border-violet-900/10 bg-[#0A0F1E]/60 text-slate-500 hover:border-slate-800 hover:text-slate-350'
                       }`}
                     >
-                      <span className="font-bold text-sm text-slate-200">{b.label}</span>
-                      <span className="text-xs text-slate-500 mt-1">{b.desc}</span>
+                      <div className="mb-2 transition-transform group-hover:scale-105">{f.svg}</div>
+                      <span className="text-[10px] font-bold tracking-wide">{f.id}</span>
                     </button>
                   )
                 })}
               </div>
             </div>
 
-            {/* Height Slider & Age */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {/* Height */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center text-xs font-bold text-slate-300 tracking-wide uppercase">
-                  <span>Height</span>
-                  <span className="text-violet-400 font-extrabold text-sm">{height} cm</span>
-                </div>
-                <input
-                  type="range"
-                  min="140"
-                  max="210"
-                  value={height}
-                  onChange={(e) => setHeight(Number(e.target.value))}
-                  className="w-full accent-violet-500 h-1.5 bg-slate-900 rounded-lg cursor-pointer"
-                />
-              </div>
-
-              {/* Age Slider */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center text-xs font-bold text-slate-300 tracking-wide uppercase">
-                  <span>Age</span>
-                  <span className="text-violet-400 font-extrabold text-sm">{age} years</span>
-                </div>
-                <input
-                  type="range"
-                  min="18"
-                  max="60"
-                  value={age}
-                  onChange={(e) => setAge(Number(e.target.value))}
-                  className="w-full accent-violet-500 h-1.5 bg-slate-900 rounded-lg cursor-pointer"
-                />
-              </div>
-            </div>
-
-            {/* Skin Tone Color Palette */}
+            {/* SKIN TONE (Color swatches - 6 shades - no text - checkmark on selection) */}
             <div className="space-y-3">
-              <label className="text-xs font-bold text-slate-300 tracking-wide uppercase">3. Skin Tone Palette</label>
+              <label className="text-xs font-bold text-slate-350 tracking-wide uppercase">3. Skin Tone Swatch</label>
               <div className="flex flex-wrap gap-4 items-center">
                 {SKIN_TONES.map((s) => {
                   const isSelected = skinTone === s.name
@@ -474,157 +451,364 @@ export default function EditCharacterPage({ params }: { params: Promise<{ id: st
                       key={s.name}
                       type="button"
                       onClick={() => setSkinTone(s.name)}
+                      className={`w-11 h-11 rounded-full relative transition-transform hover:scale-105 active:scale-95 shadow-lg border border-slate-900/40`}
+                      style={{ backgroundColor: s.hex }}
+                      title={s.name}
+                    >
+                      {isSelected && (
+                        <div className="absolute inset-0 m-auto w-6 h-6 rounded-full bg-slate-950/70 flex items-center justify-center border border-white/20">
+                          <Check className="h-3.5 w-3.5 text-white" />
+                        </div>
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* HAIR COLOR (Color swatches with actual hair shades) */}
+            <div className="space-y-3">
+              <label className="text-xs font-bold text-slate-355 tracking-wide uppercase">4. Hair Color Shade</label>
+              <div className="flex flex-wrap gap-3">
+                {HAIR_COLORS.map((hc) => {
+                  const isSelected = hairColor === hc.name
+                  return (
+                    <button
+                      key={hc.name}
+                      type="button"
+                      onClick={() => setHairColor(hc.name)}
                       className={`flex items-center gap-2 px-3 py-2 rounded-full border transition-all ${
                         isSelected 
                           ? 'border-violet-500 bg-violet-950/20' 
                           : 'border-violet-900/10 bg-[#0A0F1E]/60 hover:border-slate-800'
                       }`}
                     >
-                      <span className={`w-5 h-5 rounded-full ${s.class} shadow-inner`} />
-                      <span className="text-xs font-semibold text-slate-300">{s.name}</span>
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* Face Shape Visual Options */}
-            <div className="space-y-3">
-              <label className="text-xs font-bold text-slate-300 tracking-wide uppercase">4. Face Shape</label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {FACE_SHAPES.map((f) => {
-                  const isSelected = faceShape === f.id
-                  return (
-                    <button
-                      key={f.id}
-                      type="button"
-                      onClick={() => setFaceShape(f.id)}
-                      className={`flex flex-col p-3.5 rounded-xl border text-center transition-all ${
-                        isSelected 
-                          ? 'bg-violet-950/20 border-violet-500' 
-                          : 'bg-[#0A0F1E]/60 border-violet-900/10 hover:border-slate-855'
-                      }`}
-                    >
-                      <span className="font-bold text-xs text-slate-200">{f.label}</span>
-                      <span className="text-[10px] text-slate-500 mt-1">{f.desc}</span>
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* Hair Color & Style */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {/* Hair Style */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-300 tracking-wide uppercase">5. Hair Style</label>
-                <select
-                  value={hairStyle}
-                  onChange={(e) => setHairStyle(e.target.value)}
-                  className="w-full px-4 py-3 bg-[#0A0F1E] border border-violet-900/20 rounded-2xl text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
-                >
-                  {HAIR_STYLES.map((hs) => (
-                    <option key={hs.id} value={hs.id}>{hs.label}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Hair Color Swatches */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-300 tracking-wide uppercase">Hair Color</label>
-                <div className="flex flex-wrap gap-2.5 pt-1">
-                  {HAIR_COLORS.map((hc) => {
-                    const isSelected = hairColor === hc.name
-                    return (
-                      <button
-                        key={hc.name}
-                        type="button"
-                        onClick={() => setHairColor(hc.name)}
-                        className={`w-7.5 h-7.5 rounded-full border relative transition-all ${
-                          isSelected 
-                            ? 'ring-2 ring-violet-500 border-white' 
-                            : 'border-transparent hover:scale-105'
-                        }`}
+                      <span 
+                        className="w-5 h-5 rounded-full border border-slate-955/30 flex items-center justify-center relative" 
                         style={{ backgroundColor: hc.hex }}
-                        title={hc.name}
                       >
-                        {isSelected && <span className="absolute inset-0 m-auto w-1.5 h-1.5 bg-white rounded-full" />}
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-            </div>
-
-            {/* Eye Shape & Color */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {/* Eye Shape */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-300 tracking-wide uppercase">6. Eye Shape</label>
-                <select
-                  value={eyeShape}
-                  onChange={(e) => setEyeShape(e.target.value)}
-                  className="w-full px-4 py-3 bg-[#0A0F1E] border border-violet-900/20 rounded-2xl text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
-                >
-                  {EYE_SHAPES.map((es) => (
-                    <option key={es.id} value={es.id}>{es.label}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Eye Color */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-300 tracking-wide uppercase">Eye Color</label>
-                <div className="flex flex-wrap gap-2 pt-1">
-                  {EYE_COLORS.map((ec) => {
-                    const isSelected = eyeColor === ec.name
-                    return (
-                      <button
-                        key={ec.name}
-                        type="button"
-                        onClick={() => setEyeColor(ec.name)}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs transition-all ${
-                          isSelected 
-                            ? 'border-violet-500 bg-violet-950/20' 
-                            : 'border-violet-900/10 bg-[#0A0F1E]/60 hover:border-slate-800'
-                        }`}
-                      >
-                        <span className={`w-3 h-3 rounded-full ${ec.class}`} />
-                        <span className="text-[10px] font-medium text-slate-300">{ec.name.split(' ')[1]}</span>
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-            </div>
-
-            {/* Tattoo Options */}
-            <div className="space-y-3">
-              <label className="text-xs font-bold text-slate-300 tracking-wide uppercase">7. Tattoos & Ink</label>
-              <div className="flex flex-wrap gap-2.5">
-                {TATTOOS.map((t) => {
-                  const isSelected = tattoos === t.id
-                  return (
-                    <button
-                      key={t.id}
-                      type="button"
-                      onClick={() => setTattoos(t.id)}
-                      className={`px-4.5 py-2.5 rounded-2xl border text-xs font-bold transition-all ${
-                        isSelected 
-                          ? 'border-violet-500 bg-violet-950/30 text-white' 
-                          : 'border-violet-900/10 bg-[#0A0F1E]/60 text-slate-400 hover:border-violet-900/45 hover:text-slate-200'
-                      }`}
-                    >
-                      {t.label}
+                        {isSelected && <span className="w-1.5 h-1.5 bg-white rounded-full" />}
+                      </span>
+                      <span className="text-[10px] font-bold text-slate-300">{hc.name}</span>
                     </button>
                   )
                 })}
               </div>
             </div>
 
-            {/* Style/Vibe Mood Board */}
+            {/* HAIR STYLE (Illustrations / Silhouettes) */}
             <div className="space-y-3">
-              <label className="text-xs font-bold text-slate-300 tracking-wide uppercase">8. Style Vibe / Mood Board</label>
+              <label className="text-xs font-bold text-slate-355 tracking-wide uppercase">5. Hair Style Outline</label>
+              <div className="grid grid-cols-4 sm:grid-cols-7 gap-2.5">
+                {[
+                  {
+                    id: 'Straight',
+                    svg: (
+                      <svg viewBox="0 0 100 100" className="w-10 h-10 stroke-current fill-none" strokeWidth="2.5">
+                        <path d="M50,15 C30,15 25,30 25,60 M75,60 C75,30 70,15 50,15" />
+                        <line x1="35" y1="35" x2="35" y2="75" />
+                        <line x1="50" y1="20" x2="50" y2="80" />
+                        <line x1="65" y1="35" x2="65" y2="75" />
+                      </svg>
+                    )
+                  },
+                  {
+                    id: 'Wavy',
+                    svg: (
+                      <svg viewBox="0 0 100 100" className="w-10 h-10 stroke-current fill-none" strokeWidth="2.5">
+                        <path d="M50,15 C30,15 25,30 25,50 C25,65 30,70 30,80" />
+                        <path d="M75,50 C75,30 70,15 50,15 C50,15 55,40 55,55 C55,70 50,75 50,80" />
+                        <path d="M40,30 Q35,45 42,60 T35,80" />
+                      </svg>
+                    )
+                  },
+                  {
+                    id: 'Curly',
+                    svg: (
+                      <svg viewBox="0 0 100 100" className="w-10 h-10 stroke-current fill-none" strokeWidth="2.5">
+                        <path d="M50,15 C35,15 32,25 32,35 Q32,45 35,48 T32,60 Q32,70 36,75" />
+                        <path d="M68,35 Q68,45 65,48 T68,60 Q68,70 64,75" />
+                      </svg>
+                    )
+                  },
+                  {
+                    id: 'Bun',
+                    svg: (
+                      <svg viewBox="0 0 100 100" className="w-10 h-10 stroke-current fill-none" strokeWidth="2.5">
+                        <circle cx="50" cy="22" r="11" />
+                        <path d="M50,36 C32,36 28,45 28,70 C28,82 35,84 50,84 C65,84 72,82 72,70 Z" />
+                      </svg>
+                    )
+                  },
+                  {
+                    id: 'Ponytail',
+                    svg: (
+                      <svg viewBox="0 0 100 100" className="w-10 h-10 stroke-current fill-none" strokeWidth="2.5">
+                        <path d="M50,20 C32,20 28,30 28,55 C28,68 38,70 50,70 C62,70 72,68 72,55 Z" />
+                        <path d="M50,68 C50,68 62,75 58,90 C54,80 50,75 50,68 Z" />
+                      </svg>
+                    )
+                  },
+                  {
+                    id: 'Short',
+                    svg: (
+                      <svg viewBox="0 0 100 100" className="w-10 h-10 stroke-current fill-none" strokeWidth="2.5">
+                        <path d="M50,18 C35,18 32,25 32,45 C38,40 42,42 50,38 C58,42 62,40 68,45 C68,25 65,18 50,18 Z" />
+                      </svg>
+                    )
+                  },
+                  {
+                    id: 'Bob',
+                    svg: (
+                      <svg viewBox="0 0 100 100" className="w-10 h-10 stroke-current fill-none" strokeWidth="2.5">
+                        <path d="M50,18 C30,18 25,30 25,62 M75,62 C75,30 70,18 50,18" />
+                        <path d="M25,50 C30,55 35,50 35,62" />
+                      </svg>
+                    )
+                  }
+                ].map((h) => {
+                  const isSelected = hairStyle === h.id
+                  return (
+                    <button
+                      key={h.id}
+                      type="button"
+                      onClick={() => setHairStyle(h.id)}
+                      className={`group flex flex-col items-center justify-between p-2 rounded-2xl border transition-all ${
+                        isSelected 
+                          ? 'border-violet-500 bg-violet-950/20 text-violet-400' 
+                          : 'border-violet-900/10 bg-[#0A0F1E]/60 text-slate-500 hover:border-slate-800 hover:text-slate-350'
+                      }`}
+                    >
+                      <div className="mb-1.5 transition-transform group-hover:scale-105">{h.svg}</div>
+                      <span className="text-[9px] font-bold tracking-wide">{h.id}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* EYE COLOR (Realistic eye color swatches) */}
+            <div className="space-y-3">
+              <label className="text-xs font-bold text-slate-355 tracking-wide uppercase">6. Eye Color Iris</label>
+              <div className="flex flex-wrap gap-3">
+                {EYE_COLORS.map((ec) => {
+                  const isSelected = eyeColor === ec.name
+                  return (
+                    <button
+                      key={ec.name}
+                      type="button"
+                      onClick={() => setEyeColor(ec.name)}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-2xl border transition-all ${
+                        isSelected 
+                          ? 'border-violet-500 bg-violet-950/20' 
+                          : 'border-violet-900/10 bg-[#0A0F1E]/60 hover:border-slate-800'
+                      }`}
+                    >
+                      <span 
+                        className="w-5 h-5 rounded-full border border-slate-900/80 shadow-md flex items-center justify-center"
+                        style={{ background: ec.gradient }}
+                      >
+                        {isSelected && <span className="w-1.5 h-1.5 bg-white rounded-full" />}
+                      </span>
+                      <span className="text-[10px] font-bold text-slate-300">{ec.name}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* EYE SHAPE (Small eye illustrations showing shapes) */}
+            <div className="space-y-3">
+              <label className="text-xs font-bold text-slate-355 tracking-wide uppercase">7. Eye Shape Outline</label>
+              <div className="grid grid-cols-2 sm:grid-cols-6 gap-3">
+                {[
+                  {
+                    id: 'Almond',
+                    svg: (
+                      <svg viewBox="0 0 100 60" className="w-14 h-8 stroke-current fill-none" strokeWidth="2.5">
+                        <path d="M15,30 C30,10 70,10 85,30 C70,50 30,50 15,30 Z" />
+                        <circle cx="50" cy="30" r="10" className="fill-slate-800/40" />
+                      </svg>
+                    )
+                  },
+                  {
+                    id: 'Round',
+                    svg: (
+                      <svg viewBox="0 0 100 60" className="w-14 h-8 stroke-current fill-none" strokeWidth="2.5">
+                        <path d="M15,30 C28,5 72,5 85,30 C72,55 28,55 15,30 Z" />
+                        <circle cx="50" cy="30" r="12" className="fill-slate-800/40" />
+                      </svg>
+                    )
+                  },
+                  {
+                    id: 'Hooded',
+                    svg: (
+                      <svg viewBox="0 0 100 60" className="w-14 h-8 stroke-current fill-none" strokeWidth="2.5">
+                        <path d="M15,30 C30,10 70,10 85,30 C70,50 30,50 15,30 Z" />
+                        <path d="M18,22 C32,8 68,8 82,22" />
+                        <circle cx="50" cy="30" r="9" className="fill-slate-800/40" />
+                      </svg>
+                    )
+                  },
+                  {
+                    id: 'Monolid',
+                    svg: (
+                      <svg viewBox="0 0 100 60" className="w-14 h-8 stroke-current fill-none" strokeWidth="2.5">
+                        <path d="M15,30 C32,18 68,18 85,30 C68,45 32,45 15,30 Z" />
+                        <circle cx="50" cy="31" r="10" className="fill-slate-800/40" />
+                      </svg>
+                    )
+                  },
+                  {
+                    id: 'Upturned',
+                    svg: (
+                      <svg viewBox="0 0 100 60" className="w-14 h-8 stroke-current fill-none" strokeWidth="2.5">
+                        <path d="M15,35 C30,12 68,8 85,25 C68,48 30,52 15,35 Z" />
+                        <circle cx="50" cy="30" r="10" className="fill-slate-800/40" />
+                      </svg>
+                    )
+                  },
+                  {
+                    id: 'Downturned',
+                    svg: (
+                      <svg viewBox="0 0 100 60" className="w-14 h-8 stroke-current fill-none" strokeWidth="2.5">
+                        <path d="M15,25 C30,8 68,12 85,35 C68,52 30,48 15,25 Z" />
+                        <circle cx="50" cy="30" r="10" className="fill-slate-800/40" />
+                      </svg>
+                    )
+                  }
+                ].map((e) => {
+                  const isSelected = eyeShape === e.id
+                  return (
+                    <button
+                      key={e.id}
+                      type="button"
+                      onClick={() => setEyeShape(e.id)}
+                      className={`group flex flex-col items-center justify-between p-2.5 rounded-2xl border transition-all ${
+                        isSelected 
+                          ? 'border-violet-500 bg-violet-950/20 text-violet-400' 
+                          : 'border-violet-900/10 bg-[#0A0F1E]/60 text-slate-500 hover:border-slate-800 hover:text-slate-350'
+                      }`}
+                    >
+                      <div className="mb-2 transition-transform group-hover:scale-105">{e.svg}</div>
+                      <span className="text-[10px] font-bold tracking-wide">{e.id}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* BODY TYPE (Male/Female silhouettes showing shapes: Slim, Athletic, Curvy, Plus size, Petite) */}
+            <div className="space-y-3">
+              <label className="text-xs font-bold text-slate-355 tracking-wide uppercase">8. Torso / Body Silhouette</label>
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                {[
+                  {
+                    id: 'Slim',
+                    label: 'Slim',
+                    maleSvg: (
+                      <svg viewBox="0 0 100 150" className="w-10 h-16 stroke-current fill-none" strokeWidth="2.5">
+                        <circle cx="50" cy="20" r="10" />
+                        <path d="M50,30 L50,45 M40,45 L60,45 M43,45 L43,90 L43,140 M57,45 L57,90 L57,140" />
+                      </svg>
+                    ),
+                    femaleSvg: (
+                      <svg viewBox="0 0 100 150" className="w-10 h-16 stroke-current fill-none" strokeWidth="2.5">
+                        <circle cx="50" cy="20" r="9" />
+                        <path d="M50,29 L50,42 M41,42 C45,45 44,70 43,90 L41,140 M59,42 C55,45 56,70 57,90 L59,140 M41,42 L59,42" />
+                      </svg>
+                    )
+                  },
+                  {
+                    id: 'Athletic',
+                    label: 'Athletic',
+                    maleSvg: (
+                      <svg viewBox="0 0 100 150" className="w-10 h-16 stroke-current fill-none" strokeWidth="2.5">
+                        <circle cx="50" cy="20" r="10" />
+                        <path d="M50,30 L50,45 M36,45 L64,45 M38,45 L43,75 L42,140 M62,45 L57,75 L58,140" />
+                      </svg>
+                    ),
+                    femaleSvg: (
+                      <svg viewBox="0 0 100 150" className="w-10 h-16 stroke-current fill-none" strokeWidth="2.5">
+                        <circle cx="50" cy="20" r="9" />
+                        <path d="M50,29 L50,42 M38,42 Q48,47 43,80 L42,140 M62,42 Q52,47 57,80 L58,140 M38,42 L62,42" />
+                      </svg>
+                    )
+                  },
+                  {
+                    id: 'Curvy',
+                    label: gender === 'Male' ? 'Muscular' : 'Curvy',
+                    maleSvg: (
+                      <svg viewBox="0 0 100 150" className="w-10 h-16 stroke-current fill-none" strokeWidth="2.5">
+                        <circle cx="50" cy="20" r="10.5" />
+                        <path d="M50,30.5 L50,47 M32,47 L68,47 M35,47 L41,80 L40,140 M65,47 L59,80 L60,140" />
+                        <path d="M42,55 Q50,60 58,55" />
+                      </svg>
+                    ),
+                    femaleSvg: (
+                      <svg viewBox="0 0 100 150" className="w-10 h-16 stroke-current fill-none" strokeWidth="2.5">
+                        <circle cx="50" cy="20" r="9" />
+                        <path d="M50,29 L50,42 M37,42 C45,45 38,72 44,92 L41,140 M63,42 C55,45 62,72 56,92 L59,140" />
+                      </svg>
+                    )
+                  },
+                  {
+                    id: 'Plus size',
+                    label: 'Plus Size',
+                    maleSvg: (
+                      <svg viewBox="0 0 100 150" className="w-10 h-16 stroke-current fill-none" strokeWidth="2.5">
+                        <circle cx="50" cy="20" r="10" />
+                        <path d="M50,30 L50,45 M38,45 L62,45 M40,45 Q36,90 42,140 M60,45 Q64,90 58,140" />
+                      </svg>
+                    ),
+                    femaleSvg: (
+                      <svg viewBox="0 0 100 150" className="w-10 h-16 stroke-current fill-none" strokeWidth="2.5">
+                        <circle cx="50" cy="20" r="9" />
+                        <path d="M50,29 L50,42 M38,42 C42,45 35,90 44,140 M62,42 C58,45 65,90 56,140" />
+                      </svg>
+                    )
+                  },
+                  {
+                    id: 'Petite',
+                    label: 'Petite',
+                    maleSvg: (
+                      <svg viewBox="0 0 100 150" className="w-10 h-14 stroke-current fill-none" strokeWidth="2.5">
+                        <circle cx="50" cy="25" r="9.5" />
+                        <path d="M50,34.5 L50,48 M40,48 L60,48 M42,48 L42,130 M58,48 L58,130" />
+                      </svg>
+                    ),
+                    femaleSvg: (
+                      <svg viewBox="0 0 100 150" className="w-10 h-14 stroke-current fill-none" strokeWidth="2.5">
+                        <circle cx="50" cy="24" r="8.5" />
+                        <path d="M50,32.5 L50,45 M41,45 C44,48 43,72 43,90 L41,130 M59,45 C56,48 57,72 57,90 L59,130" />
+                      </svg>
+                    )
+                  }
+                ].map((b) => {
+                  const isSelected = bodyType === b.id
+                  const activeSvg = gender === 'Male' ? b.maleSvg : b.femaleSvg
+                  return (
+                    <button
+                      key={b.id}
+                      type="button"
+                      onClick={() => setBodyType(b.id)}
+                      className={`group flex flex-col items-center justify-between p-3 rounded-2xl border transition-all ${
+                        isSelected 
+                          ? 'border-violet-500 bg-violet-950/20 text-violet-400' 
+                          : 'border-violet-900/10 bg-[#0A0F1E]/60 text-slate-500 hover:border-slate-800 hover:text-slate-350'
+                      }`}
+                    >
+                      <div className="mb-2 transition-transform group-hover:scale-105">{activeSvg}</div>
+                      <span className="text-[10px] font-bold tracking-wide">{b.label}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* STYLE VIBE */}
+            <div className="space-y-3">
+              <label className="text-xs font-bold text-slate-355 tracking-wide uppercase">9. Style/Vibe Mood Board</label>
               <div className="space-y-2.5">
                 {STYLE_VIBES.map((vib) => {
                   const isSelected = styleVibe === vib.id
@@ -643,22 +827,33 @@ export default function EditCharacterPage({ params }: { params: Promise<{ id: st
                         <span className="font-bold text-sm text-slate-200 block">{vib.label}</span>
                         <span className="text-xs text-slate-500 block max-w-md leading-relaxed">{vib.desc}</span>
                       </div>
-                      <ChevronRight className={`h-4.5 w-4.5 text-violet-400 transition-transform ${isSelected ? 'translate-x-0.5' : 'opacity-30'}`} />
+                      {isSelected && <div className="bg-violet-500 p-0.5 rounded-full text-white"><Check className="h-3 w-3" /></div>}
                     </button>
                   )
                 })}
               </div>
             </div>
 
-            {/* Custom Description Inputs */}
+            {/* Extra details fields */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-300 tracking-wide uppercase">Tattoos & Ink</label>
+                <input
+                  type="text"
+                  value={tattoos}
+                  onChange={(e) => setTattoos(e.target.value)}
+                  placeholder="e.g. Small geometric rose, Full sleeve"
+                  className="w-full px-4 py-3 bg-[#0A0F1E] border border-violet-900/20 rounded-2xl text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
+                />
+              </div>
+
               <div className="space-y-2">
                 <label className="text-xs font-bold text-slate-300 tracking-wide uppercase">Special Face Features</label>
                 <input
                   type="text"
                   value={faceFeatures}
                   onChange={(e) => setFaceFeatures(e.target.value)}
-                  placeholder="e.g. sharp jawline, light dimples"
+                  placeholder="e.g. sharp jawline, high cheekbones"
                   className="w-full px-4 py-3 bg-[#0A0F1E] border border-violet-900/20 rounded-2xl text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
                 />
               </div>
@@ -669,7 +864,7 @@ export default function EditCharacterPage({ params }: { params: Promise<{ id: st
                   type="text"
                   value={birthmarks}
                   onChange={(e) => setBirthmarks(e.target.value)}
-                  placeholder="e.g. mole under right eye"
+                  placeholder="e.g. light freckles on nose"
                   className="w-full px-4 py-3 bg-[#0A0F1E] border border-violet-900/20 rounded-2xl text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
                 />
               </div>
@@ -680,7 +875,7 @@ export default function EditCharacterPage({ params }: { params: Promise<{ id: st
                   type="text"
                   value={signaturePose}
                   onChange={(e) => setSignaturePose(e.target.value)}
-                  placeholder="e.g. looking over shoulder"
+                  placeholder="e.g. candid looking away"
                   className="w-full px-4 py-3 bg-[#0A0F1E] border border-violet-900/20 rounded-2xl text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
                 />
               </div>
@@ -688,9 +883,61 @@ export default function EditCharacterPage({ params }: { params: Promise<{ id: st
 
           </div>
 
-          {/* Right Column: Sticky prompt builder & Avatar references (5 cols) */}
+          {/* Right Column: Game-like character view, height silhouette scaling, reference image upload (5 cols) */}
           <div className="lg:col-span-5 lg:sticky lg:top-24 space-y-6">
             
+            {/* Visual Height / Silhouette Panel */}
+            <div className="bg-[#0F1629]/60 border border-violet-900/10 p-6 rounded-3xl backdrop-blur-xl space-y-5 flex flex-col items-center">
+              <div className="w-full flex justify-between items-center border-b border-violet-900/10 pb-3">
+                <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wide">9. Height Scaling Model</h3>
+                <span className="text-violet-400 font-extrabold text-sm">{height} cm</span>
+              </div>
+              
+              {/* Growing Human Silhouette Illustration */}
+              <div className="h-64 flex items-end justify-center w-full relative bg-[#0A0F1E]/55 rounded-2xl p-4 border border-violet-900/5 overflow-hidden">
+                <div 
+                  className="transition-all duration-300 flex flex-col items-center origin-bottom"
+                  style={{ transform: `scale(${0.65 + ((height - 140) / 70) * 0.35})` }}
+                >
+                  {/* Glowing human outline SVG */}
+                  <svg viewBox="0 0 100 200" className="w-24 h-48 stroke-violet-500 fill-violet-500/10 filter drop-shadow-[0_0_8px_rgba(139,92,246,0.3)]" strokeWidth="2">
+                    {/* Head */}
+                    <circle cx="50" cy="25" r="14" />
+                    {/* Neck */}
+                    <line x1="50" y1="39" x2="50" y2="45" />
+                    {/* Shoulders & Torso */}
+                    <path d="M28,52 C32,45 68,45 72,52 L64,105 L36,105 Z" />
+                    {/* Arms */}
+                    <path d="M28,52 L20,95 L22,100" />
+                    <path d="M72,52 L80,95 L78,100" />
+                    {/* Pelvis */}
+                    <path d="M36,105 L64,105 L58,122 L42,122 Z" />
+                    {/* Legs */}
+                    <path d="M43,122 L41,185 L48,188" />
+                    <path d="M57,122 L59,185 L52,188" />
+                  </svg>
+                  <span className="text-[10px] text-slate-450 font-bold uppercase tracking-wider mt-2.5">AI Silhouette</span>
+                </div>
+              </div>
+
+              {/* Slider Input */}
+              <div className="w-full space-y-2">
+                <div className="flex justify-between text-[10px] text-slate-500 font-bold uppercase">
+                  <span>Petite (140cm)</span>
+                  <span>Average (175cm)</span>
+                  <span>Tall (210cm)</span>
+                </div>
+                <input
+                  type="range"
+                  min="140"
+                  max="210"
+                  value={height}
+                  onChange={(e) => setHeight(Number(e.target.value))}
+                  className="w-full accent-violet-500 h-1.5 bg-slate-900 rounded-lg cursor-pointer"
+                />
+              </div>
+            </div>
+
             {/* Real-time Prompt Builder Panel */}
             <div className="bg-[#0F1629]/60 border border-violet-900/10 p-6 rounded-3xl backdrop-blur-xl space-y-4">
               <div className="flex justify-between items-center">
@@ -698,15 +945,11 @@ export default function EditCharacterPage({ params }: { params: Promise<{ id: st
                   <Sparkles className="h-4.5 w-4.5 text-violet-400" />
                   Real-time Prompt Builder
                 </h3>
-                <span className="text-[10px] text-violet-400 font-bold bg-violet-950/40 px-2 py-0.5 rounded-full border border-violet-900/40">Active</span>
               </div>
               <div className="p-4 bg-[#0A0F1E] rounded-2xl border border-violet-900/10">
                 <p className="text-xs text-slate-400 leading-relaxed italic">
                   "{realtimePrompt}"
                 </p>
-              </div>
-              <div className="text-[10px] text-slate-500 leading-relaxed">
-                This prompt will be dynamically generated and sent to our generation pipeline to maintain visual consistency across all scene generations.
               </div>
             </div>
 
@@ -768,7 +1011,7 @@ export default function EditCharacterPage({ params }: { params: Promise<{ id: st
             <button
               type="submit"
               disabled={loading || !name.trim()}
-              className="w-full py-4.5 bg-gradient-to-r from-violet-600 via-fuchsia-500 to-cyan-500 hover:opacity-90 text-white font-bold rounded-2xl shadow-lg shadow-violet-500/10 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none active:scale-[0.99] text-base"
+              className="w-full py-4.5 bg-gradient-to-r from-violet-600 via-fuchsia-500 to-cyan-500 hover:opacity-90 text-white font-bold rounded-3xl shadow-lg shadow-violet-500/10 transition-all flex items-center justify-center gap-2.5 disabled:opacity-50 disabled:pointer-events-none active:scale-[0.99] text-base"
             >
               {loading ? (
                 <>
