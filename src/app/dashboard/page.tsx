@@ -91,24 +91,35 @@ export default async function DashboardPage() {
     }
 
     // Fetch user profile (credits)
-    const { data: profile } = await supabase
+    let { data: profile } = await supabase
       .from('profiles')
       .select('credits, full_name, username')
-      .single()
+      .maybeSingle()
 
-    credits = profile?.credits ?? 0
-    if (profile) {
-      user = {
-        ...user,
-        fullName: profile.full_name || user.user_metadata?.full_name || 'User',
-        username: profile.username || user.user_metadata?.username || user.email?.split('@')[0] || 'user'
+    if (!profile && user) {
+      // Auto-create missing profile
+      const { data: newProfile } = await supabase
+        .from('profiles')
+        .insert({
+          id: user.id,
+          email: user.email,
+          credits: 10,
+          full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
+          username: user.user_metadata?.username || user.email?.split('@')[0] || 'user'
+        })
+        .select('credits, full_name, username')
+        .maybeSingle()
+      
+      if (newProfile) {
+        profile = newProfile
       }
-    } else {
-      user = {
-        ...user,
-        fullName: user.user_metadata?.full_name || 'User',
-        username: user.user_metadata?.username || user.email?.split('@')[0] || 'user'
-      }
+    }
+
+    credits = profile?.credits ?? 10
+    user = {
+      ...user,
+      fullName: profile?.full_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
+      username: profile?.username || user.user_metadata?.username || user.email?.split('@')[0] || 'user'
     }
 
     // Fetch user characters

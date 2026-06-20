@@ -389,8 +389,24 @@ export default function EditCharacterPage({ params }: { params: Promise<{ id: st
       }
       setUser(user)
       
-      const { data: profile } = await supabase.from('profiles').select('credits').single()
-      setCredits(profile?.credits ?? 0)
+      let { data: profile } = await supabase.from('profiles').select('credits').maybeSingle()
+      if (!profile) {
+        const { data: newProfile } = await supabase
+          .from('profiles')
+          .insert({
+            id: user.id,
+            email: user.email,
+            credits: 10,
+            full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
+            username: user.user_metadata?.username || user.email?.split('@')[0] || 'user'
+          })
+          .select('credits')
+          .maybeSingle()
+        if (newProfile) {
+          profile = newProfile
+        }
+      }
+      setCredits(profile?.credits ?? 10)
 
       // Fetch character details
       const { data: char, error: charError } = await supabase

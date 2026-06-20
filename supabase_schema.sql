@@ -23,26 +23,25 @@ create policy "Allow users to update their own profile"
   using (auth.uid() = id)
   with check (auth.uid() = id);
 
+create policy "Allow users to insert their own profile"
+  on public.profiles for insert
+  with check (auth.uid() = id);
+
 -- 2. Create trigger to automatically create a profile on new user signup
-create or replace function public.handle_new_user()
-returns trigger as $$
-begin
-  insert into public.profiles (id, email, credits, full_name, username)
-  values (
-    new.id,
-    new.email,
-    10,
-    coalesce(new.raw_user_meta_data->>'full_name', ''),
-    coalesce(new.raw_user_meta_data->>'username', '')
-  );
-  return new;
-end;
-$$ language plpgsql security definer;
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS trigger AS $$
+BEGIN
+  INSERT INTO public.profiles (id, email, full_name, credits)
+  VALUES (new.id, new.email, new.raw_user_meta_data->>'full_name', 10)
+  ON CONFLICT (id) DO NOTHING;
+  RETURN new;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Trigger execution
-create or replace trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute procedure public.handle_new_user();
+CREATE OR REPLACE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
 
 -- 3. Create characters table
 create table if not exists public.characters (
