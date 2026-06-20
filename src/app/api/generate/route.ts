@@ -63,7 +63,9 @@ export async function POST(request: Request) {
       }
     }
 
-    // 4. Verify user credits
+    // 4. Verify user credits (only for existing character image generations - character creation/preview is FREE)
+    const isCharacterCreation = !characterId || characterId === 'new'
+
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('credits')
@@ -74,7 +76,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Profile credits could not be verified.' }, { status: 500 })
     }
 
-    if (profile.credits < 1) {
+    if (!isCharacterCreation && profile.credits < 1) {
       return NextResponse.json({ error: 'Insufficient credits. You need at least 1 credit to generate an image.' }, { status: 400 })
     }
 
@@ -94,11 +96,13 @@ export async function POST(request: Request) {
       
       const finalImageUrl = mockOutputs[aspectRatio] || mockOutputs['1:1']
       
-      // Deduct 1 credit
-      await supabase
-        .from('profiles')
-        .update({ credits: profile.credits - 1 })
-        .eq('id', user.id)
+      // Deduct 1 credit (only if not character creation)
+      if (!isCharacterCreation) {
+        await supabase
+          .from('profiles')
+          .update({ credits: profile.credits - 1 })
+          .eq('id', user.id)
+      }
 
       // Log generation history
       if (characterId && characterId !== 'new') {
@@ -205,14 +209,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: `Image generation failed: ${dalleErr.message || dalleErr}` }, { status: 500 })
     }
 
-    // 8. Deduct 1 credit from user profile
-    const { error: deductError } = await supabase
-      .from('profiles')
-      .update({ credits: profile.credits - 1 })
-      .eq('id', user.id)
+    // 8. Deduct 1 credit from user profile (only if not character creation)
+    if (!isCharacterCreation) {
+      const { error: deductError } = await supabase
+        .from('profiles')
+        .update({ credits: profile.credits - 1 })
+        .eq('id', user.id)
 
-    if (deductError) {
-      console.error('Failed to deduct credit, but image was generated:', deductError)
+      if (deductError) {
+        console.error('Failed to deduct credit, but image was generated:', deductError)
+      }
     }
 
     // 9. Log the generation history (only if character already exists in db)

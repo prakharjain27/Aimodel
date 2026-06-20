@@ -432,10 +432,6 @@ export default function CreateCharacterPage() {
       return
     }
 
-    if (credits !== null && credits < 1) {
-      setErrorMsg("Insufficient credits. You need at least 1 credit to generate an image.")
-      return
-    }
 
     setPreviewLoading(true)
     setIsPreviewActive(true)
