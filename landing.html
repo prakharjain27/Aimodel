@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InfluenceAI — Your AI Influencer, Always On</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Syne:wght@700;800&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0A0F1E;
+    --navy2: #0F1629;
+    --violet: #7C3AED;
+    --violet-light: #9D5FF0;
+    --pink: #EC4899;
+    --white: #F8F9FF;
+    --muted: #8B92A8;
+    --border: rgba(124,58,237,0.2);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--navy);
+    color: var(--white);
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 60px;
+    background: rgba(10,15,30,0.7);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 22px;
+    background: linear-gradient(135deg, #fff 0%, var(--pink) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .nav-links { display: flex; gap: 32px; }
+  .nav-links a {
+    color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--white); }
+  .nav-cta {
+    background: linear-gradient(135deg, var(--violet), var(--pink));
+    color: #fff; border: none; padding: 10px 24px; border-radius: 8px;
+    font-size: 14px; font-weight: 600; cursor: pointer;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .nav-cta:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    padding: 120px 24px 80px;
+    position: relative; overflow: hidden;
+  }
+
+  /* Animated orb */
+  .orb {
+    position: absolute;
+    width: 700px; height: 700px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(124,58,237,0.4) 0%, rgba(236,72,153,0.2) 50%, transparent 75%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    animation: pulse 6s ease-in-out infinite;
+    pointer-events: none;
+  }
+  .orb2 {
+    position: absolute;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(236,72,153,0.3) 0%, transparent 70%);
+    top: 30%; left: 60%;
+    animation: float 8s ease-in-out infinite reverse;
+    pointer-events: none;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+    50% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-30px); }
+  }
+
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(124,58,237,0.15);
+    border: 1px solid rgba(124,58,237,0.4);
+    padding: 6px 16px; border-radius: 100px;
+    font-size: 13px; font-weight: 500; color: #C4B5FD;
+    margin-bottom: 32px; position: relative; z-index: 1;
+  }
+  .badge-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--pink);
+    animation: blink 2s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(48px, 8vw, 96px);
+    line-height: 1.0;
+    letter-spacing: -2px;
+    position: relative; z-index: 1;
+    margin-bottom: 8px;
+  }
+  .hero h1 .line1 { color: var(--white); }
+  .hero h1 .line2 {
+    background: linear-gradient(90deg, var(--violet-light), var(--pink));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+
+  .hero-sub {
+    font-size: 18px; color: var(--muted); max-width: 520px;
+    line-height: 1.6; margin: 24px auto 40px;
+    position: relative; z-index: 1;
+  }
+
+  .hero-actions {
+    display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
+    position: relative; z-index: 1;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--violet), var(--pink));
+    color: #fff; border: none;
+    padding: 16px 36px; border-radius: 10px;
+    font-size: 16px; font-weight: 600; cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 0 40px rgba(124,58,237,0.4);
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 60px rgba(124,58,237,0.6);
+  }
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.15);
+    color: var(--white);
+    padding: 16px 36px; border-radius: 10px;
+    font-size: 16px; font-weight: 500; cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .btn-ghost:hover { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.05); }
+
+  .hero-stats {
+    display: flex; gap: 48px; justify-content: center; flex-wrap: wrap;
+    margin-top: 64px; position: relative; z-index: 1;
+  }
+  .stat { text-align: center; }
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 36px; font-weight: 800;
+    background: linear-gradient(135deg, var(--white), var(--violet-light));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .stat-label { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+  /* ── MARQUEE ── */
+  .marquee-wrap {
+    overflow: hidden; padding: 24px 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: var(--navy2);
+  }
+  .marquee {
+    display: flex; gap: 48px;
+    animation: marquee 20s linear infinite;
+    width: max-content;
+  }
+  @keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+  .marquee-item {
+    font-size: 13px; font-weight: 500; color: var(--muted);
+    white-space: nowrap; display: flex; align-items: center; gap: 10px;
+  }
+  .marquee-item span { color: var(--violet-light); }
+
+  /* ── FEATURES ── */
+  .section { padding: 100px 60px; max-width: 1200px; margin: 0 auto; }
+  .section-label {
+    font-size: 12px; font-weight: 600; letter-spacing: 3px;
+    color: var(--violet-light); text-transform: uppercase; margin-bottom: 16px;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(32px, 4vw, 52px);
+    font-weight: 800; line-height: 1.1;
+    margin-bottom: 16px;
+  }
+  .section-sub { font-size: 17px; color: var(--muted); max-width: 500px; line-height: 1.6; }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px; margin-top: 60px;
+  }
+  .feat-card {
+    background: var(--navy2);
+    border: 1px solid var(--border);
+    border-radius: 16px; padding: 32px;
+    transition: border-color 0.3s, transform 0.3s;
+    position: relative; overflow: hidden;
+  }
+  .feat-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--violet), var(--pink));
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .feat-card:hover { border-color: rgba(124,58,237,0.5); transform: translateY(-4px); }
+  .feat-card:hover::before { opacity: 1; }
+
+  .feat-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    background: rgba(124,58,237,0.15);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; margin-bottom: 20px;
+  }
+  .feat-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px; font-weight: 700; margin-bottom: 10px;
+  }
+  .feat-card p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+  /* ── HOW IT WORKS ── */
+  .how-wrap {
+    background: var(--navy2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 100px 0;
+  }
+  .steps {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 0; margin-top: 60px; position: relative;
+  }
+  .steps::before {
+    content: '';
+    position: absolute; top: 28px; left: calc(100%/6); right: calc(100%/6);
+    height: 1px;
+    background: linear-gradient(90deg, var(--violet), var(--pink));
+  }
+  .step { text-align: center; padding: 0 32px; }
+  .step-num {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--violet), var(--pink));
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800;
+    margin: 0 auto 24px; position: relative; z-index: 1;
+  }
+  .step h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px; font-weight: 700; margin-bottom: 10px;
+  }
+  .step p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+  /* ── SOCIAL PROOF ── */
+  .testimonials {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 20px; margin-top: 60px;
+  }
+  .testi-card {
+    background: var(--navy2);
+    border: 1px solid var(--border);
+    border-radius: 16px; padding: 28px;
+  }
+  .testi-text {
+    font-size: 15px; line-height: 1.7; color: var(--white); margin-bottom: 20px;
+  }
+  .testi-author { display: flex; align-items: center; gap: 12px; }
+  .testi-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 700; color: #fff;
+  }
+  .testi-name { font-size: 14px; font-weight: 600; }
+  .testi-handle { font-size: 12px; color: var(--muted); }
+  .stars { color: var(--pink); font-size: 13px; margin-bottom: 16px; }
+
+  /* ── CTA ── */
+  .cta-section {
+    padding: 120px 24px;
+    text-align: center; position: relative; overflow: hidden;
+  }
+  .cta-orb {
+    position: absolute;
+    width: 600px; height: 600px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(236,72,153,0.2) 0%, transparent 70%);
+    top: 50%; left: 50%; transform: translate(-50%,-50%);
+    pointer-events: none;
+  }
+  .cta-section h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(36px, 6vw, 72px);
+    font-weight: 800; line-height: 1.1;
+    margin-bottom: 20px; position: relative; z-index: 1;
+  }
+  .cta-section h2 em {
+    font-style: normal;
+    background: linear-gradient(90deg, var(--violet-light), var(--pink));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .cta-sub {
+    font-size: 18px; color: var(--muted); margin-bottom: 40px;
+    position: relative; z-index: 1;
+  }
+  .cta-form {
+    display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+    position: relative; z-index: 1;
+  }
+  .cta-form input {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: var(--white); padding: 14px 20px;
+    border-radius: 10px; font-size: 15px; width: 300px;
+    outline: none; transition: border-color 0.2s;
+  }
+  .cta-form input::placeholder { color: var(--muted); }
+  .cta-form input:focus { border-color: var(--violet); }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 40px 60px;
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .footer-links { display: flex; gap: 24px; }
+  .footer-links a { color: var(--muted); text-decoration: none; font-size: 13px; }
+  .footer-links a:hover { color: var(--white); }
+  footer p { font-size: 13px; color: var(--muted); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    nav { padding: 16px 24px; }
+    .nav-links { display: none; }
+    .section { padding: 60px 24px; }
+    .features-grid { grid-template-columns: 1fr 1fr; }
+    .steps { grid-template-columns: 1fr; gap: 40px; }
+    .steps::before { display: none; }
+    .testimonials { grid-template-columns: 1fr; }
+    footer { flex-direction: column; gap: 16px; text-align: center; }
+  }
+  @media (max-width: 600px) {
+    .features-grid { grid-template-columns: 1fr; }
+    .hero-stats { gap: 32px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .orb, .orb2, .badge-dot, .marquee { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">InfluenceAI</div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#how">How it works</a>
+    <a href="#proof">Reviews</a>
+  </div>
+  <button class="nav-cta" onclick="document.querySelector('.cta-form input').focus()">Start Free →</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="orb"></div>
+  <div class="orb2"></div>
+
+  <div class="hero-badge">
+    <span class="badge-dot"></span>
+    AI-powered influence engine — now live
+  </div>
+
+  <h1>
+    <div class="line1">Your AI Influencer,</div>
+    <div class="line2">Always On.</div>
+  </h1>
+
+  <p class="hero-sub">
+    Create viral content, grow your audience, and monetize your influence — all on autopilot. No burnout. No creative blocks.
+  </p>
+
+  <div class="hero-actions">
+    <button class="btn-primary" onclick="document.querySelector('.cta-form input').focus()">
+      Launch Your AI Influencer →
+    </button>
+    <button class="btn-ghost">See a Demo</button>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat">
+      <div class="stat-num">10x</div>
+      <div class="stat-label">More content output</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">3.2M+</div>
+      <div class="stat-label">Posts generated</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">50K+</div>
+      <div class="stat-label">Creators using it</div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee">
+    <div class="marquee-item">🎯 Instagram Reels <span>•</span></div>
+    <div class="marquee-item">🐦 Twitter / X Threads <span>•</span></div>
+    <div class="marquee-item">📹 YouTube Shorts <span>•</span></div>
+    <div class="marquee-item">💼 LinkedIn Posts <span>•</span></div>
+    <div class="marquee-item">🎵 TikTok Scripts <span>•</span></div>
+    <div class="marquee-item">📸 Caption Writing <span>•</span></div>
+    <div class="marquee-item">📈 Hashtag Strategy <span>•</span></div>
+    <div class="marquee-item">💰 Brand Deal Pitches <span>•</span></div>
+    <!-- duplicate for seamless loop -->
+    <div class="marquee-item">🎯 Instagram Reels <span>•</span></div>
+    <div class="marquee-item">🐦 Twitter / X Threads <span>•</span></div>
+    <div class="marquee-item">📹 YouTube Shorts <span>•</span></div>
+    <div class="marquee-item">💼 LinkedIn Posts <span>•</span></div>
+    <div class="marquee-item">🎵 TikTok Scripts <span>•</span></div>
+    <div class="marquee-item">📸 Caption Writing <span>•</span></div>
+    <div class="marquee-item">📈 Hashtag Strategy <span>•</span></div>
+    <div class="marquee-item">💰 Brand Deal Pitches <span>•</span></div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<div id="features">
+  <div class="section">
+    <div class="section-label">What it does</div>
+    <h2 class="section-title">Every tool an influencer needs,<br>powered by AI</h2>
+    <p class="section-sub">From content creation to monetization — InfluenceAI handles the grind so you can focus on growth.</p>
+
+    <div class="features-grid">
+      <div class="feat-card">
+        <div class="feat-icon">✍️</div>
+        <h3>AI Content Generator</h3>
+        <p>Generate platform-native posts, captions, hooks, and scripts that match your voice and niche — in seconds.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">📊</div>
+        <h3>Viral Score Predictor</h3>
+        <p>Before you post, see how likely your content is to go viral. Optimize hooks and CTAs with real data.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🗓️</div>
+        <h3>Auto Content Calendar</h3>
+        <p>Never think "what do I post today." Your AI fills the calendar with trending content ideas for your niche.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🤖</div>
+        <h3>Your AI Persona</h3>
+        <p>Train an AI that writes exactly like you — your tone, slang, humor, and brand voice. Fully yours.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">💌</div>
+        <h3>Brand Deal Outreach</h3>
+        <p>AI writes personalized pitch emails to brands. Close sponsorships 5x faster with proven templates.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">📈</div>
+        <h3>Growth Analytics</h3>
+        <p>Know exactly what's working. See which content drives followers, engagement, and real revenue.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="how-wrap" id="how">
+  <div class="section">
+    <div class="section-label">The process</div>
+    <h2 class="section-title">Live in 3 steps</h2>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>Set Your Niche</h3>
+        <p>Tell us your niche, platforms, and audience. The AI builds your custom influence strategy in minutes.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>Train Your AI</h3>
+        <p>Feed it your best posts. It learns your voice, style, and what your audience loves — and replicates it at scale.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>Grow & Earn</h3>
+        <p>Approve, schedule, and publish. Watch your followers, engagement, and brand deals grow on autopilot.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TESTIMONIALS -->
+<div id="proof">
+  <div class="section">
+    <div class="section-label">Real creators</div>
+    <h2 class="section-title">They blew up.<br>You're next.</h2>
+
+    <div class="testimonials">
+      <div class="testi-card">
+        <div class="stars">★★★★★</div>
+        <p class="testi-text">"I went from 2K to 85K followers in 4 months. InfluenceAI generates content that sounds exactly like me — my audience can't even tell."</p>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background: linear-gradient(135deg,#7C3AED,#EC4899)">P</div>
+          <div>
+            <div class="testi-name">Priya Sharma</div>
+            <div class="testi-handle">@priyacreates · Lifestyle</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="stars">★★★★★</div>
+        <p class="testi-text">"Closed 3 brand deals in my first month using the AI pitch tool. Made back 100x my subscription in one week."</p>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background: linear-gradient(135deg,#0EA5E9,#7C3AED)">R</div>
+          <div>
+            <div class="testi-name">Rahul Mehra</div>
+            <div class="testi-handle">@rahultech · Tech & Finance</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="stars">★★★★★</div>
+        <p class="testi-text">"I post 3x more content now and spend 80% less time. The viral score predictor alone changed everything for me."</p>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background: linear-gradient(135deg,#EC4899,#F97316)">Z</div>
+          <div>
+            <div class="testi-name">Zara Khan</div>
+            <div class="testi-handle">@zarafitness · Health & Wellness</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-orb"></div>
+  <h2>Ready to become an<br><em>AI-powered influencer?</em></h2>
+  <p class="cta-sub">Join 50,000+ creators who grow on autopilot. Start free, no credit card needed.</p>
+  <div class="cta-form">
+    <input type="email" placeholder="Enter your email address">
+    <button class="btn-primary">Launch for Free →</button>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="logo">InfluenceAI</div>
+  <div class="footer-links">
+    <a href="#">Privacy</a>
+    <a href="#">Terms</a>
+    <a href="#">Support</a>
+    <a href="#">Blog</a>
+  </div>
+  <p>© 2026 InfluenceAI. All rights reserved.</p>
+</footer>
+
+</body>
+</html>
