@@ -49,6 +49,235 @@ const STYLE_VIBES = [
   { id: 'Y2K Retro', label: 'Y2K Retro', desc: 'Bright nostalgic colors, mesh tees, vintage futuristic shades' }
 ]
 
+// Tattoo Styles & Sizes
+const TATTOO_STYLES = [
+  { 
+    id: 'Minimalist', 
+    label: 'Minimalist', 
+    svg: (
+      <svg viewBox="0 0 40 40" className="w-8 h-8 stroke-current fill-none" strokeWidth="2">
+        <circle cx="20" cy="20" r="4" />
+        <line x1="20" y1="8" x2="20" y2="32" />
+      </svg>
+    )
+  },
+  { 
+    id: 'Floral', 
+    label: 'Floral', 
+    svg: (
+      <svg viewBox="0 0 40 40" className="w-8 h-8 stroke-current fill-none" strokeWidth="2">
+        <circle cx="20" cy="20" r="5" />
+        <circle cx="20" cy="11" r="4" />
+        <circle cx="20" cy="29" r="4" />
+        <circle cx="11" cy="20" r="4" />
+        <circle cx="29" cy="20" r="4" />
+      </svg>
+    )
+  },
+  { 
+    id: 'Tribal', 
+    label: 'Tribal', 
+    svg: (
+      <svg viewBox="0 0 40 40" className="w-8 h-8 stroke-current fill-none" strokeWidth="2">
+        <path d="M10,20 Q20,10 30,20 Q20,30 10,20 Z M15,20 Q20,15 25,20 Q20,25 15,20 Z" />
+      </svg>
+    )
+  },
+  { 
+    id: 'Geometric', 
+    label: 'Geometric', 
+    svg: (
+      <svg viewBox="0 0 40 40" className="w-8 h-8 stroke-current fill-none" strokeWidth="2">
+        <polygon points="20,8 32,28 8,28" />
+        <polygon points="20,32 32,12 8,12" />
+      </svg>
+    )
+  },
+  { 
+    id: 'Script', 
+    label: 'Script', 
+    svg: (
+      <svg viewBox="0 0 40 40" className="w-8 h-8 stroke-current fill-none" strokeWidth="2">
+        <path d="M10,25 C15,10 25,10 30,25 C25,30 15,30 10,25 Z" />
+        <path d="M12,20 C18,28 22,28 28,20" />
+      </svg>
+    )
+  },
+  { 
+    id: 'Japanese', 
+    label: 'Japanese', 
+    svg: (
+      <svg viewBox="0 0 40 40" className="w-8 h-8 stroke-current fill-none" strokeWidth="2">
+        <path d="M8,15 Q20,5 32,15 T20,25 T8,15 Z" />
+        <path d="M14,25 Q20,18 26,25" />
+      </svg>
+    )
+  },
+  { 
+    id: 'Realistic', 
+    label: 'Realistic', 
+    svg: (
+      <svg viewBox="0 0 40 40" className="w-8 h-8 stroke-current fill-none" strokeWidth="2">
+        <circle cx="20" cy="20" r="12" />
+        <circle cx="20" cy="20" r="7" className="fill-slate-700/30" />
+      </svg>
+    )
+  }
+]
+
+const TATTOO_SIZES = [
+  { id: 'Small', label: 'Small', radius: 'w-4 h-4' },
+  { id: 'Medium', label: 'Medium', radius: 'w-6 h-6' },
+  { id: 'Large', label: 'Large', radius: 'w-8 h-8' }
+]
+
+// Special Face Features
+const SPECIAL_FACE_FEATURES = [
+  { 
+    id: 'Dimples', 
+    label: 'Dimples',
+    svg: (
+      <svg viewBox="0 0 60 60" className="w-10 h-10 stroke-current fill-none" strokeWidth="2">
+        <path d="M15,25 Q30,40 45,25" />
+        <circle cx="12" cy="22" r="2.5" className="fill-current" />
+        <circle cx="48" cy="22" r="2.5" className="fill-current" />
+      </svg>
+    )
+  },
+  { 
+    id: 'Freckles', 
+    label: 'Freckles',
+    svg: (
+      <svg viewBox="0 0 60 60" className="w-10 h-10 fill-current" strokeWidth="0">
+        <circle cx="20" cy="25" r="1.2" />
+        <circle cx="24" cy="28" r="1" />
+        <circle cx="18" cy="30" r="1.5" />
+        <circle cx="38" cy="25" r="1.2" />
+        <circle cx="42" cy="28" r="1" />
+        <circle cx="36" cy="30" r="1.5" />
+        <circle cx="30" cy="32" r="1" />
+      </svg>
+    )
+  },
+  { 
+    id: 'Sharp Jawline', 
+    label: 'Sharp Jaw',
+    svg: (
+      <svg viewBox="0 0 60 60" className="w-10 h-10 stroke-current fill-none" strokeWidth="2.5">
+        <path d="M15,15 L15,35 L30,48 L45,35 L45,15" />
+      </svg>
+    )
+  },
+  { 
+    id: 'High Cheekbones', 
+    label: 'High Cheekbones',
+    svg: (
+      <svg viewBox="0 0 60 60" className="w-10 h-10 stroke-current fill-none" strokeWidth="2">
+        <path d="M15,22 C22,25 28,18 30,18 C32,18 38,25 45,22" />
+        <path d="M18,32 Q30,22 42,32" />
+      </svg>
+    )
+  },
+  { 
+    id: 'Soft Features', 
+    label: 'Soft Features',
+    svg: (
+      <svg viewBox="0 0 60 60" className="w-10 h-10 stroke-current fill-none" strokeWidth="2">
+        <path d="M16,16 C30,12 44,16 44,30 C44,44 30,46 30,46 C30,46 16,44 16,30 Z" />
+      </svg>
+    )
+  },
+  { 
+    id: 'Strong Brow', 
+    label: 'Strong Brow',
+    svg: (
+      <svg viewBox="0 0 60 60" className="w-10 h-10 stroke-current fill-none" strokeWidth="3">
+        <path d="M14,20 Q22,14 27,18" />
+        <path d="M46,20 Q38,14 33,18" />
+      </svg>
+    )
+  }
+]
+
+// Freckle Densities & Locations
+const FRECKLE_DENSITIES = [
+  { id: 'None', label: 'No Freckles', dots: 0 },
+  { id: 'Light', label: 'Light Density', dots: 8 },
+  { id: 'Medium', label: 'Medium Density', dots: 20 },
+  { id: 'Heavy', label: 'Heavy Density', dots: 45 }
+]
+
+const FRECKLE_LOCATIONS = [
+  { id: 'Nose', label: 'Nose Bridge' },
+  { id: 'Cheeks', label: 'Cheek Bones' },
+  { id: 'Full Face', label: 'Scattered Full Face' },
+  { id: 'Under Eye', label: 'Under Eyes' }
+]
+
+// Signature Poses
+const POSES = [
+  {
+    id: 'Standing confident',
+    label: 'Confident Stand',
+    svg: (
+      <svg viewBox="0 0 100 160" className="w-12 h-18 stroke-current fill-none" strokeWidth="2.5">
+        <circle cx="50" cy="22" r="10" />
+        <path d="M50,32 L50,85 M35,45 L65,45 M38,45 L38,90 L42,148 M62,45 L62,90 L58,148" />
+      </svg>
+    )
+  },
+  {
+    id: 'Hand on hip',
+    label: 'Hand on Hip',
+    svg: (
+      <svg viewBox="0 0 100 160" className="w-12 h-18 stroke-current fill-none" strokeWidth="2.5">
+        <circle cx="50" cy="22" r="10" />
+        <path d="M50,32 L50,85 M35,45 C45,45 32,70 35,80 L44,82 M65,45 L65,95 M38,85 L42,148 M58,85 L58,148" />
+      </svg>
+    )
+  },
+  {
+    id: 'Looking over shoulder',
+    label: 'Over Shoulder',
+    svg: (
+      <svg viewBox="0 0 100 160" className="w-12 h-18 stroke-current fill-none" strokeWidth="2.5">
+        <circle cx="45" cy="22" r="10" />
+        <path d="M42,32 Q58,35 55,85 M28,48 L58,44 L54,148 L44,148" />
+      </svg>
+    )
+  },
+  {
+    id: 'Arms crossed',
+    label: 'Arms Crossed',
+    svg: (
+      <svg viewBox="0 0 100 160" className="w-12 h-18 stroke-current fill-none" strokeWidth="2.5">
+        <circle cx="50" cy="22" r="10" />
+        <path d="M50,32 L50,85 M32,45 L68,45 M32,45 L42,65 L58,65 L68,45 M40,85 L42,148 M60,85 L58,148" />
+      </svg>
+    )
+  },
+  {
+    id: 'Candid natural',
+    label: 'Candid Natural',
+    svg: (
+      <svg viewBox="0 0 100 160" className="w-12 h-18 stroke-current fill-none" strokeWidth="2.5">
+        <circle cx="53" cy="23" r="10" />
+        <path d="M51,33 L45,85 M32,48 L56,42 L52,70 M40,85 L35,145 L38,148 M56,85 L58,145 L54,148" />
+      </svg>
+    )
+  },
+  {
+    id: 'Power pose',
+    label: 'Power Pose',
+    svg: (
+      <svg viewBox="0 0 100 160" className="w-12 h-18 stroke-current fill-none" strokeWidth="2.5">
+        <circle cx="50" cy="22" r="10" />
+        <path d="M50,32 L50,85 M22,35 L50,45 L78,35 M30,85 L22,145 L25,148 M70,85 L78,145 L75,148" />
+      </svg>
+    )
+  }
+]
+
 export default function CreateCharacterPage() {
   const router = useRouter()
   const supabase = createClient()
@@ -67,11 +296,24 @@ export default function CreateCharacterPage() {
   const [hairColor, setHairColor] = useState('Blonde')
   const [eyeShape, setEyeShape] = useState('Almond')
   const [eyeColor, setEyeColor] = useState('Blue')
-  const [tattoos, setTattoos] = useState('None')
-  const [faceFeatures, setFaceFeatures] = useState('Sharp jawline, subtle dimples')
-  const [birthmarks, setBirthmarks] = useState('Light freckles across the nose bridge')
-  const [signaturePose, setSignaturePose] = useState('Looking over shoulder with a soft smile')
   const [styleVibe, setStyleVibe] = useState('High-Fashion Streetwear')
+
+  // NEW Visual Selection States replacing Text Inputs
+  // 1. Tattoos & Ink
+  const [hasTattoos, setHasTattoos] = useState(false)
+  const [selectedTattooLocs, setSelectedTattooLocs] = useState<string[]>([])
+  const [tattooStyle, setTattooStyle] = useState('Minimalist')
+  const [tattooSize, setTattooSize] = useState('Medium')
+
+  // 2. Special Face Features
+  const [selectedFaceFeatures, setSelectedFaceFeatures] = useState<string[]>(['Sharp Jawline'])
+
+  // 3. Birthmarks & Freckles
+  const [freckleDensity, setFreckleDensity] = useState('Light')
+  const [freckleLocations, setFreckleLocations] = useState<string[]>(['Nose', 'Cheeks'])
+
+  // 4. Signature Pose
+  const [selectedPose, setSelectedPose] = useState('Looking over shoulder')
   
   const [file, setFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
@@ -82,10 +324,26 @@ export default function CreateCharacterPage() {
 
   // Build realtime prompt
   useEffect(() => {
-    const genderTerm = gender.toLowerCase();
-    const constructedPrompt = `A high-fidelity photo of ${name || 'an AI Influencer'}, a ${age}-year-old ${genderTerm} model. Physical traits: ${bodyType.toLowerCase()} body type, ${height}cm tall, ${skinTone.toLowerCase()} skin tone, ${faceShape.toLowerCase()} face shape, ${hairColor.toLowerCase()} ${hairStyle.toLowerCase()} hair, and ${eyeColor.toLowerCase()} ${eyeShape.toLowerCase()}-shaped eyes. Distinguishing details: ${faceFeatures}${birthmarks ? `, ${birthmarks}` : ''}, and ${tattoos === 'None' ? 'no visible tattoos' : tattoos.toLowerCase() + ' tattoo'}. Styled in signature ${styleVibe.toLowerCase()} aesthetic, captured in a ${signaturePose.toLowerCase()} pose.`
+    const genderTerm = gender.toLowerCase()
+    
+    // Format Tattoos description
+    const tattooDesc = hasTattoos && selectedTattooLocs.length > 0
+      ? `has a ${tattooSize.toLowerCase()} ${tattooStyle.toLowerCase()} style tattoo on the ${selectedTattooLocs.join(', ')}`
+      : 'no visible tattoos'
+
+    // Format Face features
+    const faceFeaturesDesc = selectedFaceFeatures.length > 0 
+      ? `distinguishing features include ${selectedFaceFeatures.join(', ')}` 
+      : 'soft features'
+
+    // Format Freckles
+    const frecklesDesc = freckleDensity !== 'None' && freckleLocations.length > 0
+      ? `, with ${freckleDensity.toLowerCase()} density freckles across the ${freckleLocations.join(', ')}`
+      : ''
+
+    const constructedPrompt = `A high-fidelity photo of ${name || 'an AI Influencer'}, a ${age}-year-old ${genderTerm} model. Physical traits: ${bodyType.toLowerCase()} body type, ${height}cm tall, ${skinTone.toLowerCase()} skin tone, ${faceShape.toLowerCase()} face shape, ${hairColor.toLowerCase()} ${hairStyle.toLowerCase()} hair, and ${eyeColor.toLowerCase()} ${eyeShape.toLowerCase()}-shaped eyes. Style Details: ${faceFeaturesDesc}${frecklesDesc}, and ${tattooDesc}. Styled in signature ${styleVibe.toLowerCase()} aesthetic, captured in a ${selectedPose.toLowerCase()} pose.`
     setRealtimePrompt(constructedPrompt)
-  }, [name, gender, age, height, skinTone, bodyType, faceShape, hairStyle, hairColor, eyeShape, eyeColor, tattoos, faceFeatures, birthmarks, signaturePose, styleVibe])
+  }, [name, gender, age, height, skinTone, bodyType, faceShape, hairStyle, hairColor, eyeShape, eyeColor, styleVibe, hasTattoos, selectedTattooLocs, tattooStyle, tattooSize, selectedFaceFeatures, freckleDensity, freckleLocations, selectedPose])
 
   useEffect(() => {
     const checkUser = async () => {
@@ -119,6 +377,30 @@ export default function CreateCharacterPage() {
     }
   }
 
+  const toggleTattooLocation = (loc: string) => {
+    if (selectedTattooLocs.includes(loc)) {
+      setSelectedTattooLocs(selectedTattooLocs.filter(l => l !== loc))
+    } else {
+      setSelectedTattooLocs([...selectedTattooLocs, loc])
+    }
+  }
+
+  const toggleFaceFeature = (feature: string) => {
+    if (selectedFaceFeatures.includes(feature)) {
+      setSelectedFaceFeatures(selectedFaceFeatures.filter(f => f !== feature))
+    } else {
+      setSelectedFaceFeatures([...selectedFaceFeatures, feature])
+    }
+  }
+
+  const toggleFreckleLocation = (loc: string) => {
+    if (freckleLocations.includes(loc)) {
+      setFreckleLocations(freckleLocations.filter(l => l !== loc))
+    } else {
+      setFreckleLocations([...freckleLocations, loc])
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!user) return
@@ -132,6 +414,17 @@ export default function CreateCharacterPage() {
     setErrorMsg(null)
 
     try {
+      // Assemble structured choices into DB column strings
+      const tattoosString = hasTattoos && selectedTattooLocs.length > 0 
+        ? `${tattooSize} ${tattooStyle} Ink on ${selectedTattooLocs.join(', ')}` 
+        : 'None'
+
+      const faceFeaturesString = selectedFaceFeatures.join(', ') || 'Soft Features'
+
+      const birthmarksString = freckleDensity !== 'None' && freckleLocations.length > 0
+        ? `${freckleDensity} Freckles on ${freckleLocations.join(', ')}`
+        : 'None'
+
       // --- DEMO MODE BYPASS ---
       const isDemoMode = !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'your-supabase-project-url'
       if (isDemoMode) {
@@ -179,11 +472,11 @@ export default function CreateCharacterPage() {
           hair_color_style: `${hairColor} / ${hairStyle}`,
           eye_color: eyeColor,
           eye_shape: eyeShape,
-          face_features: faceFeatures,
-          tattoos,
-          birthmarks,
+          face_features: faceFeaturesString,
+          tattoos: tattoosString,
+          birthmarks: birthmarksString,
           style_vibe: styleVibe,
-          signature_pose: signaturePose,
+          signature_pose: selectedPose,
           reference_image_url: publicUrl
         })
 
@@ -203,8 +496,8 @@ export default function CreateCharacterPage() {
   return (
     <div className="flex-1 min-h-screen bg-[#0A0F1E] text-slate-100 flex flex-col relative overflow-hidden">
       {/* Background decoration */}
-      <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-violet-950/15 blur-[130px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-cyan-950/10 blur-[130px] pointer-events-none" />
+      <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-violet-955/15 blur-[130px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-cyan-955/10 blur-[130px] pointer-events-none" />
 
       {/* Header */}
       <header className="border-b border-violet-900/20 bg-[#0A0F1E]/80 backdrop-blur-md sticky top-0 z-50 px-6 py-4">
@@ -269,7 +562,7 @@ export default function CreateCharacterPage() {
               />
             </div>
 
-            {/* GENDER SELECTION (Clean Cards with Soft Glow, Realistic Images, No Neon) */}
+            {/* GENDER SELECTION */}
             <div className="space-y-3">
               <label className="text-xs font-bold text-slate-350 tracking-wide uppercase">1. Gender Selection</label>
               <div className="grid grid-cols-2 gap-5">
@@ -299,9 +592,9 @@ export default function CreateCharacterPage() {
               </div>
             </div>
 
-            {/* FACE SHAPE (6 Options with actual face outline illustrations) */}
+            {/* FACE SHAPE */}
             <div className="space-y-3">
-              <label className="text-xs font-bold text-slate-350 tracking-wide uppercase">2. Face Shape Outline</label>
+              <label className="text-xs font-bold text-slate-355 tracking-wide uppercase">2. Face Shape Outline</label>
               <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
                 {[
                   {
@@ -373,7 +666,7 @@ export default function CreateCharacterPage() {
               </div>
             </div>
 
-            {/* SKIN TONE (Color swatches - 6 shades - no text - checkmark on selection) */}
+            {/* SKIN TONE */}
             <div className="space-y-3">
               <label className="text-xs font-bold text-slate-350 tracking-wide uppercase">3. Skin Tone Swatch</label>
               <div className="flex flex-wrap gap-4 items-center">
@@ -399,7 +692,7 @@ export default function CreateCharacterPage() {
               </div>
             </div>
 
-            {/* HAIR COLOR (Color swatches with actual hair shades) */}
+            {/* HAIR COLOR */}
             <div className="space-y-3">
               <label className="text-xs font-bold text-slate-355 tracking-wide uppercase">4. Hair Color Shade</label>
               <div className="flex flex-wrap gap-3">
@@ -417,7 +710,7 @@ export default function CreateCharacterPage() {
                       }`}
                     >
                       <span 
-                        className="w-5 h-5 rounded-full border border-slate-950/30 flex items-center justify-center relative" 
+                        className="w-5 h-5 rounded-full border border-slate-955/30 flex items-center justify-center relative" 
                         style={{ backgroundColor: hc.hex }}
                       >
                         {isSelected && <span className="w-1.5 h-1.5 bg-white rounded-full" />}
@@ -429,7 +722,7 @@ export default function CreateCharacterPage() {
               </div>
             </div>
 
-            {/* HAIR STYLE (Illustrations / Silhouettes) */}
+            {/* HAIR STYLE */}
             <div className="space-y-3">
               <label className="text-xs font-bold text-slate-355 tracking-wide uppercase">5. Hair Style Outline</label>
               <div className="grid grid-cols-4 sm:grid-cols-7 gap-2.5">
@@ -520,7 +813,7 @@ export default function CreateCharacterPage() {
               </div>
             </div>
 
-            {/* EYE COLOR (Realistic eye color swatches) */}
+            {/* EYE COLOR */}
             <div className="space-y-3">
               <label className="text-xs font-bold text-slate-355 tracking-wide uppercase">6. Eye Color Iris</label>
               <div className="flex flex-wrap gap-3">
@@ -550,7 +843,7 @@ export default function CreateCharacterPage() {
               </div>
             </div>
 
-            {/* EYE SHAPE (Small eye illustrations showing shapes) */}
+            {/* EYE SHAPE */}
             <div className="space-y-3">
               <label className="text-xs font-bold text-slate-355 tracking-wide uppercase">7. Eye Shape Outline</label>
               <div className="grid grid-cols-2 sm:grid-cols-6 gap-3">
@@ -631,7 +924,7 @@ export default function CreateCharacterPage() {
               </div>
             </div>
 
-            {/* BODY TYPE (Male/Female silhouettes showing shapes: Slim, Athletic, Curvy, Plus size, Petite) */}
+            {/* BODY TYPE */}
             <div className="space-y-3">
               <label className="text-xs font-bold text-slate-355 tracking-wide uppercase">8. Torso / Body Silhouette</label>
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
@@ -767,50 +1060,340 @@ export default function CreateCharacterPage() {
               </div>
             </div>
 
-            {/* Extra details fields */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-300 tracking-wide uppercase">Tattoos & Ink</label>
-                <input
-                  type="text"
-                  value={tattoos}
-                  onChange={(e) => setTattoos(e.target.value)}
-                  placeholder="e.g. Small geometric rose, Full sleeve"
-                  className="w-full px-4 py-3 bg-[#0A0F1E] border border-violet-900/20 rounded-2xl text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
-                />
+            {/* NEW ADDITIONS - 10. TATTOOS & INK INTERACTIVE MAP */}
+            <div className="space-y-4 bg-[#0A0F1E]/40 border border-violet-900/10 p-5 rounded-3xl">
+              <div className="flex justify-between items-center">
+                <label className="text-xs font-bold text-slate-300 tracking-wide uppercase">10. Tattoos & Ink Configuration</label>
+                <div className="flex items-center bg-[#050B18] border border-violet-900/20 rounded-xl p-0.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setHasTattoos(false)
+                      setSelectedTattooLocs([])
+                    }}
+                    className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${!hasTattoos ? 'bg-rose-900/40 text-rose-200' : 'text-slate-500 hover:text-slate-300'}`}
+                  >
+                    No Tattoos
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setHasTattoos(true)}
+                    className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${hasTattoos ? 'bg-violet-600 text-white' : 'text-slate-500 hover:text-slate-300'}`}
+                  >
+                    Yes, Add Tattoos
+                  </button>
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-300 tracking-wide uppercase">Special Face Features</label>
-                <input
-                  type="text"
-                  value={faceFeatures}
-                  onChange={(e) => setFaceFeatures(e.target.value)}
-                  placeholder="e.g. sharp jawline, high cheekbones"
-                  className="w-full px-4 py-3 bg-[#0A0F1E] border border-violet-900/20 rounded-2xl text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
-                />
+              {hasTattoos && (
+                <div className="space-y-5 pt-2 animate-fade-in">
+                  
+                  {/* Interactive Body Silhouette click map */}
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Select Tattoo Locations:</span>
+                    <div className="grid grid-cols-2 gap-4">
+                      
+                      {/* Front View */}
+                      <div className="relative border border-violet-900/10 bg-[#050B18] rounded-2xl p-4 flex flex-col items-center justify-center min-h-[220px]">
+                        <span className="absolute top-2 text-[9px] text-slate-500 font-bold uppercase tracking-wider">Front View</span>
+                        <svg viewBox="0 0 100 180" className="w-20 h-40 stroke-violet-900/20 fill-violet-900/5" strokeWidth="1.5">
+                          <circle cx="50" cy="22" r="10" />
+                          <path d="M50,32 L50,85 M35,45 L65,45 M38,45 L38,90 L42,148 M62,45 L62,90 L58,148" />
+                        </svg>
+
+                        {/* Interactive hotspot labels */}
+                        <div className="absolute inset-0 w-full h-full pointer-events-none">
+                          {/* Neck */}
+                          <button
+                            type="button"
+                            onClick={() => toggleTattooLocation('Neck')}
+                            className={`absolute pointer-events-auto top-[23%] left-[48%] -translate-x-1/2 -translate-y-1/2 rounded-full border text-[9px] font-bold flex items-center justify-center shadow-md transition-all ${selectedTattooLocs.includes('Neck') ? 'bg-violet-600 text-white border-violet-400 w-9 h-5' : 'bg-slate-900 text-slate-500 border-slate-800 w-8 h-4'}`}
+                          >
+                            Neck
+                          </button>
+                          {/* Chest */}
+                          <button
+                            type="button"
+                            onClick={() => toggleTattooLocation('Chest')}
+                            className={`absolute pointer-events-auto top-[34%] left-[48%] -translate-x-1/2 -translate-y-1/2 rounded-full border text-[9px] font-bold flex items-center justify-center shadow-md transition-all ${selectedTattooLocs.includes('Chest') ? 'bg-violet-600 text-white border-violet-400 w-9 h-5' : 'bg-slate-900 text-slate-500 border-slate-800 w-9 h-4'}`}
+                          >
+                            Chest
+                          </button>
+                          {/* Left Arm */}
+                          <button
+                            type="button"
+                            onClick={() => toggleTattooLocation('Left Arm')}
+                            className={`absolute pointer-events-auto top-[42%] left-[12%] -translate-y-1/2 rounded-full border text-[8px] font-bold flex items-center justify-center shadow-md transition-all ${selectedTattooLocs.includes('Left Arm') ? 'bg-violet-600 text-white border-violet-400 w-11 h-5' : 'bg-slate-900 text-slate-500 border-slate-800 w-10 h-4'}`}
+                          >
+                            L Arm
+                          </button>
+                          {/* Right Arm */}
+                          <button
+                            type="button"
+                            onClick={() => toggleTattooLocation('Right Arm')}
+                            className={`absolute pointer-events-auto top-[42%] right-[12%] -translate-y-1/2 rounded-full border text-[8px] font-bold flex items-center justify-center shadow-md transition-all ${selectedTattooLocs.includes('Right Arm') ? 'bg-violet-600 text-white border-violet-400 w-11 h-5' : 'bg-slate-900 text-slate-500 border-slate-800 w-10 h-4'}`}
+                          >
+                            R Arm
+                          </button>
+                          {/* Left Wrist */}
+                          <button
+                            type="button"
+                            onClick={() => toggleTattooLocation('Left Wrist')}
+                            className={`absolute pointer-events-auto top-[63%] left-[8%] -translate-y-1/2 rounded-full border text-[7.5px] font-bold flex items-center justify-center shadow-md transition-all ${selectedTattooLocs.includes('Left Wrist') ? 'bg-violet-600 text-white border-violet-400 w-11 h-5' : 'bg-slate-900 text-slate-500 border-slate-800 w-10 h-4'}`}
+                          >
+                            L Wrist
+                          </button>
+                          {/* Right Wrist */}
+                          <button
+                            type="button"
+                            onClick={() => toggleTattooLocation('Right Wrist')}
+                            className={`absolute pointer-events-auto top-[63%] right-[8%] -translate-y-1/2 rounded-full border text-[7.5px] font-bold flex items-center justify-center shadow-md transition-all ${selectedTattooLocs.includes('Right Wrist') ? 'bg-violet-600 text-white border-violet-400 w-11 h-5' : 'bg-slate-900 text-slate-500 border-slate-800 w-10 h-4'}`}
+                          >
+                            R Wrist
+                          </button>
+                          {/* Thigh */}
+                          <button
+                            type="button"
+                            onClick={() => toggleTattooLocation('Thigh')}
+                            className={`absolute pointer-events-auto top-[66%] left-[48%] -translate-x-1/2 -translate-y-1/2 rounded-full border text-[9px] font-bold flex items-center justify-center shadow-md transition-all ${selectedTattooLocs.includes('Thigh') ? 'bg-violet-600 text-white border-violet-400 w-10 h-5' : 'bg-slate-900 text-slate-500 border-slate-800 w-9 h-4'}`}
+                          >
+                            Thigh
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Back View */}
+                      <div className="relative border border-violet-900/10 bg-[#050B18] rounded-2xl p-4 flex flex-col items-center justify-center min-h-[220px]">
+                        <span className="absolute top-2 text-[9px] text-slate-500 font-bold uppercase tracking-wider">Back View</span>
+                        <svg viewBox="0 0 100 180" className="w-20 h-40 stroke-violet-900/20 fill-violet-900/5" strokeWidth="1.5">
+                          <circle cx="50" cy="22" r="10" />
+                          <path d="M50,32 L50,85 M35,45 L65,45 M38,45 L38,90 L42,148 M62,45 L62,90 L58,148" />
+                          {/* back details */}
+                          <line x1="50" y1="45" x2="50" y2="78" />
+                        </svg>
+
+                        {/* Interactive hotspot labels */}
+                        <div className="absolute inset-0 w-full h-full pointer-events-none">
+                          {/* Back */}
+                          <button
+                            type="button"
+                            onClick={() => toggleTattooLocation('Back')}
+                            className={`absolute pointer-events-auto top-[36%] left-[48%] -translate-x-1/2 -translate-y-1/2 rounded-full border text-[9px] font-bold flex items-center justify-center shadow-md transition-all ${selectedTattooLocs.includes('Back') ? 'bg-violet-600 text-white border-violet-400 w-10 h-5' : 'bg-slate-900 text-slate-500 border-slate-800 w-9 h-4'}`}
+                          >
+                            Back
+                          </button>
+                          {/* Ankle */}
+                          <button
+                            type="button"
+                            onClick={() => toggleTattooLocation('Ankle')}
+                            className={`absolute pointer-events-auto top-[86%] left-[48%] -translate-x-1/2 -translate-y-1/2 rounded-full border text-[9px] font-bold flex items-center justify-center shadow-md transition-all ${selectedTattooLocs.includes('Ankle') ? 'bg-violet-600 text-white border-violet-400 w-10 h-5' : 'bg-slate-900 text-slate-500 border-slate-800 w-9 h-4'}`}
+                          >
+                            Ankle
+                          </button>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+
+                  {/* Tattoo Style Cards */}
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Select Tattoo Style:</span>
+                    <div className="grid grid-cols-4 sm:grid-cols-7 gap-2.5">
+                      {TATTOO_STYLES.map((t) => {
+                        const isSelected = tattooStyle === t.id
+                        return (
+                          <button
+                            key={t.id}
+                            type="button"
+                            onClick={() => setTattooStyle(t.id)}
+                            className={`group flex flex-col items-center justify-between p-2 rounded-2xl border transition-all ${
+                              isSelected 
+                                ? 'border-violet-500 bg-violet-950/20 text-violet-400' 
+                                : 'border-violet-900/10 bg-[#0A0F1E]/60 text-slate-500 hover:border-slate-800'
+                            }`}
+                          >
+                            <div className="mb-1 transition-transform group-hover:scale-105">{t.svg}</div>
+                            <span className="text-[8px] font-bold tracking-wide text-center">{t.label}</span>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Tattoo Sizes (visual size comparison) */}
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Select Size:</span>
+                    <div className="flex gap-4">
+                      {TATTOO_SIZES.map((ts) => {
+                        const isSelected = tattooSize === ts.id
+                        return (
+                          <button
+                            key={ts.id}
+                            type="button"
+                            onClick={() => setTattooSize(ts.id)}
+                            className={`flex-1 flex items-center justify-center gap-3 p-3.5 rounded-2xl border transition-all ${
+                              isSelected 
+                                ? 'border-violet-500 bg-violet-950/20' 
+                                : 'border-violet-900/10 bg-[#0A0F1E]/60 hover:border-slate-800'
+                            }`}
+                          >
+                            {/* visual indicator circle */}
+                            <div className="flex items-center justify-center w-8 h-8 rounded bg-[#050B18]">
+                              <span className={`bg-violet-400 rounded-full ${ts.radius}`} />
+                            </div>
+                            <span className="text-xs font-bold text-slate-300">{ts.label}</span>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+
+                </div>
+              )}
+            </div>
+
+            {/* NEW ADDITIONS - 11. SPECIAL FACE FEATURES */}
+            <div className="space-y-3">
+              <label className="text-xs font-bold text-slate-355 tracking-wide uppercase">11. Special Face Features</label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {SPECIAL_FACE_FEATURES.map((feature) => {
+                  const isSelected = selectedFaceFeatures.includes(feature.id)
+                  return (
+                    <button
+                      key={feature.id}
+                      type="button"
+                      onClick={() => toggleFaceFeature(feature.id)}
+                      className={`group flex flex-col items-center justify-between p-3.5 rounded-2xl border text-center transition-all ${
+                        isSelected 
+                          ? 'border-violet-500 bg-violet-950/20 text-violet-400 shadow-[0_0_15px_rgba(139,92,246,0.15)]' 
+                          : 'border-violet-900/10 bg-[#0A0F1E]/60 text-slate-500 hover:border-slate-850 hover:text-slate-350'
+                      }`}
+                    >
+                      <div className="mb-2 transition-transform group-hover:scale-105">{feature.svg}</div>
+                      <span className="text-[10px] font-bold tracking-wide">{feature.label}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* NEW ADDITIONS - 12. BIRTHMARKS & FRECKLES */}
+            <div className="space-y-4 bg-[#0A0F1E]/40 border border-violet-900/10 p-5 rounded-3xl space-y-4">
+              <span className="text-xs font-bold text-slate-300 tracking-wide uppercase block">12. Birthmarks & Freckles Density</span>
+              
+              {/* Density face visuals selection */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {FRECKLE_DENSITIES.map((fd) => {
+                  const isSelected = freckleDensity === fd.id
+                  return (
+                    <button
+                      key={fd.id}
+                      type="button"
+                      onClick={() => {
+                        setFreckleDensity(fd.id)
+                        if (fd.id === 'None') setFreckleLocations([])
+                      }}
+                      className={`flex flex-col items-center justify-between p-3.5 rounded-2xl border transition-all ${
+                        isSelected 
+                          ? 'border-violet-500 bg-violet-950/20 text-violet-400' 
+                          : 'border-violet-900/10 bg-[#0A0F1E]/60 text-slate-500 hover:border-slate-800'
+                      }`}
+                    >
+                      {/* Face illustration with dot counts based on density */}
+                      <div className="relative w-12 h-12 mb-2 flex items-center justify-center stroke-slate-500 fill-none">
+                        <svg viewBox="0 0 100 100" className="w-full h-full">
+                          <circle cx="50" cy="50" r="32" strokeWidth="2.5" />
+                          <circle cx="50" cy="74" r="8" strokeWidth="2" />
+                          {/* nose */}
+                          <line x1="50" y1="44" x2="50" y2="52" strokeWidth="2.5" />
+                          {/* density dots */}
+                          {fd.dots >= 8 && (
+                            <>
+                              <circle cx="36" cy="56" r="1.5" className="fill-violet-400 stroke-none" />
+                              <circle cx="44" cy="58" r="1" className="fill-violet-400 stroke-none" />
+                              <circle cx="56" cy="58" r="1" className="fill-violet-400 stroke-none" />
+                              <circle cx="64" cy="56" r="1.5" className="fill-violet-400 stroke-none" />
+                            </>
+                          )}
+                          {fd.dots >= 20 && (
+                            <>
+                              <circle cx="38" cy="50" r="1.2" className="fill-violet-400 stroke-none" />
+                              <circle cx="42" cy="52" r="1.5" className="fill-violet-400 stroke-none" />
+                              <circle cx="58" cy="52" r="1.5" className="fill-violet-400 stroke-none" />
+                              <circle cx="62" cy="50" r="1.2" className="fill-violet-400 stroke-none" />
+                              <circle cx="48" cy="62" r="1" className="fill-violet-400 stroke-none" />
+                              <circle cx="52" cy="62" r="1.2" className="fill-violet-400 stroke-none" />
+                            </>
+                          )}
+                          {fd.dots >= 45 && (
+                            <>
+                              <circle cx="30" cy="46" r="1" className="fill-violet-400 stroke-none" />
+                              <circle cx="70" cy="46" r="1" className="fill-violet-400 stroke-none" />
+                              <circle cx="34" cy="62" r="1.5" className="fill-violet-400 stroke-none" />
+                              <circle cx="66" cy="62" r="1.5" className="fill-violet-400 stroke-none" />
+                              <circle cx="44" cy="66" r="1" className="fill-violet-400 stroke-none" />
+                              <circle cx="56" cy="66" r="1.2" className="fill-violet-400 stroke-none" />
+                              <circle cx="50" cy="58" r="1.5" className="fill-violet-400 stroke-none" />
+                            </>
+                          )}
+                        </svg>
+                      </div>
+                      <span className="text-[9px] font-bold tracking-wide">{fd.label}</span>
+                    </button>
+                  )
+                })}
               </div>
 
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-300 tracking-wide uppercase">Birthmarks & Freckles</label>
-                <input
-                  type="text"
-                  value={birthmarks}
-                  onChange={(e) => setBirthmarks(e.target.value)}
-                  placeholder="e.g. light freckles on nose"
-                  className="w-full px-4 py-3 bg-[#0A0F1E] border border-violet-900/20 rounded-2xl text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
-                />
-              </div>
+              {/* Freckle Locations selection */}
+              {freckleDensity !== 'None' && (
+                <div className="space-y-2 pt-1 animate-fade-in">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Freckle Placement on Face:</span>
+                  <div className="flex flex-wrap gap-2.5">
+                    {FRECKLE_LOCATIONS.map((fl) => {
+                      const isSelected = freckleLocations.includes(fl.id)
+                      return (
+                        <button
+                          key={fl.id}
+                          type="button"
+                          onClick={() => toggleFreckleLocation(fl.id)}
+                          className={`px-4.5 py-2.5 rounded-2xl border text-xs font-bold transition-all ${
+                            isSelected 
+                              ? 'border-violet-500 bg-violet-950/30 text-white' 
+                              : 'border-violet-900/10 bg-[#0A0F1E]/60 text-slate-450 hover:border-violet-900/40 hover:text-slate-200'
+                          }`}
+                        >
+                          {fl.label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
 
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-300 tracking-wide uppercase">Signature Pose</label>
-                <input
-                  type="text"
-                  value={signaturePose}
-                  onChange={(e) => setSignaturePose(e.target.value)}
-                  placeholder="e.g. candid looking away"
-                  className="w-full px-4 py-3 bg-[#0A0F1E] border border-violet-900/20 rounded-2xl text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
-                />
+            {/* NEW ADDITIONS - 13. SIGNATURE POSE (Visual cards with illustrations) */}
+            <div className="space-y-3">
+              <label className="text-xs font-bold text-slate-355 tracking-wide uppercase">13. Signature Pose</label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {POSES.map((p) => {
+                  const isSelected = selectedPose === p.id
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => setSelectedPose(p.id)}
+                      className={`group flex flex-col items-center justify-between p-3.5 rounded-2xl border transition-all ${
+                        isSelected 
+                          ? 'border-violet-500 bg-violet-950/20 text-violet-400 shadow-[0_0_15px_rgba(139,92,246,0.15)]' 
+                          : 'border-violet-900/10 bg-[#0A0F1E]/60 text-slate-500 hover:border-slate-800'
+                      }`}
+                    >
+                      <div className="mb-2 transition-transform group-hover:scale-102">{p.svg}</div>
+                      <span className="text-[10px] font-bold tracking-wide">{p.label}</span>
+                    </button>
+                  )
+                })}
               </div>
             </div>
 
@@ -822,7 +1405,7 @@ export default function CreateCharacterPage() {
             {/* Visual Height / Silhouette Panel */}
             <div className="bg-[#0F1629]/60 border border-violet-900/10 p-6 rounded-3xl backdrop-blur-xl space-y-5 flex flex-col items-center">
               <div className="w-full flex justify-between items-center border-b border-violet-900/10 pb-3">
-                <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wide">9. Height Scaling Model</h3>
+                <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wide">Height Scaling Model</h3>
                 <span className="text-violet-400 font-extrabold text-sm">{height} cm</span>
               </div>
               
