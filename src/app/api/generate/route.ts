@@ -24,20 +24,43 @@ export async function POST(request: Request) {
     const scenePrompt = body.scenePrompt || body.prompt
     const aspectRatio = body.aspectRatio || '1:1'
 
-    if (!characterId || !scenePrompt) {
-      return NextResponse.json({ error: 'Missing characterId or scenePrompt.' }, { status: 400 })
+    if (!scenePrompt) {
+      return NextResponse.json({ error: 'Missing scenePrompt.' }, { status: 400 })
     }
 
-    // 3. Retrieve character details
-    const { data: character, error: charError } = await supabase
-      .from('characters')
-      .select('*')
-      .eq('id', characterId)
-      .eq('user_id', user.id)
-      .single()
+    // 3. Retrieve character details or construct from request body if new/unsaved
+    let character: any = null
+    if (characterId && characterId !== 'new') {
+      const { data, error: charError } = await supabase
+        .from('characters')
+        .select('*')
+        .eq('id', characterId)
+        .eq('user_id', user.id)
+        .single()
 
-    if (charError || !character) {
-      return NextResponse.json({ error: 'Character not found.' }, { status: 404 })
+      if (charError || !data) {
+        return NextResponse.json({ error: 'Character not found.' }, { status: 404 })
+      }
+      character = data
+    } else {
+      character = {
+        name: body.name || 'AI Influencer',
+        gender: body.gender || 'Female',
+        age: body.age || 24,
+        height: body.height || 170,
+        skin_tone: body.skin_tone || 'Olive',
+        body_type: body.body_type || 'Slim',
+        face_shape: body.face_shape || 'Oval',
+        hair_color_style: body.hair_color_style || 'Blonde / Straight',
+        eye_color: body.eye_color || 'Blue',
+        eye_shape: body.eye_shape || 'Almond',
+        face_features: body.face_features || 'Soft Features',
+        tattoos: body.tattoos || 'None',
+        birthmarks: body.birthmarks || 'None',
+        style_vibe: body.style_vibe || 'High-Fashion Streetwear',
+        signature_pose: body.signature_pose || 'Looking over shoulder',
+        reference_image_url: body.reference_image_url || ''
+      }
     }
 
     // 4. Verify user credits
@@ -78,15 +101,17 @@ export async function POST(request: Request) {
         .eq('id', user.id)
 
       // Log generation history
-      await supabase
-        .from('generations')
-        .insert({
-          user_id: user.id,
-          character_id: characterId,
-          prompt: scenePrompt,
-          input_image_url: character.reference_image_url,
-          output_image_url: finalImageUrl,
-        })
+      if (characterId && characterId !== 'new') {
+        await supabase
+          .from('generations')
+          .insert({
+            user_id: user.id,
+            character_id: characterId,
+            prompt: scenePrompt,
+            input_image_url: character.reference_image_url,
+            output_image_url: finalImageUrl,
+          })
+      }
 
       return NextResponse.json({
         output_image_url: finalImageUrl,
@@ -190,19 +215,21 @@ export async function POST(request: Request) {
       console.error('Failed to deduct credit, but image was generated:', deductError)
     }
 
-    // 9. Log the generation history
-    const { error: logError } = await supabase
-      .from('generations')
-      .insert({
-        user_id: user.id,
-        character_id: characterId,
-        prompt: scenePrompt,
-        input_image_url: character.reference_image_url,
-        output_image_url: finalImageUrl,
-      })
+    // 9. Log the generation history (only if character already exists in db)
+    if (characterId && characterId !== 'new') {
+      const { error: logError } = await supabase
+        .from('generations')
+        .insert({
+          user_id: user.id,
+          character_id: characterId,
+          prompt: scenePrompt,
+          input_image_url: character.reference_image_url,
+          output_image_url: finalImageUrl,
+        })
 
-    if (logError) {
-      console.error('Failed to log generation in database:', logError)
+      if (logError) {
+        console.error('Failed to log generation in database:', logError)
+      }
     }
 
     // 10. Return final output image (supports both snake_case and camelCase parameters)

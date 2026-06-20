@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
-import { Sparkles, ArrowLeft, Upload, Loader2, HelpCircle, Coins, Check } from 'lucide-react'
+import { Sparkles, ArrowLeft, Upload, Loader2, HelpCircle, Coins, Check, RefreshCw, Edit, Sparkle } from 'lucide-react'
 
 // Options Constants
 const GENDERS = [
@@ -323,6 +323,13 @@ export default function CreateCharacterPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [realtimePrompt, setRealtimePrompt] = useState('')
 
+  // DALL-E 3 preview generation states
+  const [isPreviewActive, setIsPreviewActive] = useState(false)
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null)
+  const [previewLoading, setPreviewLoading] = useState(false)
+  const [uploadedRefUrl, setUploadedRefUrl] = useState<string | null>(null)
+  const [pipelineState, setPipelineState] = useState('')
+
   // Build realtime prompt
   useEffect(() => {
     const genderTerm = gender.toLowerCase()
@@ -375,6 +382,7 @@ export default function CreateCharacterPage() {
       const selectedFile = e.target.files[0]
       setFile(selectedFile)
       setPreviewUrl(URL.createObjectURL(selectedFile))
+      setUploadedRefUrl(null) // Reset cached upload
     }
   }
 
@@ -402,8 +410,7 @@ export default function CreateCharacterPage() {
     }
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleGeneratePreview = async () => {
     if (!user) return
 
     if (!name.trim()) {
@@ -425,11 +432,125 @@ export default function CreateCharacterPage() {
       return
     }
 
+    if (credits !== null && credits < 1) {
+      setErrorMsg("Insufficient credits. You need at least 1 credit to generate an image.")
+      return
+    }
+
+    setPreviewLoading(true)
+    setIsPreviewActive(true)
+    setErrorMsg(null)
+    setPreviewImageUrl(null)
+
+    try {
+      let refUrl = uploadedRefUrl
+
+      if (!refUrl) {
+        setPipelineState('Uploading face photo...')
+        const isDemoMode = !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'your-supabase-project-url'
+        
+        if (isDemoMode) {
+          refUrl = 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=800&q=80'
+          setUploadedRefUrl(refUrl)
+        } else {
+          const fileExt = file.name.split('.').pop()
+          const fileName = `${user.id}/${Date.now()}.${fileExt}`
+          const filePath = `reference_images/${fileName}`
+
+          const { error: uploadError } = await supabase.storage
+            .from('influencer-studio')
+            .upload(filePath, file, {
+              cacheControl: '3600',
+              upsert: true
+            })
+
+          if (uploadError) {
+            throw new Error(`Upload Error: ${uploadError.message}. Make sure you created a public bucket named "influencer-studio" in Supabase Storage.`)
+          }
+
+          const { data: { publicUrl } } = supabase.storage
+            .from('influencer-studio')
+            .getPublicUrl(filePath)
+          
+          refUrl = publicUrl
+          setUploadedRefUrl(publicUrl)
+        }
+      }
+
+      setPipelineState('Generating character portrait...')
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          characterId: 'new',
+          prompt: realtimePrompt,
+          name,
+          gender,
+          age: Number(age),
+          height: Number(height),
+          skin_tone: skinTone,
+          body_type: bodyType,
+          face_shape: faceShape,
+          hair_color_style: `${hairColor} / ${hairStyle}`,
+          eye_color: eyeColor,
+          eye_shape: eyeShape,
+          face_features: selectedFaceFeatures.join(', ') || 'Soft Features',
+          tattoos: hasTattoos && selectedTattooLocs.length > 0 ? `${tattooSize} ${tattooStyle} Ink on ${selectedTattooLocs.join(', ')}` : 'None',
+          birthmarks: freckleDensity !== 'None' && freckleLocations.length > 0 ? `${freckleDensity} Freckles on ${freckleLocations.join(', ')}` : 'None',
+          style_vibe: styleVibe,
+          signature_pose: selectedPose,
+          reference_image_url: refUrl
+        })
+      })
+
+      const data = await response.json()
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to generate preview image.')
+      }
+
+      const generatedUrl = data.output_image_url || data.outputImageUrl
+      if (!generatedUrl) {
+        throw new Error('No image URL returned from the server.')
+      }
+
+      setPreviewImageUrl(generatedUrl)
+      
+      // Update credits locally
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('credits')
+        .single()
+      if (profile) {
+        setCredits(profile.credits)
+      }
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Something went wrong during generation.')
+      setIsPreviewActive(false)
+    } finally {
+      setPreviewLoading(false)
+      setPipelineState('')
+    }
+  }
+
+  const handleSaveAvatar = async () => {
+    if (!user) return
+
+    if (!name.trim()) {
+      setErrorMsg("Please specify a name for your AI Influencer.")
+      return
+    }
+
+    if (!previewImageUrl) {
+      setErrorMsg("Please generate a preview first.")
+      return
+    }
+
     setLoading(true)
     setErrorMsg(null)
 
     try {
-      // Assemble structured choices into DB column strings
       const tattoosString = hasTattoos && selectedTattooLocs.length > 0 
         ? `${tattooSize} ${tattooStyle} Ink on ${selectedTattooLocs.join(', ')}` 
         : 'None'
@@ -453,28 +574,7 @@ export default function CreateCharacterPage() {
       }
       // ------------------------
 
-      // 1. Upload reference face image to Supabase Storage
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${user.id}/${Date.now()}.${fileExt}`
-      const filePath = `reference_images/${fileName}`
-
-      const { error: uploadError } = await supabase.storage
-        .from('influencer-studio')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: true
-        })
-
-      if (uploadError) {
-        throw new Error(`Upload Error: ${uploadError.message}. Make sure you created a public bucket named "influencer-studio" in Supabase Storage.`)
-      }
-
-      // Get public URL of the uploaded image
-      const { data: { publicUrl } } = supabase.storage
-        .from('influencer-studio')
-        .getPublicUrl(filePath)
-
-      // 2. Save character to database
+      // Save character using the generated previewImageUrl as reference_image_url
       const { error: dbError } = await supabase
         .from('characters')
         .insert({
@@ -494,7 +594,7 @@ export default function CreateCharacterPage() {
           birthmarks: birthmarksString,
           style_vibe: styleVibe,
           signature_pose: selectedPose,
-          reference_image_url: publicUrl
+          reference_image_url: previewImageUrl
         })
 
       if (dbError) {
@@ -510,6 +610,11 @@ export default function CreateCharacterPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    handleGeneratePreview()
   }
 
   return (
@@ -561,7 +666,7 @@ export default function CreateCharacterPage() {
         <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
           {/* Left Column: Visual Options (7 cols) */}
-          <div className="lg:col-span-7 space-y-8 bg-[#0F1629]/45 border border-violet-900/10 p-6 sm:p-8 rounded-3xl backdrop-blur-xl">
+          <div className={`lg:col-span-7 space-y-8 bg-[#0F1629]/45 border border-violet-900/10 p-6 sm:p-8 rounded-3xl backdrop-blur-xl transition-all duration-300 ${isPreviewActive ? 'opacity-40 pointer-events-none' : ''}`}>
             {errorMsg && (
               <div className="p-4 rounded-xl bg-rose-950/40 border border-rose-900/60 text-rose-200 text-sm">
                 {errorMsg}
@@ -1421,88 +1526,193 @@ export default function CreateCharacterPage() {
           {/* Right Column: Game-like character view, height silhouette scaling, reference image upload (5 cols) */}
           <div className="lg:col-span-5 lg:sticky lg:top-24 space-y-6">
             
-            {/* Visual Height / Silhouette Panel */}
-            <div className="bg-[#0F1629]/60 border border-violet-900/10 p-6 rounded-3xl backdrop-blur-xl space-y-5 flex flex-col items-center">
-              <div className="w-full flex justify-between items-center border-b border-violet-900/10 pb-3">
-                <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wide">Height Scaling Model</h3>
-                <span className="text-violet-400 font-extrabold text-sm">{height} cm</span>
-              </div>
-              
-              {/* Growing Human Silhouette Illustration */}
-              <div className="h-64 flex items-end justify-center w-full relative bg-[#0A0F1E]/55 rounded-2xl p-4 border border-violet-900/5 overflow-hidden">
-                <div 
-                  className="transition-all duration-300 flex flex-col items-center origin-bottom"
-                  style={{ transform: `scale(${0.65 + ((height - 140) / 70) * 0.35})` }}
-                >
-                  {/* Glowing human outline SVG */}
-                  <svg viewBox="0 0 100 200" className="w-24 h-48 stroke-violet-500 fill-violet-500/10 filter drop-shadow-[0_0_8px_rgba(139,92,246,0.3)]" strokeWidth="2">
-                    {/* Head */}
-                    <circle cx="50" cy="25" r="14" />
-                    {/* Neck */}
-                    <line x1="50" y1="39" x2="50" y2="45" />
-                    {/* Shoulders & Torso */}
-                    <path d="M28,52 C32,45 68,45 72,52 L64,105 L36,105 Z" />
-                    {/* Arms */}
-                    <path d="M28,52 L20,95 L22,100" />
-                    <path d="M72,52 L80,95 L78,100" />
-                    {/* Pelvis */}
-                    <path d="M36,105 L64,105 L58,122 L42,122 Z" />
-                    {/* Legs */}
-                    <path d="M43,122 L41,185 L48,188" />
-                    <path d="M57,122 L59,185 L52,188" />
-                  </svg>
-                  <span className="text-[10px] text-slate-450 font-bold uppercase tracking-wider mt-2.5">AI Silhouette</span>
+            {isPreviewActive ? (
+              /* Output Canvas Panel */
+              <div className="bg-[#0F1629]/60 border border-violet-900/10 p-6 rounded-3xl backdrop-blur-xl space-y-6 flex flex-col min-h-[500px] justify-between">
+                <div>
+                  <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wide mb-4">Output Studio Canvas</h3>
+                  
+                  <div className="relative aspect-square w-full bg-slate-950/80 rounded-2xl overflow-hidden border border-violet-900/10 flex items-center justify-center">
+                    {previewLoading ? (
+                      <div className="flex flex-col items-center justify-center p-6 text-center space-y-4">
+                        <div className="relative">
+                          <div className="w-16 h-16 rounded-full border-4 border-violet-500/20 border-t-violet-500 animate-spin" />
+                          <Sparkles className="absolute inset-0 m-auto h-6 w-6 text-violet-400 animate-pulse" />
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-sm font-bold text-white">Generating Character Preview</p>
+                          <p className="text-xs text-slate-450 animate-pulse">{pipelineState || 'Calling DALL-E 3 API...'}</p>
+                        </div>
+                      </div>
+                    ) : previewImageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={previewImageUrl}
+                        alt="Character AI generated preview"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="text-center p-6 text-slate-500 text-sm">
+                        No preview image. Please click "Generate Preview" below.
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
 
-              {/* Slider Input */}
-              <div className="w-full space-y-2">
-                <div className="flex justify-between text-[10px] text-slate-500 font-bold uppercase">
-                  <span>Petite (140cm)</span>
-                  <span>Average (175cm)</span>
-                  <span>Tall (210cm)</span>
+                {/* Action Buttons below image (Save Avatar / Regenerate / Edit Details) */}
+                {!previewLoading && previewImageUrl && (
+                  <div className="space-y-3">
+                    <button
+                      type="button"
+                      onClick={handleSaveAvatar}
+                      disabled={loading}
+                      className="w-full py-4 bg-gradient-to-r from-emerald-600 to-green-500 hover:opacity-95 text-white font-bold rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 active:scale-[0.98] cursor-pointer"
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                          <span>Saving Avatar...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Check className="h-5 w-5 text-white" />
+                          <span>Save Avatar</span>
+                        </>
+                      )}
+                    </button>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={handleGeneratePreview}
+                        disabled={previewLoading}
+                        className="py-3 bg-slate-900 border border-slate-800 hover:border-violet-500/40 text-slate-200 font-bold rounded-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 text-sm cursor-pointer"
+                      >
+                        <RefreshCw className="h-4 w-4 text-violet-400" />
+                        <span>Regenerate</span>
+                      </button>
+                      
+                      <button
+                        type="button"
+                        onClick={() => setIsPreviewActive(false)}
+                        className="py-3 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-350 hover:text-white font-bold rounded-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 text-sm cursor-pointer"
+                      >
+                        <Edit className="h-4 w-4" />
+                        <span>Edit Details</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <>
+                {/* Visual Height / Silhouette Panel */}
+                <div className="bg-[#0F1629]/60 border border-violet-900/10 p-6 rounded-3xl backdrop-blur-xl space-y-5 flex flex-col items-center">
+                  <div className="w-full flex justify-between items-center border-b border-violet-900/10 pb-3">
+                    <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wide">Height Scaling Model</h3>
+                    <span className="text-violet-400 font-extrabold text-sm">{height} cm</span>
+                  </div>
+                  
+                  {/* Growing Human Silhouette Illustration */}
+                  <div className="h-64 flex items-end justify-center w-full relative bg-[#0A0F1E]/55 rounded-2xl p-4 border border-violet-900/5 overflow-hidden">
+                    <div 
+                      className="transition-all duration-300 flex flex-col items-center origin-bottom"
+                      style={{ transform: `scale(${0.65 + ((height - 140) / 70) * 0.35})` }}
+                    >
+                      {/* Glowing human outline SVG */}
+                      <svg viewBox="0 0 100 200" className="w-24 h-48 stroke-violet-500 fill-violet-500/10 filter drop-shadow-[0_0_8px_rgba(139,92,246,0.3)]" strokeWidth="2">
+                        {/* Head */}
+                        <circle cx="50" cy="25" r="14" />
+                        {/* Neck */}
+                        <line x1="50" y1="39" x2="50" y2="45" />
+                        {/* Shoulders & Torso */}
+                        <path d="M28,52 C32,45 68,45 72,52 L64,105 L36,105 Z" />
+                        {/* Arms */}
+                        <path d="M28,52 L20,95 L22,100" />
+                        <path d="M72,52 L80,95 L78,100" />
+                        {/* Pelvis */}
+                        <path d="M36,105 L64,105 L58,122 L42,122 Z" />
+                        {/* Legs */}
+                        <path d="M43,122 L41,185 L48,188" />
+                        <path d="M57,122 L59,185 L52,188" />
+                      </svg>
+                      <span className="text-[10px] text-slate-450 font-bold uppercase tracking-wider mt-2.5">AI Silhouette</span>
+                    </div>
+                  </div>
+
+                  {/* Slider Input */}
+                  <div className="w-full space-y-2">
+                    <div className="flex justify-between text-[10px] text-slate-500 font-bold uppercase">
+                      <span>Petite (140cm)</span>
+                      <span>Average (175cm)</span>
+                      <span>Tall (210cm)</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="140"
+                      max="210"
+                      value={height}
+                      onChange={(e) => setHeight(Number(e.target.value))}
+                      className="w-full accent-violet-500 h-1.5 bg-slate-900 rounded-lg cursor-pointer"
+                    />
+                  </div>
                 </div>
-                <input
-                  type="range"
-                  min="140"
-                  max="210"
-                  value={height}
-                  onChange={(e) => setHeight(Number(e.target.value))}
-                  className="w-full accent-violet-500 h-1.5 bg-slate-900 rounded-lg cursor-pointer"
-                />
-              </div>
-            </div>
 
-            {/* Real-time Prompt Builder Panel */}
-            <div className="bg-[#0F1629]/60 border border-violet-900/10 p-6 rounded-3xl backdrop-blur-xl space-y-4">
-              <div className="flex justify-between items-center">
-                <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wide flex items-center gap-2">
-                  <Sparkles className="h-4.5 w-4.5 text-violet-400" />
-                  Real-time Prompt Builder
-                </h3>
-              </div>
-              <div className="p-4 bg-[#0A0F1E] rounded-2xl border border-violet-900/10">
-                <p className="text-xs text-slate-400 leading-relaxed italic">
-                  "{realtimePrompt}"
-                </p>
-              </div>
-            </div>
+                {/* Real-time Prompt Builder Panel */}
+                <div className="bg-[#0F1629]/60 border border-violet-900/10 p-6 rounded-3xl backdrop-blur-xl space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wide flex items-center gap-2">
+                      <Sparkles className="h-4.5 w-4.5 text-violet-400" />
+                      Real-time Prompt Builder
+                    </h3>
+                  </div>
+                  <div className="p-4 bg-[#0A0F1E] rounded-2xl border border-violet-900/10">
+                    <p className="text-xs text-slate-400 leading-relaxed italic">
+                      "{realtimePrompt}"
+                    </p>
+                  </div>
+                </div>
 
-            {/* Reference Image Upload */}
-            <div className="bg-[#0F1629]/40 border border-violet-900/10 p-6 rounded-3xl backdrop-blur-xl flex flex-col justify-center min-h-[320px] relative">
-              <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wide mb-4">Face Reference Photo</h3>
-              
-              {previewUrl ? (
-                <div className="w-full flex-1 flex flex-col items-center justify-center relative group rounded-2xl overflow-hidden aspect-[4/3]">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={previewUrl}
-                    alt="Reference face preview"
-                    className="w-full h-full object-cover object-top rounded-2xl"
-                  />
-                  <div className="absolute inset-0 bg-slate-950/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-2xl">
-                    <label className="px-4 py-2 bg-slate-900 border border-slate-800 rounded-xl cursor-pointer hover:bg-slate-800 transition text-sm font-semibold">
-                      Change Photo
+                {/* Reference Image Upload */}
+                <div className="bg-[#0F1629]/40 border border-violet-900/10 p-6 rounded-3xl backdrop-blur-xl flex flex-col justify-center min-h-[320px] relative">
+                  <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wide mb-4">Face Reference Photo</h3>
+                  
+                  {previewUrl ? (
+                    <div className="w-full flex-1 flex flex-col items-center justify-center relative group rounded-2xl overflow-hidden aspect-[4/3]">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={previewUrl}
+                        alt="Reference face preview"
+                        className="w-full h-full object-cover object-top rounded-2xl"
+                      />
+                      {/* Reference Photo Badge */}
+                      <div className="absolute top-3 left-3 bg-violet-600/85 backdrop-blur-sm px-2.5 py-1 rounded-md text-[10px] font-bold text-white uppercase tracking-wider z-10 shadow-md">
+                        Reference Photo
+                      </div>
+                      <div className="absolute inset-0 bg-slate-950/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-2xl z-20">
+                        <label className="px-4 py-2 bg-slate-900 border border-slate-800 rounded-xl cursor-pointer hover:bg-slate-800 transition text-sm font-semibold">
+                          Change Photo
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleFileChange}
+                            className="hidden"
+                          />
+                        </label>
+                      </div>
+                    </div>
+                  ) : (
+                    <label className="flex-1 w-full border-2 border-dashed border-violet-900/20 hover:border-violet-500/50 rounded-2xl flex flex-col items-center justify-center p-6 text-center cursor-pointer transition-all hover:bg-[#0A0F1E]/40 group">
+                      <div className="p-4 rounded-full bg-slate-950/60 border border-slate-900 text-slate-400 group-hover:text-violet-400 transition-colors mb-4">
+                        <Upload className="h-7 w-7" />
+                      </div>
+                      <h4 className="font-bold text-slate-300 mb-1">Upload Face Photo</h4>
+                      <p className="text-xs text-slate-500 max-w-[220px] leading-relaxed mb-4">
+                        Choose a clear, front-facing portrait with good lighting.
+                      </p>
+                      <span className="px-3.5 py-2 bg-slate-950 border border-slate-900 hover:border-slate-850 text-xs font-bold rounded-xl text-slate-300">
+                        Browse File
+                      </span>
                       <input
                         type="file"
                         accept="image/*"
@@ -1510,62 +1720,46 @@ export default function CreateCharacterPage() {
                         className="hidden"
                       />
                     </label>
+                  )}
+
+                  {/* Hint Card */}
+                  <div className="mt-4 flex items-start space-x-2.5 p-3 rounded-xl bg-[#0A0F1E] border border-violet-900/10 text-slate-400 text-[10px] leading-relaxed">
+                    <HelpCircle className="h-4.5 w-4.5 text-violet-400 shrink-0 mt-0.5" />
+                    <span>
+                      The face swap algorithm maps this photo onto the generated image. Front-facing, high-definition selfies yield the highest quality morphs.
+                    </span>
                   </div>
                 </div>
-              ) : (
-                <label className="flex-1 w-full border-2 border-dashed border-violet-900/20 hover:border-violet-500/50 rounded-2xl flex flex-col items-center justify-center p-6 text-center cursor-pointer transition-all hover:bg-[#0A0F1E]/40 group">
-                  <div className="p-4 rounded-full bg-slate-950/60 border border-slate-900 text-slate-400 group-hover:text-violet-400 transition-colors mb-4">
-                    <Upload className="h-7 w-7" />
-                  </div>
-                  <h4 className="font-bold text-slate-300 mb-1">Upload Face Photo</h4>
-                  <p className="text-xs text-slate-500 max-w-[220px] leading-relaxed mb-4">
-                    Choose a clear, front-facing portrait with good lighting.
-                  </p>
-                  <span className="px-3.5 py-2 bg-slate-950 border border-slate-900 hover:border-slate-850 text-xs font-bold rounded-xl text-slate-300">
-                    Browse File
-                  </span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="hidden"
-                  />
-                </label>
-              )}
-
-              {/* Hint Card */}
-              <div className="mt-4 flex items-start space-x-2.5 p-3 rounded-xl bg-[#0A0F1E] border border-violet-900/10 text-slate-400 text-[10px] leading-relaxed">
-                <HelpCircle className="h-4.5 w-4.5 text-violet-400 shrink-0 mt-0.5" />
-                <span>
-                  The face swap algorithm maps this photo onto the generated image. Front-facing, high-definition selfies yield the highest quality morphs.
-                </span>
-              </div>
-            </div>
+              </>
+            )}
           </div>
 
           {/* Main Action Footer spanning full width */}
-          <div className="lg:col-span-12 border-t border-violet-900/10 pt-8 flex flex-col items-center justify-center space-y-4">
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full max-w-xl py-5 bg-gradient-to-r from-violet-600 via-fuchsia-500 to-cyan-500 hover:opacity-95 text-white font-extrabold rounded-3xl shadow-xl shadow-violet-500/20 transition-all flex items-center justify-center gap-3 active:scale-[0.99] text-lg cursor-pointer"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="h-6 w-6 animate-spin" />
-                  <span>Saving Avatar...</span>
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-6 w-6 fill-white" />
-                  <span>Save Avatar</span>
-                </>
-              )}
-            </button>
-            <p className="text-xs text-slate-500 text-center max-w-md leading-relaxed">
-              Ensure you have specified the name and uploaded a reference face photo.
-            </p>
-          </div>
+          {!isPreviewActive && (
+            <div className="lg:col-span-12 border-t border-violet-900/10 pt-8 flex flex-col items-center justify-center space-y-4">
+              <button
+                type="button"
+                onClick={handleGeneratePreview}
+                disabled={previewLoading}
+                className="w-full max-w-xl py-5 bg-gradient-to-r from-violet-600 via-fuchsia-500 to-cyan-500 hover:opacity-95 text-white font-extrabold rounded-3xl shadow-xl shadow-violet-500/20 transition-all flex items-center justify-center gap-3 active:scale-[0.99] text-lg cursor-pointer"
+              >
+                {previewLoading ? (
+                  <>
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                    <span>Generating Preview...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-6 w-6 fill-white" />
+                    <span>Generate Preview</span>
+                  </>
+                )}
+              </button>
+              <p className="text-xs text-slate-500 text-center max-w-md leading-relaxed">
+                Ensure you have specified the name and uploaded a reference face photo.
+              </p>
+            </div>
+          )}
 
         </form>
 
