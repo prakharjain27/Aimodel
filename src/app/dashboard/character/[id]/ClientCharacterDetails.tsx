@@ -327,10 +327,10 @@ export default function ClientCharacterDetails({ character, initialCredits }: Cl
           {/* Right Panel: Render Outputs (5 cols) */}
           <div className="lg:col-span-5">
             <div className="bg-slate-900/30 border border-slate-900 rounded-3xl p-6 flex flex-col items-center justify-center min-h-[450px] relative overflow-hidden">
-              <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wide mb-4 self-start">Generation Output</h3>
+              <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wide mb-4 self-start">OUTPUT STUDIO CANVAS</h3>
               
               {/* Output Image View */}
-              {outputImage && (
+              {outputImage ? (
                 <div className="w-full flex-1 flex flex-col items-center justify-center space-y-4">
                   <div className="w-full aspect-[3/4] bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden relative shadow-2xl">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -353,10 +353,8 @@ export default function ClientCharacterDetails({ character, initialCredits }: Cl
                     <span>Download High-Res Image</span>
                   </a>
                 </div>
-              )}
-
-              {/* Generating Loader View */}
-              {loading && !outputImage && (
+              ) : loading ? (
+                /* Generating Loader View */
                 <div className="w-full flex-1 flex flex-col items-center justify-center p-8 text-center space-y-6">
                   {/* Animated Loader Container */}
                   <div className="relative w-28 h-28 flex items-center justify-center">
@@ -368,7 +366,7 @@ export default function ClientCharacterDetails({ character, initialCredits }: Cl
                   <div className="space-y-2">
                     <h4 className="font-extrabold text-slate-200">Creative Engine Working</h4>
                     <p className="text-xs text-slate-400 max-w-[280px] leading-relaxed mx-auto">
-                      This takes 15-20 seconds. We are running vision analysis, prompting Flux, and merging the face structure.
+                      This takes 15-20 seconds. We are running vision analysis and rendering the scene with DALL-E 3.
                     </p>
                   </div>
 
@@ -377,18 +375,26 @@ export default function ClientCharacterDetails({ character, initialCredits }: Cl
                     {pipelineState}
                   </div>
                 </div>
-              )}
-
-              {/* Idle View */}
-              {!loading && !outputImage && (
-                <div className="w-full flex-1 border-2 border-dashed border-slate-800/80 rounded-2xl flex flex-col items-center justify-center p-8 text-center text-slate-500">
-                  <div className="p-4 rounded-full bg-slate-950 border border-slate-900 text-slate-600 mb-4">
-                    <Sparkles className="h-8 w-8 animate-pulse" />
+              ) : (
+                /* Idle View: Show Reference Image as Placeholder */
+                <div className="w-full flex-1 flex flex-col items-center justify-center space-y-4">
+                  <div className="w-full aspect-[3/4] bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden relative shadow-2xl">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={character.reference_image_url}
+                      alt="Reference placeholder"
+                      className="w-full h-full object-cover opacity-60 grayscale-[20%]"
+                    />
+                    {/* Reference Photo Badge */}
+                    <div className="absolute top-4 left-4 bg-slate-950/80 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-800/80 text-[10px] font-bold text-slate-200 tracking-wide">
+                      Reference Photo
+                    </div>
                   </div>
-                  <h4 className="font-bold text-slate-400 mb-1">Awaiting Generation</h4>
-                  <p className="text-xs text-slate-500 max-w-[220px] leading-relaxed">
-                    Select a theme or write a custom scene, then click generate to create your image.
-                  </p>
+                  <div className="text-center">
+                    <p className="text-xs text-slate-550">
+                      This is the reference photo of <strong className="text-slate-400">{character.name}</strong>. Choose a preset or write a custom scene, then click generate to create the AI photo shoot.
+                    </p>
+                  </div>
                 </div>
               )}
 

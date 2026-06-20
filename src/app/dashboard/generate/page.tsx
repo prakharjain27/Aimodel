@@ -503,6 +503,26 @@ function GenerateContent() {
               </div>
 
             </div>
+          ) : selectedChar ? (
+            <div className="w-full flex-1 flex flex-col items-center justify-center space-y-4">
+              <div className="w-full aspect-[3/4] bg-slate-950 rounded-2xl border border-violet-900/10 overflow-hidden relative shadow-2xl max-w-[280px]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={selectedChar.reference_image_url}
+                  alt="Reference placeholder"
+                  className="w-full h-full object-cover opacity-60 grayscale-[20%]"
+                />
+                {/* Reference Photo Badge */}
+                <div className="absolute top-4 left-4 bg-slate-950/80 backdrop-blur-md px-3 py-1.5 rounded-xl border border-violet-900/10 text-[10px] font-bold text-slate-200 tracking-wide">
+                  Reference Photo
+                </div>
+              </div>
+              <div className="text-center px-4">
+                <p className="text-xs text-slate-500">
+                  This is the reference photo of <strong className="text-slate-400">{selectedChar.name}</strong>. Choose settings, adjust prompt, and click generate to render.
+                </p>
+              </div>
+            </div>
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-slate-500 space-y-3">
               <ImageIcon className="h-10 w-10 text-slate-650" />

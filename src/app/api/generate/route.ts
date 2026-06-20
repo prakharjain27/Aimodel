@@ -18,9 +18,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized. Please sign in.' }, { status: 401 })
     }
 
-    // 2. Parse request parameters
+    // 2. Parse request parameters flexibly (supports both character detail page and generate studio page)
     const body = await request.json()
-    const { characterId, scenePrompt } = body
+    const characterId = body.characterId || body.charId
+    const scenePrompt = body.scenePrompt || body.prompt
+    const aspectRatio = body.aspectRatio || '1:1'
 
     if (!characterId || !scenePrompt) {
       return NextResponse.json({ error: 'Missing characterId or scenePrompt.' }, { status: 400 })
@@ -53,20 +55,49 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Insufficient credits. You need at least 1 credit to generate an image.' }, { status: 400 })
     }
 
-    // 5. Initialize API clients
-    if (!process.env.OPENAI_API_KEY) {
-      return NextResponse.json({ error: 'Server configuration error: Missing OpenAI API Key.' }, { status: 500 })
-    }
-    if (!process.env.REPLICATE_API_TOKEN) {
-      return NextResponse.json({ error: 'Server configuration error: Missing Replicate API Token.' }, { status: 500 })
-    }
+    // --- DEMO MODE / FALLBACK CHECK ---
+    const isOpenAiDemo = !process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your-openai-api-key'
+    
+    if (isOpenAiDemo) {
+      console.warn("Running in DEMO MODE. Simulating DALL-E 3 image generation.")
+      await new Promise(res => setTimeout(res, 2000)) // Simulate network delay
+      
+      const mockOutputs: Record<string, string> = {
+        '1:1': 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=1000&q=80',
+        '9:16': 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=1000&q=80',
+        '16:9': 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1000&q=80',
+        '4:3': 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=1000&q=80'
+      }
+      
+      const finalImageUrl = mockOutputs[aspectRatio] || mockOutputs['1:1']
+      
+      // Deduct 1 credit
+      await supabase
+        .from('profiles')
+        .update({ credits: profile.credits - 1 })
+        .eq('id', user.id)
 
+      // Log generation history
+      await supabase
+        .from('generations')
+        .insert({
+          user_id: user.id,
+          character_id: characterId,
+          prompt: scenePrompt,
+          input_image_url: character.reference_image_url,
+          output_image_url: finalImageUrl,
+        })
+
+      return NextResponse.json({
+        output_image_url: finalImageUrl,
+        outputImageUrl: finalImageUrl
+      })
+    }
+    // ----------------------------------
+
+    // 5. Initialize OpenAI API client
     const openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
-    })
-
-    const replicate = new Replicate({
-      auth: process.env.REPLICATE_API_TOKEN,
     })
 
     // 6. Call OpenAI ChatGPT Vision to generate a detailed target prompt matching the reference face
@@ -120,69 +151,36 @@ export async function POST(request: Request) {
       }
     } catch (visionErr) {
       console.error('OpenAI Vision prompt enhancement failed, falling back to raw prompt:', visionErr)
-      // Fallback: build a simple prompt text manually if GPT Vision fails
       generatedPrompt = `A photorealistic image of a person, ${character.gender || 'Female'}, ${character.age} years old, height ${character.height || 170}cm, skin tone: ${character.skin_tone}, body type: ${character.body_type}, face shape: ${character.face_shape || 'Oval'}, hair style: ${character.hair_color_style}, eye color: ${character.eye_color}, tattoos: ${character.tattoos || 'None'}, style vibe: ${character.style_vibe}, in the following scene: ${scenePrompt}`
     }
 
-    // 7. Call Replicate Flux-Schnell to generate the body-morph target image
-    let targetImageUrl = ''
-    try {
-      const fluxOutput = await replicate.run(
-        'black-forest-labs/flux-schnell',
-        {
-          input: {
-            prompt: generatedPrompt,
-            num_inference_steps: 4,
-            aspect_ratio: '3:4',
-            output_format: 'webp',
-          },
-        }
-      )
-
-      if (Array.isArray(fluxOutput)) {
-        targetImageUrl = fluxOutput[0]
-      } else if (typeof fluxOutput === 'string') {
-        targetImageUrl = fluxOutput
-      }
-
-      if (!targetImageUrl) {
-        throw new Error('No image returned from Flux-Schnell.')
-      }
-    } catch (fluxErr: any) {
-      console.error('Replicate Flux-Schnell failed:', fluxErr)
-      return NextResponse.json({ error: `Body generation failed: ${fluxErr.message || fluxErr}` }, { status: 500 })
-    }
-
-    // 8. Call Replicate Face-Swap model to map reference face onto target image
+    // 7. Call OpenAI DALL-E 3 API to generate the image
     let finalImageUrl = ''
     try {
-      const swapOutput = await replicate.run(
-        'cdingram/face-swap:d1d6ea8c8be89d664a07a457526f7128109dee7030fdac424788d762c71ed111',
-        {
-          input: {
-            swap_image: character.reference_image_url,
-            input_image: targetImageUrl,
-          },
-        }
-      )
-
-      if (Array.isArray(swapOutput)) {
-        finalImageUrl = swapOutput[0]
-      } else if (typeof swapOutput === 'string') {
-        finalImageUrl = swapOutput
-      } else if (swapOutput && typeof (swapOutput as any).toString === 'function') {
-        finalImageUrl = (swapOutput as any).toString()
+      let dalleSize: '1024x1024' | '1024x1792' | '1792x1024' = '1024x1024'
+      if (aspectRatio === '9:16') {
+        dalleSize = '1024x1792'
+      } else if (aspectRatio === '16:9' || aspectRatio === '4:3') {
+        dalleSize = '1792x1024'
       }
 
+      const dalleResponse = await openai.images.generate({
+        model: 'dall-e-3',
+        prompt: generatedPrompt,
+        n: 1,
+        size: dalleSize,
+      })
+
+      finalImageUrl = dalleResponse.data?.[0]?.url || ''
       if (!finalImageUrl) {
-        throw new Error('No image returned from Face-Swap.')
+        throw new Error('No image URL returned from DALL-E.')
       }
-    } catch (swapErr: any) {
-      console.error('Replicate Face-Swap failed:', swapErr)
-      return NextResponse.json({ error: `Face swap failed: ${swapErr.message || swapErr}` }, { status: 500 })
+    } catch (dalleErr: any) {
+      console.error('OpenAI DALL-E generation failed:', dalleErr)
+      return NextResponse.json({ error: `Image generation failed: ${dalleErr.message || dalleErr}` }, { status: 500 })
     }
 
-    // 9. Deduct 1 credit from user profile
+    // 8. Deduct 1 credit from user profile
     const { error: deductError } = await supabase
       .from('profiles')
       .update({ credits: profile.credits - 1 })
@@ -190,17 +188,15 @@ export async function POST(request: Request) {
 
     if (deductError) {
       console.error('Failed to deduct credit, but image was generated:', deductError)
-      // We will still log the generation and return it to not penalize the user for a DB update failure, 
-      // but log the incident.
     }
 
-    // 10. Log the generation history
+    // 9. Log the generation history
     const { error: logError } = await supabase
       .from('generations')
       .insert({
         user_id: user.id,
         character_id: characterId,
-        prompt: scenePrompt, // save the original prompt input
+        prompt: scenePrompt,
         input_image_url: character.reference_image_url,
         output_image_url: finalImageUrl,
       })
@@ -209,9 +205,10 @@ export async function POST(request: Request) {
       console.error('Failed to log generation in database:', logError)
     }
 
-    // 11. Return final output image
+    // 10. Return final output image (supports both snake_case and camelCase parameters)
     return NextResponse.json({
       output_image_url: finalImageUrl,
+      outputImageUrl: finalImageUrl
     })
 
   } catch (err: any) {
