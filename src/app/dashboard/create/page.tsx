@@ -319,6 +319,7 @@ export default function CreateCharacterPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   
   const [loading, setLoading] = useState(false)
+  const [showSuccess, setShowSuccess] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [realtimePrompt, setRealtimePrompt] = useState('')
 
@@ -405,8 +406,22 @@ export default function CreateCharacterPage() {
     e.preventDefault()
     if (!user) return
 
+    if (!name.trim()) {
+      setErrorMsg("Please specify a name for your AI Influencer.")
+      const nameInput = document.querySelector('input[type="text"]')
+      if (nameInput) {
+        nameInput.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        ;(nameInput as HTMLInputElement).focus()
+      }
+      return
+    }
+
     if (!file) {
-      setErrorMsg("Please upload a reference face image to train the AI influencer.")
+      setErrorMsg("Please upload a Face Reference Photo.")
+      const fileLabel = document.querySelector('label[class*="border-dashed"]')
+      if (fileLabel) {
+        fileLabel.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }
       return
     }
 
@@ -429,6 +444,8 @@ export default function CreateCharacterPage() {
       const isDemoMode = !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'your-supabase-project-url'
       if (isDemoMode) {
         console.warn("Running in DEMO MODE. Simulating character creation.")
+        await new Promise(res => setTimeout(res, 1000))
+        setShowSuccess(true)
         await new Promise(res => setTimeout(res, 1500))
         router.push('/dashboard')
         router.refresh()
@@ -484,6 +501,8 @@ export default function CreateCharacterPage() {
         throw new Error(`Database Error: ${dbError.message}`)
       }
 
+      setShowSuccess(true)
+      await new Promise(res => setTimeout(res, 1500))
       router.push('/dashboard')
       router.refresh()
     } catch (err: any) {
@@ -1522,30 +1541,52 @@ export default function CreateCharacterPage() {
                 </span>
               </div>
             </div>
+          </div>
 
-            {/* Action Submit */}
+          {/* Main Action Footer spanning full width */}
+          <div className="lg:col-span-12 border-t border-violet-900/10 pt-8 flex flex-col items-center justify-center space-y-4">
             <button
               type="submit"
-              disabled={loading || !name.trim()}
-              className="w-full py-4.5 bg-gradient-to-r from-violet-600 via-fuchsia-500 to-cyan-500 hover:opacity-90 text-white font-bold rounded-3xl shadow-lg shadow-violet-500/10 transition-all flex items-center justify-center gap-2.5 disabled:opacity-50 disabled:pointer-events-none active:scale-[0.99] text-base"
+              disabled={loading}
+              className="w-full max-w-xl py-5 bg-gradient-to-r from-violet-600 via-fuchsia-500 to-cyan-500 hover:opacity-95 text-white font-extrabold rounded-3xl shadow-xl shadow-violet-500/20 transition-all flex items-center justify-center gap-3 active:scale-[0.99] text-lg cursor-pointer"
             >
               {loading ? (
                 <>
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  <span>Processing Visual Parameters...</span>
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                  <span>Saving Avatar...</span>
                 </>
               ) : (
                 <>
-                  <Sparkles className="h-5 w-5 fill-white" />
-                  <span>Save AI Influencer</span>
+                  <Sparkles className="h-6 w-6 fill-white" />
+                  <span>Save Avatar</span>
                 </>
               )}
             </button>
+            <p className="text-xs text-slate-500 text-center max-w-md leading-relaxed">
+              Ensure you have specified the name and uploaded a reference face photo.
+            </p>
           </div>
 
         </form>
 
       </main>
+
+      {showSuccess && (
+        <div className="fixed inset-0 bg-[#0A0F1E]/95 backdrop-blur-md z-[100] flex flex-col items-center justify-center space-y-6">
+          <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-violet-600 to-[#EC4899] flex items-center justify-center shadow-lg shadow-violet-500/30 animate-bounce">
+            <Check className="h-10 w-10 text-white stroke-[3px]" />
+          </div>
+          <div className="text-center space-y-2">
+            <h2 className="text-3xl font-extrabold text-white tracking-tight" style={{ fontFamily: "'Syne', sans-serif" }}>
+              Avatar Saved Successfully
+            </h2>
+            <p className="text-sm text-slate-400">
+              Redirecting to dashboard...
+            </p>
+          </div>
+        </div>
+      )}
+
     </div>
   )
 }
