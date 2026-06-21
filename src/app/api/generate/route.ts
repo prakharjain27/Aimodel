@@ -148,9 +148,12 @@ export async function POST(request: Request) {
 
     // 6. Call OpenAI ChatGPT Vision to generate a detailed target prompt matching the reference face
     let generatedPrompt = scenePrompt
+    const hasMasterPrompt = character.master_prompt && character.master_prompt.trim().length > 0
     const hasReferenceImage = character.reference_image_url && character.reference_image_url.startsWith('http')
 
-    if (hasReferenceImage) {
+    if (hasMasterPrompt) {
+      generatedPrompt = `${character.master_prompt} + Scene: ${scenePrompt}`
+    } else if (hasReferenceImage) {
       try {
         const visionResponse = await openai.chat.completions.create({
           model: 'gpt-4o-mini',

@@ -63,6 +63,7 @@ create table if not exists public.characters (
   style_vibe text not null,
   signature_pose text,
   reference_image_url text not null,
+  master_prompt text,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 

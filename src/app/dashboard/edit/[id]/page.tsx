@@ -826,7 +826,8 @@ export default function EditCharacterPage({ params }: { params: Promise<{ id: st
           birthmarks: birthmarksString,
           style_vibe: styleVibe,
           signature_pose: selectedPose,
-          reference_image_url: previewImageUrl
+          reference_image_url: previewImageUrl,
+          master_prompt: realtimePrompt
         })
         .eq('id', resolvedParams.id)
 

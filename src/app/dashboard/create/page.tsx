@@ -705,7 +705,8 @@ export default function CreateCharacterPage() {
           birthmarks: birthmarksString,
           style_vibe: styleVibe,
           signature_pose: selectedPose,
-          reference_image_url: previewImageUrl
+          reference_image_url: previewImageUrl,
+          master_prompt: realtimePrompt
         })
 
       if (dbError) throw new Error(dbError.message)
