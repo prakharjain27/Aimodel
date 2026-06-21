@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import OpenAI from 'openai'
-import Replicate from 'replicate'
+import { assemblePrompt, mapAspectRatioToSize } from '@/utils/prompt-engine'
 
 export const maxDuration = 60 // Allow Vercel or other hosts to wait up to 60s for the pipeline
 
@@ -146,132 +146,14 @@ export async function POST(request: Request) {
       apiKey: process.env.OPENAI_API_KEY,
     })
 
-    // 6. Call OpenAI ChatGPT Vision to generate a detailed target prompt matching the reference face
-    let generatedPrompt = scenePrompt
-    const hasMasterPrompt = character.master_prompt && character.master_prompt.trim().length > 0
-    const hasReferenceImage = character.reference_image_url && character.reference_image_url.startsWith('http')
-
-    if (hasMasterPrompt) {
-      generatedPrompt = `${character.master_prompt} + Scene: ${scenePrompt}`
-    } else if (hasReferenceImage) {
-      try {
-        const visionResponse = await openai.chat.completions.create({
-          model: 'gpt-4o-mini',
-          messages: [
-            {
-              role: 'system',
-              content: 'You are an AI Influencer prompt engineering assistant. Your task is to output a single, detailed image-generation prompt for a model based on their physical traits and the specified scene description, incorporating their facial attributes from the reference image. Output ONLY the raw text prompt. Do not add any conversational text or markdown. Ensure the prompt describes a natural, candid, non-perfect human portrait. Do NOT use forbidden terms like "cinematic lighting", "perfect skin", "studio", "symmetrical", "8k ultra sharp", or "professional photography". Instead, focus on natural daylight, slight asymmetry, subtle skin textures, and candid lifestyle settings.',
-            },
-            {
-              role: 'user',
-              content: [
-                {
-                  type: 'text',
-                  text: `Write a high-quality, photorealistic text-to-image prompt. Do NOT use plastic-looking words like "perfect skin", "flawless", "smooth skin", or "8k". Describe the character with natural skin texture, subtle pores, and realistic human variations.
-                  Target Scene/Action: ${scenePrompt}
-                  The character has these properties:
-                  - Name: ${character.name}
-                  - Gender: ${character.gender || 'Female'}
-                  - Age: ${character.age} years old
-                  - Height: ${character.height || 170} cm tall
-                  - Skin Tone: ${skinToneString}
-                  - Body Type: ${character.body_type}
-                  - Face Shape: ${character.face_shape || 'Oval'}
-                  - Face Features: ${character.face_features || 'natural features'}
-                  - Hair Style & Color: ${character.hair_color_style}
-                  - Eye Color & Shape: ${character.eye_color} ${character.eye_shape ? `(${character.eye_shape} shape)` : ''}
-                  - Tattoos: ${character.tattoos || 'None'}
-                  - Default Vibe: ${character.style_vibe}
-                  
-                  Analyze the face details in the attached image (expression, face shape, features) and blend them with the properties above. Describe the final character in the target scene with realistic pose, clothing matching the vibe, lighting (cinematic/natural), and photorealistic quality.`,
-                },
-                {
-                  type: 'image_url',
-                  image_url: {
-                    url: character.reference_image_url,
-                  },
-                },
-              ],
-            },
-          ],
-          max_tokens: 300,
-        })
-
-        const gptOutput = visionResponse.choices[0]?.message?.content?.trim()
-        if (gptOutput) {
-          generatedPrompt = gptOutput
-        }
-      } catch (visionErr) {
-        console.error('OpenAI Vision prompt enhancement failed, falling back to raw prompt:', visionErr)
-        let hairColor = 'Black'
-        let hairStyle = 'Straight'
-        if (character.hair_color_style && character.hair_color_style.includes('/')) {
-          const parts = character.hair_color_style.split('/')
-          hairColor = parts[0].trim().toLowerCase()
-          hairStyle = parts[1].trim().toLowerCase()
-        } else if (character.hair_color_style) {
-          hairStyle = character.hair_color_style.trim().toLowerCase()
-        }
-        const skinToneLower = (character.skin_tone || 'porcelain').toLowerCase()
-        const toneString = `extremely detailed ${skinToneLower} skin tone, natural skin texture with realistic ${skinToneLower} pigmentation`
-        const faceShapeString = `a clear and distinct ${(character.face_shape || 'Oval').toLowerCase()} face shape`
-        const hairString = `hair specifically colored ${hairColor} and styled in a ${hairStyle} haircut`
-
-        generatedPrompt = `A photorealistic image of a person, ${character.gender || 'Female'}, ${character.age} years old, height ${character.height || 170}cm, ${toneString}, body type: ${character.body_type}, ${faceShapeString}, ${hairString}, eye color: ${character.eye_color}, tattoos: ${character.tattoos || 'None'}, in the following scene: ${scenePrompt}`
-      }
-    } else {
-      // Fallback text-based prompt when reference face photo is omitted
-      let hairColor = 'Black'
-      let hairStyle = 'Straight'
-      if (character.hair_color_style && character.hair_color_style.includes('/')) {
-        const parts = character.hair_color_style.split('/')
-        hairColor = parts[0].trim().toLowerCase()
-        hairStyle = parts[1].trim().toLowerCase()
-      } else if (character.hair_color_style) {
-        hairStyle = character.hair_color_style.trim().toLowerCase()
-      }
-      const skinToneLower = (character.skin_tone || 'porcelain').toLowerCase()
-      const toneString = `extremely detailed ${skinToneLower} skin tone, natural skin texture with realistic ${skinToneLower} pigmentation`
-      const faceShapeString = `a clear and distinct ${(character.face_shape || 'Oval').toLowerCase()} face shape`
-      const hairString = `hair specifically colored ${hairColor} and styled in a ${hairStyle} haircut`
-
-      generatedPrompt = `A photorealistic image of ${character.name}, a ${character.gender || 'Female'} model, ${character.age} years old, height ${character.height || 170}cm, ${toneString}, body type: ${character.body_type}, ${faceShapeString}, face details: ${character.face_features || 'natural features'}, ${hairString}, eye color: ${character.eye_color}, tattoos: ${character.tattoos || 'None'}, scene/action: ${scenePrompt}`
-    }
-
-    // Helper to sanitize prompts from plastic/AI keywords
-    const cleanPrompt = (prompt: string): string => {
-      let cleaned = prompt;
-      cleaned = cleaned.replace(/\bperfect\s+skin\b/gi, '');
-      cleaned = cleaned.replace(/\bflawless\b/gi, '');
-      cleaned = cleaned.replace(/\bsmooth\s+skin\b/gi, '');
-      cleaned = cleaned.replace(/\bcinematic\s+lighting\b/gi, '');
-      cleaned = cleaned.replace(/\bstudio\b/gi, '');
-      cleaned = cleaned.replace(/\bsymmetrical\b/gi, '');
-      cleaned = cleaned.replace(/\b8k\s+ultra\s+sharp\b/gi, '');
-      cleaned = cleaned.replace(/\b8k\b/gi, '');
-      cleaned = cleaned.replace(/\bprofessional\s+photography\b/gi, '');
-      cleaned = cleaned.replace(/\bprofessional\b/gi, '');
-      cleaned = cleaned.replace(/,\s*,/g, ',');
-      cleaned = cleaned.replace(/\s+/g, ' ');
-      return cleaned.trim();
-    };
+    // 6. Call the unified Prompt Assembly Engine
+    // This handles Smart Scene Detection, master prompt injection, and realism suffixes
+    const characterPrompt = assemblePrompt(character, scenePrompt)
 
     // 7. Call OpenAI DALL-E 3 API to generate the image
     let finalImageUrl = ''
     try {
-      const sanitizedPrompt = cleanPrompt(generatedPrompt);
-      const suffix = `, close-up portrait, face and shoulders only, person slightly looking away or caught mid-moment, not staring directly at camera, candid natural expression, caught in a moment, slight natural smile or thoughtful look, not posing, unposed natural moment, candid lifestyle photography, real human moment, iPhone candid or DSLR street photography style, looks like iPhone or DSLR candid shot, casual snap, natural daylight or window light or cafe light, natural ambient illumination, no orange grading, f/1.8 natural light, natural clothing matching lifestyle - casual top, shirt, everyday outfit, lifestyle scene background - cafe, street, home, office, real-world setting, wheatish olive Indian skin tone, naturally South Asian appearance, real skin texture with varied pores, subtle blemishes, uneven skin tone, natural redness on cheeks and nose, natural imperfections, deep dark brown eyes, naturally dark iris, no blue or grey eyes, slight natural facial asymmetry, one side slightly different from other, natural random curly hair with flyaways, frizz, broken curl groups, not every curl perfectly defined, film grain, detailed facial features, no blur on face`;
-      const characterPrompt = `${sanitizedPrompt}${suffix}`;
-
-      // Map aspect ratio to OpenAI size parameter
-      let imageSize: "1024x1024" | "1024x1792" | "1792x1024" = "1024x1024"
-      if (aspectRatio === '9:16') {
-        imageSize = "1024x1792"
-      } else if (aspectRatio === '16:9') {
-        imageSize = "1792x1024"
-      } else {
-        imageSize = "1024x1024" // Includes 1:1 and 4:3
-      }
+      const imageSize = mapAspectRatioToSize(aspectRatio)
 
       const response = await openai.images.generate({
         model: "gpt-image-1",

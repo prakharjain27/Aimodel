@@ -24,15 +24,8 @@ function GenerateContent() {
   const [selectedCharId, setSelectedCharId] = useState<string | null>(preselectedCharId)
   
   // Generation Parameters
-  const [generationMode, setGenerationMode] = useState<'txt2img' | 'img2img' | 'multi'>('txt2img')
   const [prompt, setPrompt] = useState('')
   const [aspectRatio, setAspectRatio] = useState('1:1')
-  
-  // Reference files
-  const [refFile1, setRefFile1] = useState<File | null>(null)
-  const [refPreviewUrl1, setRefPreviewUrl1] = useState<string | null>(null)
-  const [refFile2, setRefFile2] = useState<File | null>(null)
-  const [refPreviewUrl2, setRefPreviewUrl2] = useState<string | null>(null)
 
   const [generating, setGenerating] = useState(false)
   const [outputImage, setOutputImage] = useState<string | null>(null)
@@ -90,21 +83,7 @@ function GenerateContent() {
     initData()
   }, [router, supabase, preselectedCharId])
 
-  const handleFileChange1 = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const selectedFile = e.target.files[0]
-      setRefFile1(selectedFile)
-      setRefPreviewUrl1(URL.createObjectURL(selectedFile))
-    }
-  }
-
-  const handleFileChange2 = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const selectedFile = e.target.files[0]
-      setRefFile2(selectedFile)
-      setRefPreviewUrl2(URL.createObjectURL(selectedFile))
-    }
-  }
+  // File handlers removed as part of simplification
 
   const handleGenerate = async () => {
     if (!selectedCharId) {
@@ -139,8 +118,7 @@ function GenerateContent() {
       }
       // ------------------------
 
-      // Real implementation would invoke /api/generate
-      const charData = characters.find(c => c.id === selectedCharId)
+      // Real implementation invoking /api/generate
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -148,8 +126,6 @@ function GenerateContent() {
           charId: selectedCharId,
           prompt,
           aspectRatio,
-          mode: generationMode,
-          charPrompt: `${charData?.name}, a ${charData?.age}-year-old ${charData?.gender || 'Female'} influencer with a ${charData?.body_type} build, ${charData?.skin_tone} skin tone, ${charData?.hair_color_style} style, styled in ${charData?.style_vibe}.`
         })
       })
 
@@ -252,128 +228,27 @@ function GenerateContent() {
           )}
         </section>
 
-        {/* 2. Generation Modes Tabs */}
+        {/* 2. Generation Settings */}
         <section className="space-y-4 bg-[#0F1629]/40 border border-violet-900/10 p-6 rounded-3xl backdrop-blur-xl">
           <div>
             <h2 className="text-lg font-bold text-white tracking-tight flex items-center gap-2" style={{ fontFamily: "'Syne', sans-serif" }}>
               <span className="w-1.5 h-5 bg-cyan-500 rounded-full" />
               2. Generation Settings
             </h2>
-            <p className="text-xs text-slate-450 mt-0.5">Toggle generation inputs and customize the aspect ratio output formats.</p>
+            <p className="text-xs text-slate-450 mt-0.5">Select aspect ratio and describe your scene.</p>
           </div>
 
-          {/* Mode Selector Tabs */}
-          <div className="bg-[#0A0F1E] p-1 rounded-2xl border border-violet-900/10 grid grid-cols-3">
-            {[
-              { id: 'txt2img', name: 'Text to Image' },
-              { id: 'img2img', name: 'Image to Image' },
-              { id: 'multi', name: 'Multi Input' }
-            ].map((m) => {
-              const isActive = generationMode === m.id
-              return (
-                <button
-                  key={m.id}
-                  type="button"
-                  onClick={() => setGenerationMode(m.id as any)}
-                  className={`py-2 text-xs font-bold rounded-xl transition-all ${
-                    isActive 
-                      ? 'bg-violet-600 text-white shadow-md' 
-                      : 'text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  {m.name}
-                </button>
-              )
-            })}
-          </div>
-
-          {/* Scenario Text Prompt */}
+          {/* Simple Text Box */}
           <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-350 tracking-wide uppercase">Scenario Prompt Description</label>
+            <label className="text-xs font-bold text-slate-350 tracking-wide uppercase">Scene Description</label>
             <textarea
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              placeholder="e.g. Standing inside a high-end streetwear boutique in Paris, holding shopping bags, dynamic cinematic lighting, detailed face..."
-              rows={4}
+              placeholder="e.g. Maya ko cafe mein dikhao, or sitting on stool in cafe..."
+              rows={3}
               className="w-full px-4 py-3 bg-[#0A0F1E] border border-violet-900/20 rounded-2xl text-slate-100 placeholder-slate-650 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all resize-none"
             />
           </div>
-
-          {/* Dynamic mode inputs */}
-          {generationMode === 'img2img' && (
-            <div className="space-y-2 pt-2">
-              <label className="text-xs font-bold text-slate-350 tracking-wide uppercase">Background / Pose Reference Image</label>
-              {refPreviewUrl1 ? (
-                <div className="relative aspect-[16/9] w-full rounded-2xl overflow-hidden border border-violet-900/25 group">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={refPreviewUrl1} alt="Reference" className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-slate-950/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <label className="px-4 py-2 bg-slate-900 border border-slate-800 rounded-xl cursor-pointer text-xs font-bold text-white hover:bg-slate-800">
-                      Change Reference
-                      <input type="file" accept="image/*" onChange={handleFileChange1} className="hidden" />
-                    </label>
-                  </div>
-                </div>
-              ) : (
-                <label className="flex w-full border-2 border-dashed border-violet-900/10 hover:border-violet-500/50 rounded-2xl flex-col items-center justify-center p-6 text-center cursor-pointer transition-all bg-[#0A0F1E]/40">
-                  <Upload className="h-6 w-6 text-slate-500 mb-2" />
-                  <span className="text-xs font-bold text-slate-300">Upload Reference Image</span>
-                  <span className="text-[10px] text-slate-500 mt-1">This image will act as the template/layout for the generation.</span>
-                  <input type="file" accept="image/*" onChange={handleFileChange1} className="hidden" />
-                </label>
-              )}
-            </div>
-          )}
-
-          {generationMode === 'multi' && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-              {/* Pose Reference */}
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold text-slate-350 tracking-wide uppercase">Pose Reference Template</label>
-                {refPreviewUrl1 ? (
-                  <div className="relative aspect-square w-full rounded-2xl overflow-hidden border border-violet-900/20 group">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={refPreviewUrl1} alt="Pose" className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-slate-950/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <label className="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-lg cursor-pointer text-[10px] font-bold text-white hover:bg-slate-850">
-                        Change
-                        <input type="file" accept="image/*" onChange={handleFileChange1} className="hidden" />
-                      </label>
-                    </div>
-                  </div>
-                ) : (
-                  <label className="flex aspect-square w-full border-2 border-dashed border-violet-900/10 hover:border-violet-500/50 rounded-2xl flex-col items-center justify-center p-4 text-center cursor-pointer transition-all bg-[#0A0F1E]/40">
-                    <Upload className="h-5 w-5 text-slate-500 mb-1" />
-                    <span className="text-[11px] font-bold text-slate-300">Upload Pose</span>
-                    <input type="file" accept="image/*" onChange={handleFileChange1} className="hidden" />
-                  </label>
-                )}
-              </div>
-
-              {/* Style/Texture Reference */}
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold text-slate-350 tracking-wide uppercase">Style / Texture Sample</label>
-                {refPreviewUrl2 ? (
-                  <div className="relative aspect-square w-full rounded-2xl overflow-hidden border border-violet-900/20 group">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={refPreviewUrl2} alt="Style" className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-slate-950/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <label className="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-lg cursor-pointer text-[10px] font-bold text-white hover:bg-slate-855">
-                        Change
-                        <input type="file" accept="image/*" onChange={handleFileChange2} className="hidden" />
-                      </label>
-                    </div>
-                  </div>
-                ) : (
-                  <label className="flex aspect-square w-full border-2 border-dashed border-violet-900/10 hover:border-violet-500/50 rounded-2xl flex-col items-center justify-center p-4 text-center cursor-pointer transition-all bg-[#0A0F1E]/40">
-                    <Upload className="h-5 w-5 text-slate-500 mb-1" />
-                    <span className="text-[11px] font-bold text-slate-300">Upload Style</span>
-                    <input type="file" accept="image/*" onChange={handleFileChange2} className="hidden" />
-                  </label>
-                )}
-              </div>
-            </div>
-          )}
 
           {/* Aspect Ratio Selector */}
           <div className="space-y-3 pt-2">
@@ -493,10 +368,7 @@ function GenerateContent() {
                   <span className="text-[#8B92A8]">Influencer:</span>
                   <span className="font-semibold text-slate-200">{selectedChar?.name}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-[#8B92A8]">Prompt Category:</span>
-                  <span className="font-semibold text-cyan-400 capitalize">{generationMode === 'txt2img' ? 'Text to Image' : generationMode === 'img2img' ? 'Image to Image' : 'Multi Reference'}</span>
-                </div>
+                {/* Mode removed as requested */}
                 <div className="pt-2 border-t border-violet-900/10 text-slate-400 italic">
                   "{prompt}"
                 </div>
