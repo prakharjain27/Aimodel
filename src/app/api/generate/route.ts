@@ -263,11 +263,21 @@ export async function POST(request: Request) {
       const suffix = `, close-up portrait, face and shoulders only, person slightly looking away or caught mid-moment, not staring directly at camera, candid natural expression, caught in a moment, slight natural smile or thoughtful look, not posing, unposed natural moment, candid lifestyle photography, real human moment, iPhone candid or DSLR street photography style, looks like iPhone or DSLR candid shot, casual snap, natural daylight or window light or cafe light, natural ambient illumination, no orange grading, f/1.8 natural light, natural clothing matching lifestyle - casual top, shirt, everyday outfit, lifestyle scene background - cafe, street, home, office, real-world setting, wheatish olive Indian skin tone, naturally South Asian appearance, real skin texture with varied pores, subtle blemishes, uneven skin tone, natural redness on cheeks and nose, natural imperfections, deep dark brown eyes, naturally dark iris, no blue or grey eyes, slight natural facial asymmetry, one side slightly different from other, natural random curly hair with flyaways, frizz, broken curl groups, not every curl perfectly defined, film grain, detailed facial features, no blur on face`;
       const characterPrompt = `${sanitizedPrompt}${suffix}`;
 
+      // Map aspect ratio to OpenAI size parameter
+      let imageSize: "1024x1024" | "1024x1792" | "1792x1024" = "1024x1024"
+      if (aspectRatio === '9:16') {
+        imageSize = "1024x1792"
+      } else if (aspectRatio === '16:9') {
+        imageSize = "1792x1024"
+      } else {
+        imageSize = "1024x1024" // Includes 1:1 and 4:3
+      }
+
       const response = await openai.images.generate({
         model: "gpt-image-1",
         prompt: characterPrompt,
         n: 1,
-        size: "1024x1024",
+        size: imageSize,
       })
 
       const imgData = response.data?.[0]
