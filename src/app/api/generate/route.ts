@@ -148,62 +148,69 @@ export async function POST(request: Request) {
 
     // 6. Call OpenAI ChatGPT Vision to generate a detailed target prompt matching the reference face
     let generatedPrompt = scenePrompt
-    try {
-      const visionResponse = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are an AI Influencer prompt engineering assistant. Your task is to output a single, detailed image-generation prompt for a model based on their physical traits and the specified scene description, incorporating their facial attributes from the reference image. Output ONLY the raw text prompt. Do not add any conversational text or markdown.',
-          },
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: `Write a high-quality, photorealistic text-to-image prompt.
-                Target Scene/Action: ${scenePrompt}
-                The character has these properties:
-                - Name: ${character.name}
-                - Gender: ${character.gender || 'Female'}
-                - Age: ${character.age} years old
-                - Height: ${character.height || 170} cm tall
-                - Skin Tone: ${skinToneString}
-                - Body Type: ${character.body_type}
-                - Face Shape: ${character.face_shape || 'Oval'}
-                - Face Features: ${character.face_features || 'symmetrical'}
-                - Hair Style & Color: ${character.hair_color_style}
-                - Eye Color & Shape: ${character.eye_color} ${character.eye_shape ? `(${character.eye_shape} shape)` : ''}
-                - Tattoos: ${character.tattoos || 'None'}
-                - Default Vibe: ${character.style_vibe}
-                
-                Analyze the face details in the attached image (expression, face shape, features) and blend them with the properties above. Describe the final character in the target scene with realistic pose, clothing matching the vibe, lighting (cinematic/natural), and photorealistic quality.`,
-              },
-              {
-                type: 'image_url',
-                image_url: {
-                  url: character.reference_image_url,
-                },
-              },
-            ],
-          },
-        ],
-        max_tokens: 300,
-      })
+    const hasReferenceImage = character.reference_image_url && character.reference_image_url.startsWith('http')
 
-      const gptOutput = visionResponse.choices[0]?.message?.content?.trim()
-      if (gptOutput) {
-        generatedPrompt = gptOutput
+    if (hasReferenceImage) {
+      try {
+        const visionResponse = await openai.chat.completions.create({
+          model: 'gpt-4o-mini',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are an AI Influencer prompt engineering assistant. Your task is to output a single, detailed image-generation prompt for a model based on their physical traits and the specified scene description, incorporating their facial attributes from the reference image. Output ONLY the raw text prompt. Do not add any conversational text or markdown.',
+            },
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'text',
+                  text: `Write a high-quality, photorealistic text-to-image prompt.
+                  Target Scene/Action: ${scenePrompt}
+                  The character has these properties:
+                  - Name: ${character.name}
+                  - Gender: ${character.gender || 'Female'}
+                  - Age: ${character.age} years old
+                  - Height: ${character.height || 170} cm tall
+                  - Skin Tone: ${skinToneString}
+                  - Body Type: ${character.body_type}
+                  - Face Shape: ${character.face_shape || 'Oval'}
+                  - Face Features: ${character.face_features || 'symmetrical'}
+                  - Hair Style & Color: ${character.hair_color_style}
+                  - Eye Color & Shape: ${character.eye_color} ${character.eye_shape ? `(${character.eye_shape} shape)` : ''}
+                  - Tattoos: ${character.tattoos || 'None'}
+                  - Default Vibe: ${character.style_vibe}
+                  
+                  Analyze the face details in the attached image (expression, face shape, features) and blend them with the properties above. Describe the final character in the target scene with realistic pose, clothing matching the vibe, lighting (cinematic/natural), and photorealistic quality.`,
+                },
+                {
+                  type: 'image_url',
+                  image_url: {
+                    url: character.reference_image_url,
+                  },
+                },
+              ],
+            },
+          ],
+          max_tokens: 300,
+        })
+
+        const gptOutput = visionResponse.choices[0]?.message?.content?.trim()
+        if (gptOutput) {
+          generatedPrompt = gptOutput
+        }
+      } catch (visionErr) {
+        console.error('OpenAI Vision prompt enhancement failed, falling back to raw prompt:', visionErr)
+        generatedPrompt = `A photorealistic image of a person, ${character.gender || 'Female'}, ${character.age} years old, height ${character.height || 170}cm, skin tone: ${skinToneString}, body type: ${character.body_type}, face shape: ${character.face_shape || 'Oval'}, hair style: ${character.hair_color_style}, eye color: ${character.eye_color}, tattoos: ${character.tattoos || 'None'}, style vibe: ${character.style_vibe}, in the following scene: ${scenePrompt}`
       }
-    } catch (visionErr) {
-      console.error('OpenAI Vision prompt enhancement failed, falling back to raw prompt:', visionErr)
-      generatedPrompt = `A photorealistic image of a person, ${character.gender || 'Female'}, ${character.age} years old, height ${character.height || 170}cm, skin tone: ${skinToneString}, body type: ${character.body_type}, face shape: ${character.face_shape || 'Oval'}, hair style: ${character.hair_color_style}, eye color: ${character.eye_color}, tattoos: ${character.tattoos || 'None'}, style vibe: ${character.style_vibe}, in the following scene: ${scenePrompt}`
+    } else {
+      // Fallback text-based prompt when reference face photo is omitted
+      generatedPrompt = `A photorealistic image of ${character.name}, a ${character.gender || 'Female'} model, ${character.age} years old, height ${character.height || 170}cm, skin tone: ${skinToneString}, body type: ${character.body_type}, face shape: ${character.face_shape || 'Oval'}, face details: ${character.face_features || 'symmetrical'}, hair style: ${character.hair_color_style}, eye color: ${character.eye_color}, tattoos: ${character.tattoos || 'None'}, style vibe: ${character.style_vibe}, scene/action: ${scenePrompt}`
     }
 
     // 7. Call OpenAI DALL-E 3 API to generate the image
     let finalImageUrl = ''
     try {
-      const characterPrompt = `${generatedPrompt}, close-up portrait, face focused, chest up, professional photography, sharp facial details, neutral background, photorealistic, 8k quality, sharp facial features, professional studio lighting`
+      const characterPrompt = `${generatedPrompt}, close-up portrait, face and shoulders only, looking slightly to camera with natural candid expression, editorial photography style, shallow depth of field, warm cinematic lighting, photorealistic, 8k quality`
 
       const response = await openai.images.generate({
         model: "gpt-image-1",

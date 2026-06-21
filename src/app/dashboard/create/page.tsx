@@ -4,206 +4,484 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
-import { Sparkles, ArrowLeft, Upload, Loader2, HelpCircle, Coins, Check, RefreshCw, Edit, Sparkle } from 'lucide-react'
+import { Sparkles, ArrowLeft, Loader2, Coins, Check, RefreshCw, Save } from 'lucide-react'
 
-// Options Constants
+// Options Constants with Illustrated SVG Icons
 const GENDERS = [
-  { id: 'Male', name: 'Male AI Model', image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=350&h=350&fit=crop' },
-  { id: 'Female', name: 'Female AI Model', image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=350&h=350&fit=crop' }
+  { 
+    id: 'Male', 
+    name: 'Male', 
+    svg: (
+      <svg viewBox="0 0 100 100" className="w-16 h-16 stroke-slate-300 fill-slate-800" strokeWidth="2.5">
+        <circle cx="50" cy="48" r="28" />
+        <path d="M50,14 C36,14 30,22 30,30 L70,30 C70,22 64,14 50,14 Z" className="fill-slate-600 stroke-none" />
+        <circle cx="40" cy="48" r="3" className="fill-slate-200 stroke-none" />
+        <circle cx="60" cy="48" r="3" className="fill-slate-200 stroke-none" />
+        <path d="M42,60 Q50,65 58,60" className="fill-none stroke-slate-200" strokeWidth="2.5" />
+      </svg>
+    ) 
+  },
+  { 
+    id: 'Female', 
+    name: 'Female', 
+    svg: (
+      <svg viewBox="0 0 100 100" className="w-16 h-16 stroke-slate-300 fill-slate-850" strokeWidth="2.5">
+        <circle cx="50" cy="50" r="26" />
+        <path d="M22,50 C22,25 35,18 50,18 C65,18 78,25 78,50 C78,75 75,80 75,80 L25,80 Z" className="fill-slate-650 stroke-none" />
+        <circle cx="41" cy="50" r="3" className="fill-slate-200 stroke-none" />
+        <circle cx="59" cy="50" r="3" className="fill-slate-200 stroke-none" />
+        <path d="M44,61 Q50,66 56,61" className="fill-none stroke-slate-200" strokeWidth="2.5" />
+      </svg>
+    ) 
+  }
 ]
 
 const SKIN_TONES = [
-  { name: 'Porcelain', description: 'Very fair, cool undertone (Northern European)', hex: '#f6ede4', image: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=150&h=150&fit=crop' },
-  { name: 'Ivory', description: 'Fair, neutral undertone (European)', hex: '#f3e0d3', image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop' },
-  { name: 'Sand', description: 'Light, warm undertone (Mediterranean, Latin)', hex: '#eec0a6', image: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=150&h=150&fit=crop' },
-  { name: 'Beige', description: 'Light medium, neutral (East Asian, Middle Eastern)', hex: '#d5a982', image: 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=150&h=150&fit=crop' },
-  { name: 'Honey', description: 'Medium, warm golden (South Asian, Latino)', hex: '#be8763', image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop' },
-  { name: 'Wheatish', description: 'Medium brown, warm (Indian, Southeast Asian)', hex: '#a27756', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop' },
-  { name: 'Caramel', description: 'Medium dark, warm (Hispanic, Middle Eastern)', hex: '#855b41', image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop' },
-  { name: 'Bronze', description: 'Dark medium, warm (African, South Asian)', hex: '#6a4632', image: 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=150&h=150&fit=crop' },
-  { name: 'Mahogany', description: 'Dark, cool undertone (African)', hex: '#523629', image: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150&h=150&fit=crop' },
-  { name: 'Ebony', description: 'Deep dark (West African)', hex: '#291c1b', image: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150&h=150&fit=crop' }
+  { name: 'Porcelain', description: 'Very fair, cool undertone (Northern European)', hex: '#f6ede4' },
+  { name: 'Ivory', description: 'Fair, neutral undertone (European)', hex: '#f3e0d3' },
+  { name: 'Sand', description: 'Light, warm undertone (Mediterranean, Latin)', hex: '#eec0a6' },
+  { name: 'Beige', description: 'Light medium, neutral (East Asian, Middle Eastern)', hex: '#d5a982' },
+  { name: 'Honey', description: 'Medium, warm golden (South Asian, Latino)', hex: '#be8763' },
+  { name: 'Wheatish', description: 'Medium brown, warm (Indian, Southeast Asian)', hex: '#a27756' },
+  { name: 'Caramel', description: 'Medium dark, warm (Hispanic, Middle Eastern)', hex: '#855b41' },
+  { name: 'Bronze', description: 'Dark medium, warm (African, South Asian)', hex: '#6a4632' },
+  { name: 'Mahogany', description: 'Dark, cool undertone (African)', hex: '#523629' },
+  { name: 'Ebony', description: 'Deep dark (West African)', hex: '#291c1b' }
 ]
 
 const FACE_SHAPES = [
-  { id: 'Oval', name: 'Oval Face', image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop' },
-  { id: 'Round', name: 'Round Face', image: 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=150&h=150&fit=crop' },
-  { id: 'Square', name: 'Square Face', image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop' },
-  { id: 'Heart', name: 'Heart Face', image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop' },
-  { id: 'Diamond', name: 'Diamond Face', image: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150&h=150&fit=crop' },
-  { id: 'Oblong', name: 'Oblong Face', image: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&h=150&fit=crop' }
-]
-
-const HAIR_COLORS = [
-  { name: 'Black', hex: '#09090b', image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop' },
-  { name: 'Brown', hex: '#5c3d2e', image: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150&h=150&fit=crop' },
-  { name: 'Blonde', hex: '#ecd599', image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop' },
-  { name: 'Red', hex: '#b83b1d', image: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=150&h=150&fit=crop' },
-  { name: 'Auburn', hex: '#843b2b', image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop' },
-  { name: 'White', hex: '#e2e8f0', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop' },
-  { name: 'Pink', hex: '#f472b6', image: 'https://images.unsplash.com/photo-1611605698335-8b15d27e03f2?w=150&h=150&fit=crop' },
-  { name: 'Blue', hex: '#2563eb', image: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150&h=150&fit=crop' }
-]
-
-const HAIR_STYLES = [
-  { id: 'Straight', name: 'Straight Hair', image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop' },
-  { id: 'Wavy', name: 'Wavy Hair', image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop' },
-  { id: 'Curly', name: 'Curly Hair', image: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=150&h=150&fit=crop' },
-  { id: 'Bun', name: 'Hair Bun', image: 'https://images.unsplash.com/photo-1528228728616-4447737f941f?w=150&h=150&fit=crop' },
-  { id: 'Ponytail', name: 'Ponytail Style', image: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150&h=150&fit=crop' },
-  { id: 'Short', name: 'Short Haircut', image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop' },
-  { id: 'Bob', name: 'Bob Cut', image: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&h=150&fit=crop' }
-]
-
-const EYE_COLORS = [
-  { name: 'Brown', image: 'https://images.unsplash.com/photo-1516257984-b1b4d707412e?w=150&h=150&fit=crop' },
-  { name: 'Black', image: 'https://images.unsplash.com/photo-1518020382113-a7e8fc38eac9?w=150&h=150&fit=crop' },
-  { name: 'Blue', image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop' },
-  { name: 'Green', image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop' },
-  { name: 'Hazel', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop' },
-  { name: 'Grey', image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop' }
-]
-
-const EYE_SHAPES = [
-  { id: 'Almond', name: 'Almond Eyes', image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop' },
-  { id: 'Round', name: 'Round Eyes', image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop' },
-  { id: 'Hooded', name: 'Hooded Eyes', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop' },
-  { id: 'Monolid', name: 'Monolid Eyes', image: 'https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?w=150&h=150&fit=crop' },
-  { id: 'Upturned', name: 'Upturned Eyes', image: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150&h=150&fit=crop' },
-  { id: 'Downturned', name: 'Downturned Eyes', image: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&h=150&fit=crop' }
-]
-
-const BODY_TYPES = [
-  { id: 'Slim', label: 'Slim', image: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150&h=150&fit=crop' },
-  { id: 'Athletic', label: 'Athletic', image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop' },
-  { id: 'Curvy', label: 'Curvy', image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop' },
-  { id: 'Plus size', label: 'Plus Size', image: 'https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?w=150&h=150&fit=crop' },
-  { id: 'Petite', label: 'Petite', image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop' }
-]
-
-const STYLE_VIBES = [
-  { id: 'Cyberpunk Techwear', label: 'Cyberpunk Techwear', desc: 'Neon glows, functional dark fabrics, futuristic edge' },
-  { id: 'High-Fashion Streetwear', label: 'High-Fashion Streetwear', desc: 'Oversized luxury layers, sneakers, high-end accessories' },
-  { id: 'Bohemian Beach', label: 'Bohemian Beach', desc: 'Flowing linen outfits, warm sun-kissed textures' },
-  { id: 'Classic Minimalist', label: 'Classic Minimalist', desc: 'Neutral tones, clean structured tailoring, quiet luxury' },
-  { id: 'Y2K Retro', label: 'Y2K Retro', desc: 'Bright nostalgic colors, mesh tees, vintage futuristic shades' }
-]
-
-// Tattoo Styles & Sizes
-const TATTOO_STYLES = [
-  { 
-    id: 'Minimalist', 
-    label: 'Minimalist', 
+  {
+    id: 'Oval',
     svg: (
-      <svg viewBox="0 0 40 40" className="w-8 h-8 stroke-current fill-none" strokeWidth="2">
-        <circle cx="20" cy="20" r="4" />
-        <line x1="20" y1="8" x2="20" y2="32" />
+      <svg viewBox="0 0 100 100" className="w-12 h-12 stroke-current fill-none" strokeWidth="2.5">
+        <path d="M50,15 C28,15 28,45 28,68 C28,84 38,86 50,86 C62,86 72,84 72,68 C72,45 72,15 50,15 Z" />
       </svg>
     )
   },
-  { 
-    id: 'Floral', 
-    label: 'Floral', 
+  {
+    id: 'Round',
     svg: (
-      <svg viewBox="0 0 40 40" className="w-8 h-8 stroke-current fill-none" strokeWidth="2">
-        <circle cx="20" cy="20" r="5" />
-        <circle cx="20" cy="11" r="4" />
-        <circle cx="20" cy="29" r="4" />
-        <circle cx="11" cy="20" r="4" />
-        <circle cx="29" cy="20" r="4" />
+      <svg viewBox="0 0 100 100" className="w-12 h-12 stroke-current fill-none" strokeWidth="2.5">
+        <path d="M50,16 C31,16 30,34 30,52 C30,70 38,80 50,80 C62,80 70,70 70,52 C70,34 69,16 50,16 Z" />
       </svg>
     )
   },
-  { 
-    id: 'Tribal', 
-    label: 'Tribal', 
+  {
+    id: 'Square',
     svg: (
-      <svg viewBox="0 0 40 40" className="w-8 h-8 stroke-current fill-none" strokeWidth="2">
-        <path d="M10,20 Q20,10 30,20 Q20,30 10,20 Z M15,20 Q20,15 25,20 Q20,25 15,20 Z" />
+      <svg viewBox="0 0 100 100" className="w-12 h-12 stroke-current fill-none" strokeWidth="2.5">
+        <path d="M50,16 C31,16 29,26 29,66 C29,81 36,82 50,82 C64,82 71,81 71,66 C71,26 69,16 50,16 Z" />
       </svg>
     )
   },
-  { 
-    id: 'Geometric', 
-    label: 'Geometric', 
+  {
+    id: 'Heart',
     svg: (
-      <svg viewBox="0 0 40 40" className="w-8 h-8 stroke-current fill-none" strokeWidth="2">
-        <polygon points="20,8 32,28 8,28" />
-        <polygon points="20,32 32,12 8,12" />
+      <svg viewBox="0 0 100 100" className="w-12 h-12 stroke-current fill-none" strokeWidth="2.5">
+        <path d="M50,16 C27,13 25,34 25,54 C25,68 38,79 50,85 C62,79 75,68 75,54 C75,34 73,13 50,16 Z" />
       </svg>
     )
   },
-  { 
-    id: 'Script', 
-    label: 'Script', 
+  {
+    id: 'Diamond',
     svg: (
-      <svg viewBox="0 0 40 40" className="w-8 h-8 stroke-current fill-none" strokeWidth="2">
-        <path d="M10,25 C15,10 25,10 30,25 C25,30 15,30 10,25 Z" />
-        <path d="M12,20 C18,28 22,28 28,20" />
+      <svg viewBox="0 0 100 100" className="w-12 h-12 stroke-current fill-none" strokeWidth="2.5">
+        <path d="M50,16 C33,34 26,48 26,60 C26,73 38,83 50,85 C62,83 74,73 74,60 C74,48 67,34 50,16 Z" />
       </svg>
     )
   },
-  { 
-    id: 'Japanese', 
-    label: 'Japanese', 
+  {
+    id: 'Oblong',
     svg: (
-      <svg viewBox="0 0 40 40" className="w-8 h-8 stroke-current fill-none" strokeWidth="2">
-        <path d="M8,15 Q20,5 32,15 T20,25 T8,15 Z" />
-        <path d="M14,25 Q20,18 26,25" />
-      </svg>
-    )
-  },
-  { 
-    id: 'Realistic', 
-    label: 'Realistic', 
-    svg: (
-      <svg viewBox="0 0 40 40" className="w-8 h-8 stroke-current fill-none" strokeWidth="2">
-        <circle cx="20" cy="20" r="12" />
-        <circle cx="20" cy="20" r="7" className="fill-slate-700/30" />
+      <svg viewBox="0 0 100 100" className="w-12 h-12 stroke-current fill-none" strokeWidth="2.5">
+        <path d="M50,10 C32,10 32,24 32,74 C32,87 40,89 50,89 C60,89 68,87 68,74 C68,24 68,10 50,10 Z" />
       </svg>
     )
   }
 ]
 
-const TATTOO_SIZES = [
-  { id: 'Small', label: 'Small', radius: 'w-4 h-4' },
-  { id: 'Medium', label: 'Medium', radius: 'w-6 h-6' },
-  { id: 'Large', label: 'Large', radius: 'w-8 h-8' }
+const EYE_SHAPES = [
+  {
+    id: 'Almond',
+    svg: (
+      <svg viewBox="0 0 100 60" className="w-14 h-8 stroke-current fill-none" strokeWidth="2.5">
+        <path d="M15,30 C30,10 70,10 85,30 C70,50 30,50 15,30 Z" />
+        <circle cx="50" cy="30" r="9" className="fill-slate-700/40" />
+      </svg>
+    )
+  },
+  {
+    id: 'Round',
+    svg: (
+      <svg viewBox="0 0 100 60" className="w-14 h-8 stroke-current fill-none" strokeWidth="2.5">
+        <path d="M15,30 C28,5 72,5 85,30 C72,55 28,55 15,30 Z" />
+        <circle cx="50" cy="30" r="11" className="fill-slate-700/40" />
+      </svg>
+    )
+  },
+  {
+    id: 'Hooded',
+    svg: (
+      <svg viewBox="0 0 100 60" className="w-14 h-8 stroke-current fill-none" strokeWidth="2.5">
+        <path d="M15,30 C30,10 70,10 85,30 C70,50 30,50 15,30 Z" />
+        <path d="M18,22 C32,8 68,8 82,22" />
+        <circle cx="50" cy="30" r="8" className="fill-slate-700/40" />
+      </svg>
+    )
+  },
+  {
+    id: 'Monolid',
+    svg: (
+      <svg viewBox="0 0 100 60" className="w-14 h-8 stroke-current fill-none" strokeWidth="2.5">
+        <path d="M15,30 C32,18 68,18 85,30 C68,45 32,45 15,30 Z" />
+        <circle cx="50" cy="31" r="9" className="fill-slate-700/40" />
+      </svg>
+    )
+  },
+  {
+    id: 'Upturned',
+    svg: (
+      <svg viewBox="0 0 100 60" className="w-14 h-8 stroke-current fill-none" strokeWidth="2.5">
+        <path d="M15,35 C30,12 68,8 85,25 C68,48 30,52 15,35 Z" />
+        <circle cx="50" cy="30" r="9" className="fill-slate-700/40" />
+      </svg>
+    )
+  },
+  {
+    id: 'Downturned',
+    svg: (
+      <svg viewBox="0 0 100 60" className="w-14 h-8 stroke-current fill-none" strokeWidth="2.5">
+        <path d="M15,25 C30,8 68,12 85,35 C68,52 30,48 15,25 Z" />
+        <circle cx="50" cy="30" r="9" className="fill-slate-700/40" />
+      </svg>
+    )
+  }
 ]
 
-// Special Face Features
-const SPECIAL_FACE_FEATURES = [
-  { id: 'Dimples', label: 'Dimples', image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop' },
-  { id: 'Freckles', label: 'Freckles', image: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150&h=150&fit=crop' },
-  { id: 'Sharp Jawline', label: 'Sharp Jaw', image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop' },
-  { id: 'High Cheekbones', label: 'High Cheekbones', image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop' },
-  { id: 'Soft Features', label: 'Soft Features', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop' },
-  { id: 'Strong Brow', label: 'Strong Brow', image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop' }
+const EYE_COLORS = [
+  { name: 'Brown', gradient: 'radial-gradient(circle, #78350f 10%, #451a03 70%, #000 100%)' },
+  { name: 'Black', gradient: 'radial-gradient(circle, #1e293b 10%, #0f172a 70%, #000 100%)' },
+  { name: 'Blue', gradient: 'radial-gradient(circle, #3b82f6 10%, #1d4ed8 70%, #000 100%)' },
+  { name: 'Green', gradient: 'radial-gradient(circle, #10b981 10%, #047857 70%, #000 100%)' },
+  { name: 'Hazel', gradient: 'radial-gradient(circle, #d97706 10%, #78350f 70%, #000 100%)' },
+  { name: 'Grey', gradient: 'radial-gradient(circle, #94a3b8 10%, #475569 70%, #000 100%)' }
 ]
 
-// Freckle Densities & Locations
-const FRECKLE_DENSITIES = [
-  { id: 'None', label: 'No Freckles', dots: 0 },
-  { id: 'Light', label: 'Light Density', dots: 8 },
-  { id: 'Medium', label: 'Medium Density', dots: 20 },
-  { id: 'Heavy', label: 'Heavy Density', dots: 45 }
+const EYEBROWS = [
+  {
+    id: 'Arched',
+    svg: (
+      <svg viewBox="0 0 60 20" className="w-14 h-6 stroke-current fill-none" strokeWidth="2.5">
+        <path d="M10,14 Q30,5 50,14" />
+      </svg>
+    )
+  },
+  {
+    id: 'Thin',
+    svg: (
+      <svg viewBox="0 0 60 20" className="w-14 h-6 stroke-current fill-none" strokeWidth="1.5">
+        <path d="M10,12 C20,9 40,9 50,12" />
+      </svg>
+    )
+  },
+  {
+    id: 'Thick',
+    svg: (
+      <svg viewBox="0 0 60 20" className="w-14 h-6 stroke-current fill-none" strokeWidth="4">
+        <path d="M10,13 Q30,7 50,13" />
+      </svg>
+    )
+  },
+  {
+    id: 'Straight',
+    svg: (
+      <svg viewBox="0 0 60 20" className="w-14 h-6 stroke-current fill-none" strokeWidth="2.5">
+        <line x1="10" y1="10" x2="50" y2="10" />
+      </svg>
+    )
+  },
+  {
+    id: 'Curved',
+    svg: (
+      <svg viewBox="0 0 60 20" className="w-14 h-6 stroke-current fill-none" strokeWidth="2.5">
+        <path d="M10,15 C20,5 40,5 50,15" />
+      </svg>
+    )
+  }
 ]
 
-const FRECKLE_LOCATIONS = [
-  { id: 'Nose', label: 'Nose Bridge' },
-  { id: 'Cheeks', label: 'Cheek Bones' },
-  { id: 'Full Face', label: 'Scattered Full Face' },
-  { id: 'Under Eye', label: 'Under Eyes' }
+const NOSES = [
+  {
+    id: 'Straight',
+    svg: (
+      <svg viewBox="0 0 40 40" className="w-8 h-8 stroke-current fill-none" strokeWidth="2.5">
+        <path d="M16,10 L16,28 Q16,32 20,32 L24,32" />
+      </svg>
+    )
+  },
+  {
+    id: 'Button',
+    svg: (
+      <svg viewBox="0 0 40 40" className="w-8 h-8 stroke-current fill-none" strokeWidth="2.5">
+        <path d="M18,15 L18,28 Q20,32 22,30 Q24,28 26,28" />
+      </svg>
+    )
+  },
+  {
+    id: 'Turned Up',
+    svg: (
+      <svg viewBox="0 0 40 40" className="w-8 h-8 stroke-current fill-none" strokeWidth="2.5">
+        <path d="M15,10 L15,26 Q15,30 20,29 Q25,27 25,24" />
+      </svg>
+    )
+  },
+  {
+    id: 'Hooked',
+    svg: (
+      <svg viewBox="0 0 40 40" className="w-8 h-8 stroke-current fill-none" strokeWidth="2.5">
+        <path d="M16,10 Q20,18 16,26 Q15,30 22,30" />
+      </svg>
+    )
+  },
+  {
+    id: 'Flat',
+    svg: (
+      <svg viewBox="0 0 40 40" className="w-8 h-8 stroke-current fill-none" strokeWidth="2.5">
+        <path d="M14,15 L14,28 L26,28" />
+      </svg>
+    )
+  }
 ]
 
-// Signature Poses
-const POSES = [
-  { id: 'Standing confident', label: 'Confident Stand', image: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=150&h=150&fit=crop' },
-  { id: 'Hand on hip', label: 'Hand on Hip', image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop' },
-  { id: 'Looking over shoulder', label: 'Over Shoulder', image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop' },
-  { id: 'Arms crossed', label: 'Arms Crossed', image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop' },
-  { id: 'Candid natural', label: 'Candid Natural', image: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150&h=150&fit=crop' },
-  { id: 'Power pose', label: 'Power Pose', image: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&h=150&fit=crop' }
+const LIPS = [
+  {
+    id: 'Full',
+    svg: (
+      <svg viewBox="0 0 60 40" className="w-12 h-8 stroke-current fill-none" strokeWidth="2">
+        <path d="M10,20 Q18,12 30,17 Q42,12 50,20 Q30,28 10,20" />
+        <path d="M10,20 Q30,34 50,20" />
+      </svg>
+    )
+  },
+  {
+    id: 'Thin',
+    svg: (
+      <svg viewBox="0 0 60 40" className="w-12 h-8 stroke-current fill-none" strokeWidth="1.5">
+        <path d="M12,20 Q30,17 48,20 Q30,23 12,20" />
+      </svg>
+    )
+  },
+  {
+    id: 'Bow-shaped',
+    svg: (
+      <svg viewBox="0 0 60 40" className="w-12 h-8 stroke-current fill-none" strokeWidth="2.5">
+        <path d="M10,20 Q16,10 30,18 Q44,10 50,20 Q30,30 10,20" />
+      </svg>
+    )
+  },
+  {
+    id: 'Round',
+    svg: (
+      <svg viewBox="0 0 60 40" className="w-12 h-8 stroke-current fill-none" strokeWidth="2">
+        <path d="M15,20 C15,10 45,10 45,20 C45,30 15,30 15,20 Z" />
+      </svg>
+    )
+  },
+  {
+    id: 'Oval',
+    svg: (
+      <svg viewBox="0 0 60 40" className="w-12 h-8 stroke-current fill-none" strokeWidth="2">
+        <path d="M10,20 Q30,13 50,20 Q30,27 10,20 Z" />
+      </svg>
+    )
+  }
+]
+
+const HAIR_STYLES = [
+  {
+    id: 'Straight',
+    svg: (
+      <svg viewBox="0 0 100 100" className="w-10 h-10 stroke-current fill-none" strokeWidth="2.5">
+        <path d="M50,15 C30,15 25,30 25,60 M75,60 C75,30 70,15 50,15" />
+        <line x1="35" y1="35" x2="35" y2="75" />
+        <line x1="50" y1="20" x2="50" y2="80" />
+        <line x1="65" y1="35" x2="65" y2="75" />
+      </svg>
+    )
+  },
+  {
+    id: 'Wavy',
+    svg: (
+      <svg viewBox="0 0 100 100" className="w-10 h-10 stroke-current fill-none" strokeWidth="2.5">
+        <path d="M50,15 C30,15 25,30 25,50 C25,65 30,70 30,80" />
+        <path d="M75,50 C75,30 70,15 50,15 C50,15 55,40 55,55 C55,70 50,75 50,80" />
+        <path d="M40,30 Q35,45 42,60 T35,80" />
+      </svg>
+    )
+  },
+  {
+    id: 'Curly',
+    svg: (
+      <svg viewBox="0 0 100 100" className="w-10 h-10 stroke-current fill-none" strokeWidth="2.5">
+        <path d="M50,15 C35,15 32,25 32,35 Q32,45 35,48 T32,60 Q32,70 36,75" />
+        <path d="M68,35 Q68,45 65,48 T68,60 Q68,70 64,75" />
+      </svg>
+    )
+  },
+  {
+    id: 'Bun',
+    svg: (
+      <svg viewBox="0 0 100 100" className="w-10 h-10 stroke-current fill-none" strokeWidth="2.5">
+        <circle cx="50" cy="22" r="11" />
+        <path d="M50,36 C32,36 28,45 28,70 C28,82 35,84 50,84 C65,84 72,82 72,70 Z" />
+      </svg>
+    )
+  },
+  {
+    id: 'Ponytail',
+    svg: (
+      <svg viewBox="0 0 100 100" className="w-10 h-10 stroke-current fill-none" strokeWidth="2.5">
+        <path d="M50,20 C32,20 28,30 28,55 C28,68 38,70 50,70 C62,70 72,68 72,55 Z" />
+        <path d="M50,68 C50,68 62,75 58,90 C54,80 50,75 50,68 Z" />
+      </svg>
+    )
+  },
+  {
+    id: 'Short',
+    svg: (
+      <svg viewBox="0 0 100 100" className="w-10 h-10 stroke-current fill-none" strokeWidth="2.5">
+        <path d="M50,18 C35,18 32,25 32,45 C38,40 42,42 50,38 C58,42 62,40 68,45 C68,25 65,18 50,18 Z" />
+      </svg>
+    )
+  },
+  {
+    id: 'Bob',
+    svg: (
+      <svg viewBox="0 0 100 100" className="w-10 h-10 stroke-current fill-none" strokeWidth="2.5">
+        <path d="M50,18 C30,18 25,30 25,62 M75,62 C75,30 70,18 50,18" />
+        <path d="M25,50 C30,55 35,50 35,62" />
+      </svg>
+    )
+  }
+]
+
+const HAIR_COLORS = [
+  { name: 'Black', hex: '#09090b' },
+  { name: 'Brown', hex: '#5c3d2e' },
+  { name: 'Blonde', hex: '#ecd599' },
+  { name: 'Red', hex: '#b83b1d' },
+  { name: 'Auburn', hex: '#843b2b' },
+  { name: 'White', hex: '#e2e8f0' },
+  { name: 'Pink', hex: '#f472b6' },
+  { name: 'Blue', hex: '#2563eb' }
+]
+
+const BODY_TYPES = [
+  {
+    id: 'Slim',
+    svg: (
+      <svg viewBox="0 0 100 150" className="w-10 h-14 stroke-current fill-none" strokeWidth="2.5">
+        <circle cx="50" cy="20" r="9" />
+        <path d="M50,29 L50,42 M41,42 C45,45 44,70 43,90 L41,140 M59,42 C55,45 56,70 57,90 L59,140 M41,42 L59,42" />
+      </svg>
+    )
+  },
+  {
+    id: 'Athletic',
+    svg: (
+      <svg viewBox="0 0 100 150" className="w-10 h-14 stroke-current fill-none" strokeWidth="2.5">
+        <circle cx="50" cy="20" r="9" />
+        <path d="M50,29 L50,42 M38,42 Q48,47 43,80 L42,140 M62,42 Q52,47 57,80 L58,140 M38,42 L62,42" />
+      </svg>
+    )
+  },
+  {
+    id: 'Curvy',
+    svg: (
+      <svg viewBox="0 0 100 150" className="w-10 h-14 stroke-current fill-none" strokeWidth="2.5">
+        <circle cx="50" cy="20" r="9" />
+        <path d="M50,29 L50,42 M37,42 C45,45 38,72 44,92 L41,140 M63,42 C55,45 62,72 56,92 L59,140" />
+      </svg>
+    )
+  },
+  {
+    id: 'Plus size',
+    svg: (
+      <svg viewBox="0 0 100 150" className="w-10 h-14 stroke-current fill-none" strokeWidth="2.5">
+        <circle cx="50" cy="20" r="9" />
+        <path d="M50,29 L50,42 M38,42 C42,45 35,90 44,140 M62,42 C58,45 65,90 56,140" />
+      </svg>
+    )
+  },
+  {
+    id: 'Petite',
+    svg: (
+      <svg viewBox="0 0 100 150" className="w-10 h-14 stroke-current fill-none" strokeWidth="2.5">
+        <circle cx="50" cy="24" r="8.5" />
+        <path d="M50,32.5 L50,45 M41,45 C44,48 43,72 43,90 L41,130 M59,45 C56,48 57,72 57,90 L59,130" />
+      </svg>
+    )
+  }
+]
+
+const STYLE_VIBES = [
+  {
+    id: 'Cyberpunk Techwear',
+    label: 'Cyberpunk',
+    svg: (
+      <svg viewBox="0 0 100 100" className="w-12 h-12 stroke-current fill-none" strokeWidth="2.5">
+        <rect x="20" y="35" width="60" height="30" rx="6" />
+        <line x1="20" y1="50" x2="80" y2="50" />
+        <circle cx="35" cy="50" r="6" className="fill-current" />
+        <circle cx="65" cy="50" r="6" className="fill-current" />
+      </svg>
+    )
+  },
+  {
+    id: 'High-Fashion Streetwear',
+    label: 'Streetwear',
+    svg: (
+      <svg viewBox="0 0 100 100" className="w-12 h-12 stroke-current fill-none" strokeWidth="2.5">
+        <path d="M15,75 L35,55 L65,55 L85,75 Z" />
+        <circle cx="35" cy="75" r="10" />
+        <circle cx="65" cy="75" r="10" />
+      </svg>
+    )
+  },
+  {
+    id: 'Bohemian Beach',
+    label: 'Bohemian',
+    svg: (
+      <svg viewBox="0 0 100 100" className="w-12 h-12 stroke-current fill-none" strokeWidth="2">
+        <circle cx="50" cy="50" r="18" />
+        <line x1="50" y1="15" x2="50" y2="25" />
+        <line x1="50" y1="75" x2="50" y2="85" />
+        <line x1="15" y1="50" x2="25" y2="50" />
+        <line x1="75" y1="50" x2="85" y2="50" />
+      </svg>
+    )
+  },
+  {
+    id: 'Classic Minimalist',
+    label: 'Minimalist',
+    svg: (
+      <svg viewBox="0 0 100 100" className="w-12 h-12 stroke-current fill-none" strokeWidth="2.5">
+        <rect x="25" y="25" width="50" height="50" rx="4" />
+        <line x1="25" y1="25" x2="75" y2="75" />
+      </svg>
+    )
+  },
+  {
+    id: 'Y2K Retro',
+    label: 'Retro Y2K',
+    svg: (
+      <svg viewBox="0 0 100 100" className="w-12 h-12 stroke-current fill-none" strokeWidth="2">
+        <circle cx="50" cy="50" r="30" />
+        <path d="M30,50 A20,20 0 0,0 70,50" />
+        <circle cx="50" cy="50" r="8" className="fill-current" />
+      </svg>
+    )
+  }
 ]
 
 export default function CreateCharacterPage() {
@@ -217,64 +495,53 @@ export default function CreateCharacterPage() {
   const [gender, setGender] = useState('Female')
   const [age, setAge] = useState(24)
   const [height, setHeight] = useState(170)
-  const [skinTone, setSkinTone] = useState('Olive')
+  const [skinTone, setSkinTone] = useState('Porcelain')
   const [bodyType, setBodyType] = useState('Slim')
   const [faceShape, setFaceShape] = useState('Oval')
   const [hairStyle, setHairStyle] = useState('Straight')
-  const [hairColor, setHairColor] = useState('Blonde')
+  const [hairColor, setHairColor] = useState('Black')
   const [eyeShape, setEyeShape] = useState('Almond')
   const [eyeColor, setEyeColor] = useState('Blue')
+  const [eyebrows, setEyebrows] = useState('Arched')
+  const [nose, setNose] = useState('Straight')
+  const [lips, setLips] = useState('Full')
   const [styleVibe, setStyleVibe] = useState('High-Fashion Streetwear')
 
-  // NEW Visual Selection States replacing Text Inputs
-  // 1. Tattoos & Ink
+  // Extra Details (Freckles, Tattoos)
   const [hasTattoos, setHasTattoos] = useState(false)
   const [selectedTattooLocs, setSelectedTattooLocs] = useState<string[]>([])
   const [tattooStyle, setTattooStyle] = useState('Minimalist')
   const [tattooSize, setTattooSize] = useState('Medium')
-
-  // 2. Special Face Features
-  const [selectedFaceFeatures, setSelectedFaceFeatures] = useState<string[]>(['Sharp Jawline'])
-
-  // 3. Birthmarks & Freckles
-  const [freckleDensity, setFreckleDensity] = useState('Light')
-  const [freckleLocations, setFreckleLocations] = useState<string[]>(['Nose', 'Cheeks'])
-
-  // 4. Signature Pose
+  const [selectedFaceFeatures, setSelectedFaceFeatures] = useState<string[]>([])
+  const [freckleDensity, setFreckleDensity] = useState('None')
+  const [freckleLocations, setFreckleLocations] = useState<string[]>([])
   const [selectedPose, setSelectedPose] = useState('Looking over shoulder')
-  
-  const [file, setFile] = useState<File | null>(null)
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   
   const [loading, setLoading] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [realtimePrompt, setRealtimePrompt] = useState('')
 
-  // DALL-E 3 preview generation states
-  const [isPreviewActive, setIsPreviewActive] = useState(false)
+  // Generation Preview States
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null)
   const [previewLoading, setPreviewLoading] = useState(false)
-  const [uploadedRefUrl, setUploadedRefUrl] = useState<string | null>(null)
   const [pipelineState, setPipelineState] = useState('')
 
-  // Build realtime prompt
+  // Build realtime prompt in background automatically
   useEffect(() => {
     const genderTerm = gender.toLowerCase()
     
-    // Format Tattoos description
     const tattooDesc = hasTattoos && selectedTattooLocs.length > 0
       ? `has a ${tattooSize.toLowerCase()} ${tattooStyle.toLowerCase()} style tattoo on the ${selectedTattooLocs.join(', ')}`
       : 'no visible tattoos'
 
-    // Format Face features
-    const faceFeaturesDesc = selectedFaceFeatures.length > 0 
-      ? `distinguishing features include ${selectedFaceFeatures.join(', ')}` 
-      : 'soft features'
+    const eyebrowsDesc = `eyebrows: ${eyebrows.toLowerCase()}`
+    const noseDesc = `nose: ${nose.toLowerCase()}`
+    const lipsDesc = `lips: ${lips.toLowerCase()}`
+    const faceFeaturesDesc = [eyebrowsDesc, noseDesc, lipsDesc, ...selectedFaceFeatures].join(', ')
 
-    // Format Freckles
     const frecklesDesc = freckleDensity !== 'None' && freckleLocations.length > 0
-      ? `, with ${freckleDensity.toLowerCase()} density freckles across the ${freckleLocations.join(', ')}`
+      ? `, with ${freckleDensity.toLowerCase()} freckles on ${freckleLocations.join(', ')}`
       : ''
 
     const selectedToneObj = SKIN_TONES.find(t => t.name === skinTone)
@@ -282,9 +549,9 @@ export default function CreateCharacterPage() {
       ? `${selectedToneObj.name} skin tone (${selectedToneObj.description})` 
       : `${skinTone} skin tone`
 
-    const constructedPrompt = `A high-fidelity photo of ${name || 'an AI Influencer'}, a ${age}-year-old ${genderTerm} model. Physical traits: ${bodyType.toLowerCase()} body type, ${height}cm tall, ${toneString.toLowerCase()}, ${faceShape.toLowerCase()} face shape, ${hairColor.toLowerCase()} ${hairStyle.toLowerCase()} hair, and ${eyeColor.toLowerCase()} ${eyeShape.toLowerCase()}-shaped eyes. Style Details: ${faceFeaturesDesc}${frecklesDesc}, and ${tattooDesc}. Styled in signature ${styleVibe.toLowerCase()} aesthetic, captured in a ${selectedPose.toLowerCase()} pose.`
+    const constructedPrompt = `A portrait photography shot of ${name || 'AI Model'}, a ${age}-year-old ${genderTerm}. Traits: ${bodyType.toLowerCase()} build, ${height}cm, ${toneString.toLowerCase()}, ${faceShape.toLowerCase()} face shape, ${hairColor.toLowerCase()} ${hairStyle.toLowerCase()} hair, and ${eyeColor.toLowerCase()} ${eyeShape.toLowerCase()} eyes. Face Details: ${faceFeaturesDesc}${frecklesDesc}, ${tattooDesc}. Styled in signature ${styleVibe.toLowerCase()} fashion.`
     setRealtimePrompt(constructedPrompt)
-  }, [name, gender, age, height, skinTone, bodyType, faceShape, hairStyle, hairColor, eyeShape, eyeColor, styleVibe, hasTattoos, selectedTattooLocs, tattooStyle, tattooSize, selectedFaceFeatures, freckleDensity, freckleLocations, selectedPose])
+  }, [name, gender, age, height, skinTone, bodyType, faceShape, hairStyle, hairColor, eyeShape, eyeColor, eyebrows, nose, lips, styleVibe, hasTattoos, selectedTattooLocs, tattooStyle, tattooSize, selectedFaceFeatures, freckleDensity, freckleLocations])
 
   useEffect(() => {
     const checkUser = async () => {
@@ -300,130 +567,38 @@ export default function CreateCharacterPage() {
         router.push('/')
       } else {
         setUser(user)
-        let { data: profile } = await supabase
+        const { data: profile } = await supabase
           .from('profiles')
           .select('credits')
           .maybeSingle()
-
-        if (!profile) {
-          const { data: newProfile } = await supabase
-            .from('profiles')
-            .insert({
-              id: user.id,
-              email: user.email,
-              credits: 10,
-              full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
-              username: user.user_metadata?.username || user.email?.split('@')[0] || 'user'
-            })
-            .select('credits')
-            .maybeSingle()
-          if (newProfile) {
-            profile = newProfile
-          }
-        }
         setCredits(profile?.credits ?? 10)
       }
     }
     checkUser()
   }, [router, supabase])
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const selectedFile = e.target.files[0]
-      setFile(selectedFile)
-      setPreviewUrl(URL.createObjectURL(selectedFile))
-      setUploadedRefUrl(null) // Reset cached upload
-    }
-  }
-
-  const toggleTattooLocation = (loc: string) => {
-    if (selectedTattooLocs.includes(loc)) {
-      setSelectedTattooLocs(selectedTattooLocs.filter(l => l !== loc))
-    } else {
-      setSelectedTattooLocs([...selectedTattooLocs, loc])
-    }
-  }
-
-  const toggleFaceFeature = (feature: string) => {
-    if (selectedFaceFeatures.includes(feature)) {
-      setSelectedFaceFeatures(selectedFaceFeatures.filter(f => f !== feature))
-    } else {
-      setSelectedFaceFeatures([...selectedFaceFeatures, feature])
-    }
-  }
-
-  const toggleFreckleLocation = (loc: string) => {
-    if (freckleLocations.includes(loc)) {
-      setFreckleLocations(freckleLocations.filter(l => l !== loc))
-    } else {
-      setFreckleLocations([...freckleLocations, loc])
-    }
-  }
-
   const handleGeneratePreview = async () => {
     if (!user) return
 
     if (!name.trim()) {
-      setErrorMsg("Please specify a name for your AI Influencer.")
-      const nameInput = document.querySelector('input[type="text"]')
-      if (nameInput) {
-        nameInput.scrollIntoView({ behavior: 'smooth', block: 'center' })
-        ;(nameInput as HTMLInputElement).focus()
-      }
+      setErrorMsg("Please enter a character name at the top first.")
+      window.scrollTo({ top: 0, behavior: 'smooth' })
       return
     }
-
-    if (!file) {
-      setErrorMsg("Please upload a Face Reference Photo.")
-      const fileLabel = document.querySelector('label[class*="border-dashed"]')
-      if (fileLabel) {
-        fileLabel.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      }
-      return
-    }
-
 
     setPreviewLoading(true)
-    setIsPreviewActive(true)
     setErrorMsg(null)
     setPreviewImageUrl(null)
+    setPipelineState('Generating avatar portrait...')
 
     try {
-      let refUrl = uploadedRefUrl
+      const faceFeaturesString = [
+        `eyebrows: ${eyebrows.toLowerCase()}`,
+        `nose: ${nose.toLowerCase()}`,
+        `lips: ${lips.toLowerCase()}`,
+        ...selectedFaceFeatures
+      ].join(', ')
 
-      if (!refUrl) {
-        setPipelineState('Uploading face photo...')
-        const isDemoMode = !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'your-supabase-project-url'
-        
-        if (isDemoMode) {
-          refUrl = 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=800&q=80'
-          setUploadedRefUrl(refUrl)
-        } else {
-          const fileExt = file.name.split('.').pop()
-          const fileName = `${user.id}/${Date.now()}.${fileExt}`
-          const filePath = `reference_images/${fileName}`
-
-          const { error: uploadError } = await supabase.storage
-            .from('influencer-studio')
-            .upload(filePath, file, {
-              cacheControl: '3600',
-              upsert: true
-            })
-
-          if (uploadError) {
-            throw new Error(`Upload Error: ${uploadError.message}. Make sure you created a public bucket named "influencer-studio" in Supabase Storage.`)
-          }
-
-          const { data: { publicUrl } } = supabase.storage
-            .from('influencer-studio')
-            .getPublicUrl(filePath)
-          
-          refUrl = publicUrl
-          setUploadedRefUrl(publicUrl)
-        }
-      }
-
-      setPipelineState('Generating character portrait...')
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: {
@@ -442,12 +617,12 @@ export default function CreateCharacterPage() {
           hair_color_style: `${hairColor} / ${hairStyle}`,
           eye_color: eyeColor,
           eye_shape: eyeShape,
-          face_features: selectedFaceFeatures.join(', ') || 'Soft Features',
+          face_features: faceFeaturesString,
           tattoos: hasTattoos && selectedTattooLocs.length > 0 ? `${tattooSize} ${tattooStyle} Ink on ${selectedTattooLocs.join(', ')}` : 'None',
           birthmarks: freckleDensity !== 'None' && freckleLocations.length > 0 ? `${freckleDensity} Freckles on ${freckleLocations.join(', ')}` : 'None',
           style_vibe: styleVibe,
           signature_pose: selectedPose,
-          reference_image_url: refUrl
+          reference_image_url: '' // Redesigned snapchat style: no reference image upload needed!
         })
       })
 
@@ -462,18 +637,8 @@ export default function CreateCharacterPage() {
       }
 
       setPreviewImageUrl(generatedUrl)
-      
-      // Update credits locally
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('credits')
-        .single()
-      if (profile) {
-        setCredits(profile.credits)
-      }
     } catch (err: any) {
       setErrorMsg(err.message || 'Something went wrong during generation.')
-      setIsPreviewActive(false)
     } finally {
       setPreviewLoading(false)
       setPipelineState('')
@@ -497,30 +662,30 @@ export default function CreateCharacterPage() {
     setErrorMsg(null)
 
     try {
+      const faceFeaturesString = [
+        `eyebrows: ${eyebrows.toLowerCase()}`,
+        `nose: ${nose.toLowerCase()}`,
+        `lips: ${lips.toLowerCase()}`,
+        ...selectedFaceFeatures
+      ].join(', ')
+
       const tattoosString = hasTattoos && selectedTattooLocs.length > 0 
         ? `${tattooSize} ${tattooStyle} Ink on ${selectedTattooLocs.join(', ')}` 
         : 'None'
-
-      const faceFeaturesString = selectedFaceFeatures.join(', ') || 'Soft Features'
 
       const birthmarksString = freckleDensity !== 'None' && freckleLocations.length > 0
         ? `${freckleDensity} Freckles on ${freckleLocations.join(', ')}`
         : 'None'
 
-      // --- DEMO MODE BYPASS ---
       const isDemoMode = !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'your-supabase-project-url'
       if (isDemoMode) {
-        console.warn("Running in DEMO MODE. Simulating character creation.")
-        await new Promise(res => setTimeout(res, 1000))
         setShowSuccess(true)
         await new Promise(res => setTimeout(res, 1500))
         router.push('/dashboard')
         router.refresh()
         return
       }
-      // ------------------------
 
-      // Save character using the generated previewImageUrl as reference_image_url
       const { error: dbError } = await supabase
         .from('characters')
         .insert({
@@ -543,9 +708,7 @@ export default function CreateCharacterPage() {
           reference_image_url: previewImageUrl
         })
 
-      if (dbError) {
-        throw new Error(`Database Error: ${dbError.message}`)
-      }
+      if (dbError) throw new Error(dbError.message)
 
       setShowSuccess(true)
       await new Promise(res => setTimeout(res, 1500))
@@ -558,29 +721,24 @@ export default function CreateCharacterPage() {
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    handleGeneratePreview()
-  }
-
   return (
-    <div className="flex-1 min-h-screen bg-[#0A0F1E] text-slate-100 flex flex-col relative overflow-hidden">
+    <div className="flex-1 min-h-screen bg-[#060814] text-slate-100 flex flex-col relative overflow-hidden">
       {/* Background decoration */}
-      <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-violet-955/15 blur-[130px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-cyan-955/10 blur-[130px] pointer-events-none" />
+      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-violet-900/10 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-blue-900/10 blur-[120px] pointer-events-none" />
 
       {/* Header */}
-      <header className="border-b border-violet-900/20 bg-[#0A0F1E]/80 backdrop-blur-md sticky top-0 z-50 px-6 py-4">
+      <header className="border-b border-slate-900 bg-[#060814]/80 backdrop-blur-md sticky top-0 z-50 px-6 py-4">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <Link href="/dashboard" className="flex items-center space-x-2 group">
-            <div className="bg-gradient-to-tr from-violet-600 to-[#EC4899] p-2 rounded-xl group-hover:scale-105 transition-all shadow-md shadow-violet-500/10">
+            <div className="bg-gradient-to-tr from-violet-600 to-blue-500 p-2 rounded-xl group-hover:scale-105 transition-all shadow-md shadow-violet-500/10">
               <Sparkles className="h-5 w-5 text-white" />
             </div>
             <span className="font-extrabold text-lg tracking-tight text-white" style={{ fontFamily: "'Syne', sans-serif" }}>AI Influencer Studio</span>
           </Link>
 
           {credits !== null && (
-            <div className="flex items-center space-x-2 bg-slate-900/80 border border-violet-900/20 px-3.5 py-1.5 rounded-full">
+            <div className="flex items-center space-x-2 bg-slate-950/80 border border-slate-900 px-3.5 py-1.5 rounded-full">
               <Coins className="h-4.5 w-4.5 text-amber-400" />
               <span className="text-sm font-semibold text-slate-200">
                 {credits} <span className="text-slate-500 font-normal">Credits</span>
@@ -590,9 +748,7 @@ export default function CreateCharacterPage() {
         </div>
       </header>
 
-      {/* Creator Interface */}
-      <main className="max-w-7xl mx-auto w-full px-6 py-10 space-y-8 relative z-10 flex-1">
-        
+      <main className="max-w-7xl mx-auto w-full px-6 py-8 space-y-8 relative z-10 flex-1 flex flex-col">
         {/* Back Link */}
         <Link
           href="/dashboard"
@@ -603,39 +759,40 @@ export default function CreateCharacterPage() {
         </Link>
 
         {/* Title */}
-        <div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight" style={{ fontFamily: "'Syne', sans-serif" }}>Character Creator</h1>
-          <p className="text-sm text-slate-400">Design your virtual AI model with detailed physical traits in a game-like creator.</p>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-extrabold text-white tracking-tight" style={{ fontFamily: "'Syne', sans-serif" }}>Avatar Creator</h1>
+            <p className="text-sm text-slate-400">Design your virtual influencer avatar with a Snapchat-style interface.</p>
+          </div>
+          {/* Character Name Input */}
+          <div className="w-full md:w-80">
+            <input
+              type="text"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter Character Name (e.g. Mia)..."
+              className="w-full px-4 py-3.5 bg-slate-905 border border-slate-800 rounded-2xl text-slate-100 placeholder-slate-650 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all shadow-inner"
+            />
+          </div>
         </div>
 
-        {/* Form Container */}
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {errorMsg && (
+          <div className="p-4 rounded-2xl bg-rose-950/40 border border-rose-900/60 text-rose-200 text-sm">
+            {errorMsg}
+          </div>
+        )}
+
+        {/* Layout Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start flex-1">
           
-          {/* Left Column: Visual Options (7 cols) */}
-          <div className={`lg:col-span-7 space-y-8 bg-[#0F1629]/45 border border-violet-900/10 p-6 sm:p-8 rounded-3xl backdrop-blur-xl transition-all duration-300 ${isPreviewActive ? 'opacity-40 pointer-events-none' : ''}`}>
-            {errorMsg && (
-              <div className="p-4 rounded-xl bg-rose-950/40 border border-rose-900/60 text-rose-200 text-sm">
-                {errorMsg}
-              </div>
-            )}
-
-            {/* Custom Name */}
+          {/* Left Column: Horizontal Scroll Categories (7 cols) */}
+          <div className="lg:col-span-7 space-y-8 bg-slate-950/40 border border-slate-900/50 p-6 rounded-3xl backdrop-blur-xl">
+            
+            {/* 1. GENDER */}
             <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-300 tracking-wide uppercase">AI Influencer Name</label>
-              <input
-                type="text"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Mia Jenkins"
-                className="w-full px-4 py-3 bg-[#0A0F1E] border border-violet-900/20 rounded-2xl text-slate-100 placeholder-slate-600 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
-              />
-            </div>
-
-            {/* GENDER SELECTION */}
-            <div className="space-y-3">
-              <label className="text-xs font-bold text-slate-355 tracking-wide uppercase">1. Gender Selection</label>
-              <div className="grid grid-cols-2 gap-5">
+              <label className="text-xs font-bold text-slate-400 tracking-wide uppercase">1. Gender Selection</label>
+              <div className="flex overflow-x-auto gap-4 pb-2 scrollbar-thin scrollbar-thumb-violet-900/20 scrollbar-track-transparent">
                 {GENDERS.map((g) => {
                   const isSelected = gender === g.id
                   return (
@@ -643,57 +800,24 @@ export default function CreateCharacterPage() {
                       key={g.id}
                       type="button"
                       onClick={() => setGender(g.id)}
-                      className={`relative rounded-3xl overflow-hidden aspect-[4/3] border transition-all duration-300 ${
-                        isSelected 
-                          ? 'border-violet-500/80 shadow-[0_0_20px_rgba(139,92,246,0.35)] ring-2 ring-violet-500/50' 
-                          : 'border-violet-900/10 opacity-70 hover:opacity-100 hover:border-violet-900/30'
-                      }`}
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={g.image} alt={g.name} className="w-full h-full object-cover object-top" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent" />
-                      <div className="absolute bottom-3 left-4 right-4 flex justify-between items-center">
-                        <span className="text-sm font-bold text-white tracking-wide">{g.name}</span>
-                        {isSelected && <div className="bg-violet-500 p-1 rounded-full"><Check className="h-3 w-3 text-white" /></div>}
-                      </div>
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* FACE SHAPE */}
-            <div className="space-y-3">
-              <label className="text-xs font-bold text-slate-355 tracking-wide uppercase">2. Face Shape Outline</label>
-              <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
-                {FACE_SHAPES.map((f) => {
-                  const isSelected = faceShape === f.id
-                  return (
-                    <button
-                      key={f.id}
-                      type="button"
-                      onClick={() => setFaceShape(f.id)}
-                      className={`group flex flex-col items-center justify-between p-2 rounded-2xl border transition-all ${
+                      className={`flex-shrink-0 w-24 h-24 rounded-2xl bg-slate-900/90 border flex flex-col items-center justify-center gap-1.5 transition-all duration-300 ${
                         isSelected 
                           ? 'border-violet-500 bg-violet-950/20 text-violet-400 shadow-[0_0_15px_rgba(139,92,246,0.35)] ring-2 ring-violet-500/50' 
-                          : 'border-violet-900/10 bg-[#0A0F1E]/60 text-slate-500 hover:border-slate-800 hover:text-slate-350'
+                          : 'border-slate-800/80 hover:border-slate-700 hover:bg-slate-900 text-slate-400'
                       }`}
                     >
-                      <div className="w-12 h-14 rounded-xl overflow-hidden mb-1.5 transition-transform group-hover:scale-105">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={f.image} alt={f.name} className="w-full h-full object-cover object-top" />
-                      </div>
-                      <span className="text-[10px] font-bold tracking-wide">{f.id}</span>
+                      {g.svg}
+                      <span className="text-[10px] font-bold tracking-wide">{g.name}</span>
                     </button>
                   )
                 })}
               </div>
             </div>
 
-            {/* SKIN TONE */}
-            <div className="space-y-3">
-              <label className="text-xs font-bold text-slate-350 tracking-wide uppercase">3. Skin Tone Swatch</label>
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+            {/* 2. SKIN TONE */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-400 tracking-wide uppercase">2. Skin Tone</label>
+              <div className="flex overflow-x-auto gap-4 pb-2 scrollbar-thin scrollbar-thumb-violet-900/20 scrollbar-track-transparent">
                 {SKIN_TONES.map((s) => {
                   const isSelected = skinTone === s.name
                   return (
@@ -701,120 +825,50 @@ export default function CreateCharacterPage() {
                       key={s.name}
                       type="button"
                       onClick={() => setSkinTone(s.name)}
-                      className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all ${
+                      className={`flex-shrink-0 w-20 h-20 rounded-2xl bg-slate-900/90 border flex flex-col items-center justify-center gap-1.5 transition-all duration-300 ${
                         isSelected 
                           ? 'border-violet-500 bg-violet-950/20 text-violet-400 shadow-[0_0_15px_rgba(139,92,246,0.35)] ring-2 ring-violet-500/50' 
-                          : 'border-violet-900/10 bg-[#0A0F1E]/60 text-slate-500 hover:border-slate-800 hover:text-slate-355'
+                          : 'border-slate-800/80 hover:border-slate-700 hover:bg-slate-900 text-slate-400'
                       }`}
                       title={s.description}
                     >
-                      <div
-                        className="w-10 h-10 rounded-full relative shadow-lg border border-slate-900/40 mb-2 transition-transform overflow-hidden"
-                      >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={s.image} alt={s.name} className="w-full h-full object-cover object-top" />
-                        {isSelected && (
-                          <div className="absolute inset-0 m-auto w-6 h-6 rounded-full bg-slate-950/70 flex items-center justify-center border border-white/20">
-                            <Check className="h-3.5 w-3.5 text-white" />
-                          </div>
-                        )}
-                      </div>
-                      <span className="text-[11px] font-bold tracking-wide">{s.name}</span>
+                      <div className="w-8 h-8 rounded-full border border-slate-950 shadow-md" style={{ backgroundColor: s.hex }} />
+                      <span className="text-[9px] font-semibold">{s.name}</span>
                     </button>
                   )
                 })}
               </div>
             </div>
 
-            {/* HAIR COLOR */}
-            <div className="space-y-3">
-              <label className="text-xs font-bold text-slate-355 tracking-wide uppercase">4. Hair Color Shade</label>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {HAIR_COLORS.map((hc) => {
-                  const isSelected = hairColor === hc.name
+            {/* 3. FACE SHAPE */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-400 tracking-wide uppercase">3. Face Shape</label>
+              <div className="flex overflow-x-auto gap-4 pb-2 scrollbar-thin scrollbar-thumb-violet-900/20 scrollbar-track-transparent">
+                {FACE_SHAPES.map((f) => {
+                  const isSelected = faceShape === f.id
                   return (
                     <button
-                      key={hc.name}
+                      key={f.id}
                       type="button"
-                      onClick={() => setHairColor(hc.name)}
-                      className={`group flex flex-col items-center p-2 rounded-2xl border transition-all ${
+                      onClick={() => setFaceShape(f.id)}
+                      className={`flex-shrink-0 w-20 h-20 rounded-2xl bg-slate-900/90 border flex flex-col items-center justify-center gap-1.5 transition-all duration-300 ${
                         isSelected 
-                          ? 'border-violet-500 bg-violet-950/20 text-violet-400 shadow-[0_0_15px_rgba(139,92,246,0.35)] ring-2 ring-violet-500/50' 
-                          : 'border-violet-900/10 bg-[#0A0F1E]/60 text-slate-550 hover:border-slate-800 hover:text-slate-300'
+                          ? 'border-violet-500 bg-violet-950/20 text-violet-450 shadow-[0_0_15px_rgba(139,92,246,0.35)] ring-2 ring-violet-500/50' 
+                          : 'border-slate-800/80 hover:border-slate-700 hover:bg-slate-900 text-slate-400'
                       }`}
                     >
-                      <div className="w-12 h-12 rounded-full overflow-hidden relative mb-2 shadow-lg border border-slate-900/40">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={hc.image} alt={hc.name} className="w-full h-full object-cover object-top" />
-                        <div className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border border-white/20" style={{ backgroundColor: hc.hex }} />
-                      </div>
-                      <span className="text-[10px] font-bold tracking-wide">{hc.name}</span>
+                      {f.svg}
+                      <span className="text-[10px] font-bold">{f.id}</span>
                     </button>
                   )
                 })}
               </div>
             </div>
 
-            {/* HAIR STYLE */}
-            <div className="space-y-3">
-              <label className="text-xs font-bold text-slate-355 tracking-wide uppercase">5. Hair Style Outline</label>
-              <div className="grid grid-cols-3 sm:grid-cols-7 gap-2.5">
-                {HAIR_STYLES.map((h) => {
-                  const isSelected = hairStyle === h.id
-                  return (
-                    <button
-                      key={h.id}
-                      type="button"
-                      onClick={() => setHairStyle(h.id)}
-                      className={`group flex flex-col items-center justify-between p-2 rounded-2xl border transition-all ${
-                        isSelected 
-                          ? 'border-violet-500 bg-violet-950/20 text-violet-400 shadow-[0_0_15px_rgba(139,92,246,0.35)] ring-2 ring-violet-500/50' 
-                          : 'border-violet-900/10 bg-[#0A0F1E]/60 text-slate-500 hover:border-slate-800 hover:text-slate-355'
-                      }`}
-                    >
-                      <div className="w-10 h-10 rounded-xl overflow-hidden mb-1.5 transition-transform group-hover:scale-105">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={h.image} alt={h.id} className="w-full h-full object-cover object-top" />
-                      </div>
-                      <span className="text-[9px] font-bold tracking-wide">{h.id}</span>
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* EYE COLOR */}
-            <div className="space-y-3">
-              <label className="text-xs font-bold text-slate-355 tracking-wide uppercase">6. Eye Color Iris</label>
-              <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
-                {EYE_COLORS.map((ec) => {
-                  const isSelected = eyeColor === ec.name
-                  return (
-                    <button
-                      key={ec.name}
-                      type="button"
-                      onClick={() => setEyeColor(ec.name)}
-                      className={`group flex flex-col items-center p-2 rounded-2xl border transition-all ${
-                        isSelected 
-                          ? 'border-violet-500 bg-violet-950/20 text-violet-400 shadow-[0_0_15px_rgba(139,92,246,0.35)] ring-2 ring-violet-500/50' 
-                          : 'border-violet-900/10 bg-[#0A0F1E]/60 text-slate-550 hover:border-slate-800 hover:text-slate-300'
-                      }`}
-                    >
-                      <div className="w-12 h-10 rounded-lg overflow-hidden mb-1.5 transition-transform group-hover:scale-105">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={ec.image} alt={ec.name} className="w-full h-full object-cover" />
-                      </div>
-                      <span className="text-[10px] font-bold tracking-wide">{ec.name}</span>
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* EYE SHAPE */}
-            <div className="space-y-3">
-              <label className="text-xs font-bold text-slate-355 tracking-wide uppercase">7. Eye Shape Outline</label>
-              <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+            {/* 4. EYES */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-400 tracking-wide uppercase">4. Eye Shape</label>
+              <div className="flex overflow-x-auto gap-4 pb-2 scrollbar-thin scrollbar-thumb-violet-900/20 scrollbar-track-transparent">
                 {EYE_SHAPES.map((e) => {
                   const isSelected = eyeShape === e.id
                   return (
@@ -822,27 +876,174 @@ export default function CreateCharacterPage() {
                       key={e.id}
                       type="button"
                       onClick={() => setEyeShape(e.id)}
-                      className={`group flex flex-col items-center justify-between p-2.5 rounded-2xl border transition-all ${
+                      className={`flex-shrink-0 w-22 h-20 rounded-2xl bg-slate-900/90 border flex flex-col items-center justify-center gap-1.5 transition-all duration-300 ${
                         isSelected 
-                          ? 'border-violet-500 bg-violet-950/20 text-violet-400 shadow-[0_0_15px_rgba(139,92,246,0.35)] ring-2 ring-violet-500/50' 
-                          : 'border-violet-900/10 bg-[#0A0F1E]/60 text-slate-500 hover:border-slate-800 hover:text-slate-355'
+                          ? 'border-violet-500 bg-violet-950/20 text-violet-455 shadow-[0_0_15px_rgba(139,92,246,0.35)] ring-2 ring-violet-500/50' 
+                          : 'border-slate-800/80 hover:border-slate-700 hover:bg-slate-900 text-slate-400'
                       }`}
                     >
-                      <div className="w-12 h-8 rounded-lg overflow-hidden mb-1.5 transition-transform group-hover:scale-105">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={e.image} alt={e.id} className="w-full h-full object-cover" />
-                      </div>
-                      <span className="text-[10px] font-bold tracking-wide">{e.id}</span>
+                      {e.svg}
+                      <span className="text-[10px] font-bold">{e.id}</span>
                     </button>
                   )
                 })}
               </div>
             </div>
 
-            {/* BODY TYPE */}
-            <div className="space-y-3">
-              <label className="text-xs font-bold text-slate-355 tracking-wide uppercase">8. Torso / Body Silhouette</label>
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+            {/* 5. EYE COLOR */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-400 tracking-wide uppercase">5. Eye Color</label>
+              <div className="flex overflow-x-auto gap-4 pb-2 scrollbar-thin scrollbar-thumb-violet-900/20 scrollbar-track-transparent">
+                {EYE_COLORS.map((ec) => {
+                  const isSelected = eyeColor === ec.name
+                  return (
+                    <button
+                      key={ec.name}
+                      type="button"
+                      onClick={() => setEyeColor(ec.name)}
+                      className={`flex-shrink-0 w-20 h-20 rounded-2xl bg-slate-900/90 border flex flex-col items-center justify-center gap-1.5 transition-all duration-300 ${
+                        isSelected 
+                          ? 'border-violet-500 bg-violet-955/20 text-violet-400 shadow-[0_0_15px_rgba(139,92,246,0.35)] ring-2 ring-violet-500/50' 
+                          : 'border-slate-800/80 hover:border-slate-700 hover:bg-slate-900 text-slate-400'
+                      }`}
+                    >
+                      <div className="w-8 h-8 rounded-full border border-slate-950 shadow-md" style={{ background: ec.gradient }} />
+                      <span className="text-[10px] font-bold">{ec.name}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* 6. EYEBROWS */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-400 tracking-wide uppercase">6. Eyebrows Shape</label>
+              <div className="flex overflow-x-auto gap-4 pb-2 scrollbar-thin scrollbar-thumb-violet-900/20 scrollbar-track-transparent">
+                {EYEBROWS.map((eb) => {
+                  const isSelected = eyebrows === eb.id
+                  return (
+                    <button
+                      key={eb.id}
+                      type="button"
+                      onClick={() => setEyebrows(eb.id)}
+                      className={`flex-shrink-0 w-20 h-20 rounded-2xl bg-slate-900/90 border flex flex-col items-center justify-center gap-1.5 transition-all duration-300 ${
+                        isSelected 
+                          ? 'border-violet-500 bg-violet-950/20 text-violet-455 shadow-[0_0_15px_rgba(139,92,246,0.35)] ring-2 ring-violet-500/50' 
+                          : 'border-slate-800/80 hover:border-slate-700 hover:bg-slate-900 text-slate-400'
+                      }`}
+                    >
+                      {eb.svg}
+                      <span className="text-[10px] font-bold">{eb.id}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* 7. NOSE */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-400 tracking-wide uppercase">7. Nose Shape</label>
+              <div className="flex overflow-x-auto gap-4 pb-2 scrollbar-thin scrollbar-thumb-violet-900/20 scrollbar-track-transparent">
+                {NOSES.map((n) => {
+                  const isSelected = nose === n.id
+                  return (
+                    <button
+                      key={n.id}
+                      type="button"
+                      onClick={() => setNose(n.id)}
+                      className={`flex-shrink-0 w-20 h-20 rounded-2xl bg-slate-900/90 border flex flex-col items-center justify-center gap-1.5 transition-all duration-300 ${
+                        isSelected 
+                          ? 'border-violet-500 bg-violet-955/20 text-violet-455 shadow-[0_0_15px_rgba(139,92,246,0.35)] ring-2 ring-violet-500/50' 
+                          : 'border-slate-800/80 hover:border-slate-700 hover:bg-slate-900 text-slate-400'
+                      }`}
+                    >
+                      {n.svg}
+                      <span className="text-[10px] font-bold">{n.id}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* 8. LIPS */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-400 tracking-wide uppercase">8. Lip Shape</label>
+              <div className="flex overflow-x-auto gap-4 pb-2 scrollbar-thin scrollbar-thumb-violet-900/20 scrollbar-track-transparent">
+                {LIPS.map((l) => {
+                  const isSelected = lips === l.id
+                  return (
+                    <button
+                      key={l.id}
+                      type="button"
+                      onClick={() => setLips(l.id)}
+                      className={`flex-shrink-0 w-20 h-20 rounded-2xl bg-slate-900/90 border flex flex-col items-center justify-center gap-1.5 transition-all duration-300 ${
+                        isSelected 
+                          ? 'border-violet-500 bg-violet-950/20 text-violet-455 shadow-[0_0_15px_rgba(139,92,246,0.35)] ring-2 ring-violet-500/50' 
+                          : 'border-slate-800/80 hover:border-slate-700 hover:bg-slate-900 text-slate-400'
+                      }`}
+                    >
+                      {l.svg}
+                      <span className="text-[10px] font-bold">{l.id}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* 9. HAIR STYLE */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-400 tracking-wide uppercase">9. Hair Style</label>
+              <div className="flex overflow-x-auto gap-4 pb-2 scrollbar-thin scrollbar-thumb-violet-900/20 scrollbar-track-transparent">
+                {HAIR_STYLES.map((h) => {
+                  const isSelected = hairStyle === h.id
+                  return (
+                    <button
+                      key={h.id}
+                      type="button"
+                      onClick={() => setHairStyle(h.id)}
+                      className={`flex-shrink-0 w-20 h-20 rounded-2xl bg-slate-900/90 border flex flex-col items-center justify-center gap-1.5 transition-all duration-300 ${
+                        isSelected 
+                          ? 'border-violet-500 bg-violet-955/20 text-violet-455 shadow-[0_0_15px_rgba(139,92,246,0.35)] ring-2 ring-violet-500/50' 
+                          : 'border-slate-800/80 hover:border-slate-700 hover:bg-slate-900 text-slate-400'
+                      }`}
+                    >
+                      {h.svg}
+                      <span className="text-[10px] font-bold">{h.id}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* 10. HAIR COLOR */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-400 tracking-wide uppercase">10. Hair Color</label>
+              <div className="flex overflow-x-auto gap-4 pb-2 scrollbar-thin scrollbar-thumb-violet-900/20 scrollbar-track-transparent">
+                {HAIR_COLORS.map((hc) => {
+                  const isSelected = hairColor === hc.name
+                  return (
+                    <button
+                      key={hc.name}
+                      type="button"
+                      onClick={() => setHairColor(hc.name)}
+                      className={`flex-shrink-0 w-20 h-20 rounded-2xl bg-slate-900/90 border flex flex-col items-center justify-center gap-1.5 transition-all duration-300 ${
+                        isSelected 
+                          ? 'border-violet-500 bg-violet-950/20 text-violet-400 shadow-[0_0_15px_rgba(139,92,246,0.35)] ring-2 ring-violet-500/50' 
+                          : 'border-slate-800/80 hover:border-slate-700 hover:bg-slate-900 text-slate-400'
+                      }`}
+                    >
+                      <div className="w-8 h-8 rounded-full border border-slate-950 shadow-md" style={{ backgroundColor: hc.hex }} />
+                      <span className="text-[10px] font-bold">{hc.name}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* 11. BODY TYPE */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-400 tracking-wide uppercase">11. Body Silhouette</label>
+              <div className="flex overflow-x-auto gap-4 pb-2 scrollbar-thin scrollbar-thumb-violet-900/20 scrollbar-track-transparent">
                 {BODY_TYPES.map((b) => {
                   const isSelected = bodyType === b.id
                   return (
@@ -850,27 +1051,24 @@ export default function CreateCharacterPage() {
                       key={b.id}
                       type="button"
                       onClick={() => setBodyType(b.id)}
-                      className={`group flex flex-col items-center justify-between p-2.5 rounded-2xl border transition-all ${
+                      className={`flex-shrink-0 w-20 h-20 rounded-2xl bg-slate-900/90 border flex flex-col items-center justify-center gap-1.5 transition-all duration-300 ${
                         isSelected 
-                          ? 'border-violet-500 bg-violet-950/20 text-violet-400 shadow-[0_0_15px_rgba(139,92,246,0.35)] ring-2 ring-violet-500/50' 
-                          : 'border-violet-900/10 bg-[#0A0F1E]/60 text-slate-500 hover:border-slate-800 hover:text-slate-350'
+                          ? 'border-violet-500 bg-violet-955/20 text-violet-400 shadow-[0_0_15px_rgba(139,92,246,0.35)] ring-2 ring-violet-500/50' 
+                          : 'border-slate-800/80 hover:border-slate-700 hover:bg-slate-900 text-slate-400'
                       }`}
                     >
-                      <div className="w-12 h-16 rounded-xl overflow-hidden mb-2 transition-transform group-hover:scale-105">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={b.image} alt={b.label} className="w-full h-full object-cover" />
-                      </div>
-                      <span className="text-[10px] font-bold tracking-wide">{b.id}</span>
+                      {b.svg}
+                      <span className="text-[10px] font-bold">{b.id}</span>
                     </button>
                   )
                 })}
               </div>
             </div>
 
-            {/* STYLE VIBE */}
-            <div className="space-y-3">
-              <label className="text-xs font-bold text-slate-355 tracking-wide uppercase">9. Style/Vibe Mood Board</label>
-              <div className="space-y-2.5">
+            {/* 12. STYLE/VIBE */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-400 tracking-wide uppercase">12. Style & Vibe</label>
+              <div className="flex overflow-x-auto gap-4 pb-2 scrollbar-thin scrollbar-thumb-violet-900/20 scrollbar-track-transparent">
                 {STYLE_VIBES.map((vib) => {
                   const isSelected = styleVibe === vib.id
                   return (
@@ -878,613 +1076,131 @@ export default function CreateCharacterPage() {
                       key={vib.id}
                       type="button"
                       onClick={() => setStyleVibe(vib.id)}
-                      className={`w-full flex items-center justify-between p-4 rounded-2xl border text-left transition-all ${
-                        isSelected 
-                          ? 'bg-violet-950/20 border-violet-500 shadow-md' 
-                          : 'bg-[#0A0F1E]/60 border-violet-900/10 hover:border-slate-800'
-                      }`}
-                    >
-                      <div className="space-y-0.5">
-                        <span className="font-bold text-sm text-slate-200 block">{vib.label}</span>
-                        <span className="text-xs text-slate-500 block max-w-md leading-relaxed">{vib.desc}</span>
-                      </div>
-                      {isSelected && <div className="bg-violet-500 p-0.5 rounded-full text-white"><Check className="h-3 w-3" /></div>}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* NEW ADDITIONS - 10. TATTOOS & INK INTERACTIVE MAP */}
-            <div className="space-y-4 bg-[#0A0F1E]/40 border border-violet-900/10 p-5 rounded-3xl">
-              <div className="flex justify-between items-center">
-                <label className="text-xs font-bold text-slate-300 tracking-wide uppercase">10. Tattoos & Ink Configuration</label>
-                <div className="flex items-center bg-[#050B18] border border-violet-900/20 rounded-xl p-0.5">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setHasTattoos(false)
-                      setSelectedTattooLocs([])
-                    }}
-                    className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${!hasTattoos ? 'bg-rose-900/40 text-rose-200' : 'text-slate-500 hover:text-slate-300'}`}
-                  >
-                    No Tattoos
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setHasTattoos(true)}
-                    className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${hasTattoos ? 'bg-violet-600 text-white' : 'text-slate-500 hover:text-slate-300'}`}
-                  >
-                    Yes, Add Tattoos
-                  </button>
-                </div>
-              </div>
-
-              {hasTattoos && (
-                <div className="space-y-5 pt-2 animate-fade-in">
-                  
-                  {/* Interactive Body Silhouette click map */}
-                  <div className="space-y-2">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Select Tattoo Locations:</span>
-                    <div className="grid grid-cols-2 gap-4">
-                      
-                      {/* Front View */}
-                      <div className="relative border border-violet-900/10 bg-[#050B18] rounded-2xl p-4 flex flex-col items-center justify-center min-h-[220px]">
-                        <span className="absolute top-2 text-[9px] text-slate-500 font-bold uppercase tracking-wider">Front View</span>
-                        <svg viewBox="0 0 100 180" className="w-20 h-40 stroke-violet-900/20 fill-violet-900/5" strokeWidth="1.5">
-                          <circle cx="50" cy="22" r="10" />
-                          <path d="M50,32 L50,85 M35,45 L65,45 M38,45 L38,90 L42,148 M62,45 L62,90 L58,148" />
-                        </svg>
-
-                        {/* Interactive hotspot labels */}
-                        <div className="absolute inset-0 w-full h-full pointer-events-none">
-                          {/* Neck */}
-                          <button
-                            type="button"
-                            onClick={() => toggleTattooLocation('Neck')}
-                            className={`absolute pointer-events-auto top-[23%] left-[48%] -translate-x-1/2 -translate-y-1/2 rounded-full border text-[9px] font-bold flex items-center justify-center shadow-md transition-all ${selectedTattooLocs.includes('Neck') ? 'bg-violet-600 text-white border-violet-400 w-9 h-5' : 'bg-slate-900 text-slate-500 border-slate-800 w-8 h-4'}`}
-                          >
-                            Neck
-                          </button>
-                          {/* Chest */}
-                          <button
-                            type="button"
-                            onClick={() => toggleTattooLocation('Chest')}
-                            className={`absolute pointer-events-auto top-[34%] left-[48%] -translate-x-1/2 -translate-y-1/2 rounded-full border text-[9px] font-bold flex items-center justify-center shadow-md transition-all ${selectedTattooLocs.includes('Chest') ? 'bg-violet-600 text-white border-violet-400 w-9 h-5' : 'bg-slate-900 text-slate-500 border-slate-800 w-9 h-4'}`}
-                          >
-                            Chest
-                          </button>
-                          {/* Left Arm */}
-                          <button
-                            type="button"
-                            onClick={() => toggleTattooLocation('Left Arm')}
-                            className={`absolute pointer-events-auto top-[42%] left-[12%] -translate-y-1/2 rounded-full border text-[8px] font-bold flex items-center justify-center shadow-md transition-all ${selectedTattooLocs.includes('Left Arm') ? 'bg-violet-600 text-white border-violet-400 w-11 h-5' : 'bg-slate-900 text-slate-500 border-slate-800 w-10 h-4'}`}
-                          >
-                            L Arm
-                          </button>
-                          {/* Right Arm */}
-                          <button
-                            type="button"
-                            onClick={() => toggleTattooLocation('Right Arm')}
-                            className={`absolute pointer-events-auto top-[42%] right-[12%] -translate-y-1/2 rounded-full border text-[8px] font-bold flex items-center justify-center shadow-md transition-all ${selectedTattooLocs.includes('Right Arm') ? 'bg-violet-600 text-white border-violet-400 w-11 h-5' : 'bg-slate-900 text-slate-500 border-slate-800 w-10 h-4'}`}
-                          >
-                            R Arm
-                          </button>
-                          {/* Left Wrist */}
-                          <button
-                            type="button"
-                            onClick={() => toggleTattooLocation('Left Wrist')}
-                            className={`absolute pointer-events-auto top-[63%] left-[8%] -translate-y-1/2 rounded-full border text-[7.5px] font-bold flex items-center justify-center shadow-md transition-all ${selectedTattooLocs.includes('Left Wrist') ? 'bg-violet-600 text-white border-violet-400 w-11 h-5' : 'bg-slate-900 text-slate-500 border-slate-800 w-10 h-4'}`}
-                          >
-                            L Wrist
-                          </button>
-                          {/* Right Wrist */}
-                          <button
-                            type="button"
-                            onClick={() => toggleTattooLocation('Right Wrist')}
-                            className={`absolute pointer-events-auto top-[63%] right-[8%] -translate-y-1/2 rounded-full border text-[7.5px] font-bold flex items-center justify-center shadow-md transition-all ${selectedTattooLocs.includes('Right Wrist') ? 'bg-violet-600 text-white border-violet-400 w-11 h-5' : 'bg-slate-900 text-slate-500 border-slate-800 w-10 h-4'}`}
-                          >
-                            R Wrist
-                          </button>
-                          {/* Thigh */}
-                          <button
-                            type="button"
-                            onClick={() => toggleTattooLocation('Thigh')}
-                            className={`absolute pointer-events-auto top-[66%] left-[48%] -translate-x-1/2 -translate-y-1/2 rounded-full border text-[9px] font-bold flex items-center justify-center shadow-md transition-all ${selectedTattooLocs.includes('Thigh') ? 'bg-violet-600 text-white border-violet-400 w-10 h-5' : 'bg-slate-900 text-slate-500 border-slate-800 w-9 h-4'}`}
-                          >
-                            Thigh
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Back View */}
-                      <div className="relative border border-violet-900/10 bg-[#050B18] rounded-2xl p-4 flex flex-col items-center justify-center min-h-[220px]">
-                        <span className="absolute top-2 text-[9px] text-slate-500 font-bold uppercase tracking-wider">Back View</span>
-                        <svg viewBox="0 0 100 180" className="w-20 h-40 stroke-violet-900/20 fill-violet-900/5" strokeWidth="1.5">
-                          <circle cx="50" cy="22" r="10" />
-                          <path d="M50,32 L50,85 M35,45 L65,45 M38,45 L38,90 L42,148 M62,45 L62,90 L58,148" />
-                          {/* back details */}
-                          <line x1="50" y1="45" x2="50" y2="78" />
-                        </svg>
-
-                        {/* Interactive hotspot labels */}
-                        <div className="absolute inset-0 w-full h-full pointer-events-none">
-                          {/* Back */}
-                          <button
-                            type="button"
-                            onClick={() => toggleTattooLocation('Back')}
-                            className={`absolute pointer-events-auto top-[36%] left-[48%] -translate-x-1/2 -translate-y-1/2 rounded-full border text-[9px] font-bold flex items-center justify-center shadow-md transition-all ${selectedTattooLocs.includes('Back') ? 'bg-violet-600 text-white border-violet-400 w-10 h-5' : 'bg-slate-900 text-slate-500 border-slate-800 w-9 h-4'}`}
-                          >
-                            Back
-                          </button>
-                          {/* Ankle */}
-                          <button
-                            type="button"
-                            onClick={() => toggleTattooLocation('Ankle')}
-                            className={`absolute pointer-events-auto top-[86%] left-[48%] -translate-x-1/2 -translate-y-1/2 rounded-full border text-[9px] font-bold flex items-center justify-center shadow-md transition-all ${selectedTattooLocs.includes('Ankle') ? 'bg-violet-600 text-white border-violet-400 w-10 h-5' : 'bg-slate-900 text-slate-500 border-slate-800 w-9 h-4'}`}
-                          >
-                            Ankle
-                          </button>
-                        </div>
-                      </div>
-
-                    </div>
-                  </div>
-
-                  {/* Tattoo Style Cards */}
-                  <div className="space-y-2">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Select Tattoo Style:</span>
-                    <div className="grid grid-cols-4 sm:grid-cols-7 gap-2.5">
-                      {TATTOO_STYLES.map((t) => {
-                        const isSelected = tattooStyle === t.id
-                        return (
-                          <button
-                            key={t.id}
-                            type="button"
-                            onClick={() => setTattooStyle(t.id)}
-                            className={`group flex flex-col items-center justify-between p-2 rounded-2xl border transition-all ${
-                              isSelected 
-                                ? 'border-violet-500 bg-violet-950/20 text-violet-400' 
-                                : 'border-violet-900/10 bg-[#0A0F1E]/60 text-slate-500 hover:border-slate-800'
-                            }`}
-                          >
-                            <div className="mb-1 transition-transform group-hover:scale-105">{t.svg}</div>
-                            <span className="text-[8px] font-bold tracking-wide text-center">{t.label}</span>
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Tattoo Sizes (visual size comparison) */}
-                  <div className="space-y-2">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Select Size:</span>
-                    <div className="flex gap-4">
-                      {TATTOO_SIZES.map((ts) => {
-                        const isSelected = tattooSize === ts.id
-                        return (
-                          <button
-                            key={ts.id}
-                            type="button"
-                            onClick={() => setTattooSize(ts.id)}
-                            className={`flex-1 flex items-center justify-center gap-3 p-3.5 rounded-2xl border transition-all ${
-                              isSelected 
-                                ? 'border-violet-500 bg-violet-950/20' 
-                                : 'border-violet-900/10 bg-[#0A0F1E]/60 hover:border-slate-800'
-                            }`}
-                          >
-                            {/* visual indicator circle */}
-                            <div className="flex items-center justify-center w-8 h-8 rounded bg-[#050B18]">
-                              <span className={`bg-violet-400 rounded-full ${ts.radius}`} />
-                            </div>
-                            <span className="text-xs font-bold text-slate-300">{ts.label}</span>
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </div>
-
-                </div>
-              )}
-            </div>
-
-            {/* NEW ADDITIONS - 11. SPECIAL FACE FEATURES */}
-            <div className="space-y-3">
-              <label className="text-xs font-bold text-slate-355 tracking-wide uppercase">11. Special Face Features</label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {SPECIAL_FACE_FEATURES.map((feature) => {
-                  const isSelected = selectedFaceFeatures.includes(feature.id)
-                  return (
-                    <button
-                      key={feature.id}
-                      type="button"
-                      onClick={() => toggleFaceFeature(feature.id)}
-                      className={`group flex flex-col items-center justify-between p-3.5 rounded-2xl border text-center transition-all ${
+                      className={`flex-shrink-0 w-24 h-24 rounded-2xl bg-slate-900/90 border flex flex-col items-center justify-center gap-1.5 transition-all duration-300 ${
                         isSelected 
                           ? 'border-violet-500 bg-violet-950/20 text-violet-400 shadow-[0_0_15px_rgba(139,92,246,0.35)] ring-2 ring-violet-500/50' 
-                          : 'border-violet-900/10 bg-[#0A0F1E]/60 text-slate-500 hover:border-slate-850 hover:text-slate-355'
+                          : 'border-slate-800/80 hover:border-slate-700 hover:bg-slate-900 text-slate-400'
                       }`}
                     >
-                      <div className="w-14 h-14 rounded-xl overflow-hidden mb-2 transition-transform group-hover:scale-105">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={feature.image} alt={feature.label} className="w-full h-full object-cover object-top" />
-                      </div>
-                      <span className="text-[10px] font-bold tracking-wide">{feature.label}</span>
+                      {vib.svg}
+                      <span className="text-[9px] font-bold text-center tracking-tight px-1">{vib.label}</span>
                     </button>
                   )
                 })}
               </div>
             </div>
 
-            {/* NEW ADDITIONS - 12. BIRTHMARKS & FRECKLES */}
-            <div className="space-y-4 bg-[#0A0F1E]/40 border border-violet-900/10 p-5 rounded-3xl space-y-4">
-              <span className="text-xs font-bold text-slate-300 tracking-wide uppercase block">12. Birthmarks & Freckles Density</span>
-              
-              {/* Density face visuals selection */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {FRECKLE_DENSITIES.map((fd) => {
-                  const isSelected = freckleDensity === fd.id
-                  return (
-                    <button
-                      key={fd.id}
-                      type="button"
-                      onClick={() => {
-                        setFreckleDensity(fd.id)
-                        if (fd.id === 'None') setFreckleLocations([])
-                      }}
-                      className={`flex flex-col items-center justify-between p-3.5 rounded-2xl border transition-all ${
-                        isSelected 
-                          ? 'border-violet-500 bg-violet-950/20 text-violet-400' 
-                          : 'border-violet-900/10 bg-[#0A0F1E]/60 text-slate-500 hover:border-slate-800'
-                      }`}
-                    >
-                      {/* Face illustration with dot counts based on density */}
-                      <div className="relative w-12 h-12 mb-2 flex items-center justify-center stroke-slate-500 fill-none">
-                        <svg viewBox="0 0 100 100" className="w-full h-full">
-                          <circle cx="50" cy="50" r="32" strokeWidth="2.5" />
-                          <circle cx="50" cy="74" r="8" strokeWidth="2" />
-                          {/* nose */}
-                          <line x1="50" y1="44" x2="50" y2="52" strokeWidth="2.5" />
-                          {/* density dots */}
-                          {fd.dots >= 8 && (
-                            <>
-                              <circle cx="36" cy="56" r="1.5" className="fill-violet-400 stroke-none" />
-                              <circle cx="44" cy="58" r="1" className="fill-violet-400 stroke-none" />
-                              <circle cx="56" cy="58" r="1" className="fill-violet-400 stroke-none" />
-                              <circle cx="64" cy="56" r="1.5" className="fill-violet-400 stroke-none" />
-                            </>
-                          )}
-                          {fd.dots >= 20 && (
-                            <>
-                              <circle cx="38" cy="50" r="1.2" className="fill-violet-400 stroke-none" />
-                              <circle cx="42" cy="52" r="1.5" className="fill-violet-400 stroke-none" />
-                              <circle cx="58" cy="52" r="1.5" className="fill-violet-400 stroke-none" />
-                              <circle cx="62" cy="50" r="1.2" className="fill-violet-400 stroke-none" />
-                              <circle cx="48" cy="62" r="1" className="fill-violet-400 stroke-none" />
-                              <circle cx="52" cy="62" r="1.2" className="fill-violet-400 stroke-none" />
-                            </>
-                          )}
-                          {fd.dots >= 45 && (
-                            <>
-                              <circle cx="30" cy="46" r="1" className="fill-violet-400 stroke-none" />
-                              <circle cx="70" cy="46" r="1" className="fill-violet-400 stroke-none" />
-                              <circle cx="34" cy="62" r="1.5" className="fill-violet-400 stroke-none" />
-                              <circle cx="66" cy="62" r="1.5" className="fill-violet-400 stroke-none" />
-                              <circle cx="44" cy="66" r="1" className="fill-violet-400 stroke-none" />
-                              <circle cx="56" cy="66" r="1.2" className="fill-violet-400 stroke-none" />
-                              <circle cx="50" cy="58" r="1.5" className="fill-violet-400 stroke-none" />
-                            </>
-                          )}
-                        </svg>
-                      </div>
-                      <span className="text-[9px] font-bold tracking-wide">{fd.label}</span>
-                    </button>
-                  )
-                })}
-              </div>
-
-              {/* Freckle Locations selection */}
-              {freckleDensity !== 'None' && (
-                <div className="space-y-2 pt-1 animate-fade-in">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Freckle Placement on Face:</span>
-                  <div className="flex flex-wrap gap-2.5">
-                    {FRECKLE_LOCATIONS.map((fl) => {
-                      const isSelected = freckleLocations.includes(fl.id)
-                      return (
-                        <button
-                          key={fl.id}
-                          type="button"
-                          onClick={() => toggleFreckleLocation(fl.id)}
-                          className={`px-4.5 py-2.5 rounded-2xl border text-xs font-bold transition-all ${
-                            isSelected 
-                              ? 'border-violet-500 bg-violet-950/30 text-white' 
-                              : 'border-violet-900/10 bg-[#0A0F1E]/60 text-slate-450 hover:border-violet-900/40 hover:text-slate-200'
-                          }`}
-                        >
-                          {fl.label}
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* NEW ADDITIONS - 13. SIGNATURE POSE */}
-            <div className="space-y-3">
-              <label className="text-xs font-bold text-slate-355 tracking-wide uppercase">13. Signature Pose</label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {POSES.map((p) => {
-                  const isSelected = selectedPose === p.id
-                  return (
-                    <button
-                      key={p.id}
-                      type="button"
-                      onClick={() => setSelectedPose(p.id)}
-                      className={`group flex flex-col items-center justify-between p-3.5 rounded-2xl border transition-all ${
-                        isSelected 
-                          ? 'border-violet-500 bg-violet-950/20 text-violet-400 shadow-[0_0_15px_rgba(139,92,246,0.35)] ring-2 ring-violet-500/50' 
-                          : 'border-violet-900/10 bg-[#0A0F1E]/60 text-slate-500 hover:border-slate-800'
-                      }`}
-                    >
-                      <div className="w-14 h-20 rounded-xl overflow-hidden mb-2 transition-transform group-hover:scale-105">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={p.image} alt={p.label} className="w-full h-full object-cover object-top" />
-                      </div>
-                      <span className="text-[10px] font-bold tracking-wide">{p.label}</span>
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-
-          </div>
-
-          {/* Right Column: Game-like character view, height silhouette scaling, reference image upload (5 cols) */}
-          <div className="lg:col-span-5 lg:sticky lg:top-24 space-y-6">
-            
-            {isPreviewActive ? (
-              /* Output Canvas Panel */
-              <div className="bg-[#0F1629]/60 border border-violet-900/10 p-6 rounded-3xl backdrop-blur-xl space-y-6 flex flex-col min-h-[500px] justify-between">
-                <div>
-                  <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wide mb-4">Output Studio Canvas</h3>
-                  
-                  <div className="relative aspect-square w-full bg-slate-950/80 rounded-2xl overflow-hidden border border-violet-900/10 flex items-center justify-center">
-                    {previewLoading ? (
-                      <div className="flex flex-col items-center justify-center p-6 text-center space-y-4">
-                        <div className="relative">
-                          <div className="w-16 h-16 rounded-full border-4 border-violet-500/20 border-t-violet-500 animate-spin" />
-                          <Sparkles className="absolute inset-0 m-auto h-6 w-6 text-violet-400 animate-pulse" />
-                        </div>
-                        <div className="space-y-1">
-                          <p className="text-sm font-bold text-white">Generating Character Preview</p>
-                          <p className="text-xs text-slate-450 animate-pulse">{pipelineState || 'Calling DALL-E 3 API...'}</p>
-                        </div>
-                      </div>
-                    ) : previewImageUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={previewImageUrl}
-                        alt="Character AI generated preview"
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="text-center p-6 text-slate-500 text-sm">
-                        No preview image. Please click "Generate Preview" below.
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Action Buttons below image (Save Avatar / Regenerate / Edit Details) */}
-                {!previewLoading && previewImageUrl && (
-                  <div className="space-y-3">
-                    <button
-                      type="button"
-                      onClick={handleSaveAvatar}
-                      disabled={loading}
-                      className="w-full py-4 bg-gradient-to-r from-emerald-600 to-green-500 hover:opacity-95 text-white font-bold rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 active:scale-[0.98] cursor-pointer"
-                    >
-                      {loading ? (
-                        <>
-                          <Loader2 className="h-5 w-5 animate-spin" />
-                          <span>Saving Avatar...</span>
-                        </>
-                      ) : (
-                        <>
-                          <Check className="h-5 w-5 text-white" />
-                          <span>Save Avatar</span>
-                        </>
-                      )}
-                    </button>
-                    
-                    <div className="grid grid-cols-2 gap-3">
-                      <button
-                        type="button"
-                        onClick={handleGeneratePreview}
-                        disabled={previewLoading}
-                        className="py-3 bg-slate-900 border border-slate-800 hover:border-violet-500/40 text-slate-200 font-bold rounded-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 text-sm cursor-pointer"
-                      >
-                        <RefreshCw className="h-4 w-4 text-violet-400" />
-                        <span>Regenerate</span>
-                      </button>
-                      
-                      <button
-                        type="button"
-                        onClick={() => setIsPreviewActive(false)}
-                        className="py-3 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-350 hover:text-white font-bold rounded-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 text-sm cursor-pointer"
-                      >
-                        <Edit className="h-4 w-4" />
-                        <span>Edit Details</span>
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <>
-                {/* Visual Height / Silhouette Panel */}
-                <div className="bg-[#0F1629]/60 border border-violet-900/10 p-6 rounded-3xl backdrop-blur-xl space-y-5 flex flex-col items-center">
-                  <div className="w-full flex justify-between items-center border-b border-violet-900/10 pb-3">
-                    <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wide">Height Scaling Model</h3>
-                    <span className="text-violet-400 font-extrabold text-sm">{height} cm</span>
-                  </div>
-                  
-                  {/* Growing Human Silhouette Illustration */}
-                  <div className="h-64 flex items-end justify-center w-full relative bg-[#0A0F1E]/55 rounded-2xl p-4 border border-violet-900/5 overflow-hidden">
-                    <div 
-                      className="transition-all duration-300 flex flex-col items-center origin-bottom"
-                      style={{ transform: `scale(${0.65 + ((height - 140) / 70) * 0.35})` }}
-                    >
-                      {/* Glowing human outline SVG */}
-                      <svg viewBox="0 0 100 200" className="w-24 h-48 stroke-violet-500 fill-violet-500/10 filter drop-shadow-[0_0_8px_rgba(139,92,246,0.3)]" strokeWidth="2">
-                        {/* Head */}
-                        <circle cx="50" cy="25" r="14" />
-                        {/* Neck */}
-                        <line x1="50" y1="39" x2="50" y2="45" />
-                        {/* Shoulders & Torso */}
-                        <path d="M28,52 C32,45 68,45 72,52 L64,105 L36,105 Z" />
-                        {/* Arms */}
-                        <path d="M28,52 L20,95 L22,100" />
-                        <path d="M72,52 L80,95 L78,100" />
-                        {/* Pelvis */}
-                        <path d="M36,105 L64,105 L58,122 L42,122 Z" />
-                        {/* Legs */}
-                        <path d="M43,122 L41,185 L48,188" />
-                        <path d="M57,122 L59,185 L52,188" />
-                      </svg>
-                      <span className="text-[10px] text-slate-450 font-bold uppercase tracking-wider mt-2.5">AI Silhouette</span>
-                    </div>
-                  </div>
-
-                  {/* Slider Input */}
-                  <div className="w-full space-y-2">
-                    <div className="flex justify-between text-[10px] text-slate-500 font-bold uppercase">
-                      <span>Petite (140cm)</span>
-                      <span>Average (175cm)</span>
-                      <span>Tall (210cm)</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="140"
-                      max="210"
-                      value={height}
-                      onChange={(e) => setHeight(Number(e.target.value))}
-                      className="w-full accent-violet-500 h-1.5 bg-slate-900 rounded-lg cursor-pointer"
-                    />
-                  </div>
-                </div>
-
-                {/* Real-time Prompt Builder Panel */}
-                <div className="bg-[#0F1629]/60 border border-violet-900/10 p-6 rounded-3xl backdrop-blur-xl space-y-4">
-                  <div className="flex justify-between items-center">
-                    <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wide flex items-center gap-2">
-                      <Sparkles className="h-4.5 w-4.5 text-violet-400" />
-                      Real-time Prompt Builder
-                    </h3>
-                  </div>
-                  <div className="p-4 bg-[#0A0F1E] rounded-2xl border border-violet-900/10">
-                    <p className="text-xs text-slate-400 leading-relaxed italic">
-                      "{realtimePrompt}"
-                    </p>
-                  </div>
-                </div>
-
-                {/* Reference Image Upload */}
-                <div className="bg-[#0F1629]/40 border border-violet-900/10 p-6 rounded-3xl backdrop-blur-xl flex flex-col justify-center min-h-[320px] relative">
-                  <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wide mb-4">Face Reference Photo</h3>
-                  
-                  {previewUrl ? (
-                    <div className="w-full flex-1 flex flex-col items-center justify-center relative group rounded-2xl overflow-hidden aspect-[4/3]">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={previewUrl}
-                        alt="Reference face preview"
-                        className="w-full h-full object-cover object-top rounded-2xl"
-                      />
-                      {/* Reference Photo Badge */}
-                      <div className="absolute top-3 left-3 bg-violet-600/85 backdrop-blur-sm px-2.5 py-1 rounded-md text-[10px] font-bold text-white uppercase tracking-wider z-10 shadow-md">
-                        Reference Photo
-                      </div>
-                      <div className="absolute inset-0 bg-slate-950/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-2xl z-20">
-                        <label className="px-4 py-2 bg-slate-900 border border-slate-800 rounded-xl cursor-pointer hover:bg-slate-800 transition text-sm font-semibold">
-                          Change Photo
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleFileChange}
-                            className="hidden"
-                          />
-                        </label>
-                      </div>
-                    </div>
-                  ) : (
-                    <label className="flex-1 w-full border-2 border-dashed border-violet-900/20 hover:border-violet-500/50 rounded-2xl flex flex-col items-center justify-center p-6 text-center cursor-pointer transition-all hover:bg-[#0A0F1E]/40 group">
-                      <div className="p-4 rounded-full bg-slate-950/60 border border-slate-900 text-slate-400 group-hover:text-violet-400 transition-colors mb-4">
-                        <Upload className="h-7 w-7" />
-                      </div>
-                      <h4 className="font-bold text-slate-300 mb-1">Upload Face Photo</h4>
-                      <p className="text-xs text-slate-500 max-w-[220px] leading-relaxed mb-4">
-                        Choose a clear, front-facing portrait with good lighting.
-                      </p>
-                      <span className="px-3.5 py-2 bg-slate-950 border border-slate-900 hover:border-slate-850 text-xs font-bold rounded-xl text-slate-300">
-                        Browse File
-                      </span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleFileChange}
-                        className="hidden"
-                      />
-                    </label>
-                  )}
-
-                  {/* Hint Card */}
-                  <div className="mt-4 flex items-start space-x-2.5 p-3 rounded-xl bg-[#0A0F1E] border border-violet-900/10 text-slate-400 text-[10px] leading-relaxed">
-                    <HelpCircle className="h-4.5 w-4.5 text-violet-400 shrink-0 mt-0.5" />
-                    <span>
-                      The face swap algorithm maps this photo onto the generated image. Front-facing, high-definition selfies yield the highest quality morphs.
-                    </span>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* Main Action Footer spanning full width */}
-          {!isPreviewActive && (
-            <div className="lg:col-span-12 border-t border-violet-900/10 pt-8 flex flex-col items-center justify-center space-y-4">
+            {/* Generate Trigger */}
+            <div className="pt-6 border-t border-slate-900">
               <button
                 type="button"
                 onClick={handleGeneratePreview}
-                disabled={previewLoading}
-                className="w-full max-w-xl py-5 bg-gradient-to-r from-violet-600 via-fuchsia-500 to-cyan-500 hover:opacity-95 text-white font-extrabold rounded-3xl shadow-xl shadow-violet-500/20 transition-all flex items-center justify-center gap-3 active:scale-[0.99] text-lg cursor-pointer"
+                disabled={previewLoading || !name.trim()}
+                className="w-full py-4.5 bg-gradient-to-r from-violet-600 via-fuchsia-500 to-blue-500 hover:opacity-95 text-white font-extrabold rounded-2xl shadow-lg transition-all flex items-center justify-center gap-3 active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed text-base cursor-pointer"
               >
                 {previewLoading ? (
                   <>
-                    <Loader2 className="h-6 w-6 animate-spin" />
-                    <span>Generating Preview...</span>
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <span>Generating Avatar Portrait...</span>
                   </>
                 ) : (
                   <>
-                    <Sparkles className="h-6 w-6 fill-white" />
-                    <span>Generate Preview</span>
+                    <Sparkles className="h-5 w-5 text-white" />
+                    <span>Generate Portrait</span>
                   </>
                 )}
               </button>
-              <p className="text-xs text-slate-500 text-center max-w-md leading-relaxed">
-                Ensure you have specified the name and uploaded a reference face photo.
+            </div>
+
+          </div>
+
+          {/* Right Column: Game-like character studio output canvas (5 cols) */}
+          <div className="lg:col-span-5 lg:sticky lg:top-24 space-y-6">
+            <div className="bg-slate-950/40 border border-slate-900/50 p-6 rounded-3xl backdrop-blur-xl space-y-6 flex flex-col min-h-[500px] justify-between">
+              <div>
+                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Studio Output Canvas</h3>
+                
+                <div className="relative aspect-square w-full bg-slate-900/60 rounded-2xl overflow-hidden border border-slate-900 flex items-center justify-center shadow-inner">
+                  {previewLoading ? (
+                    <div className="flex flex-col items-center justify-center p-6 text-center space-y-4">
+                      <div className="relative">
+                        <div className="w-16 h-16 rounded-full border-4 border-violet-500/20 border-t-violet-500 animate-spin" />
+                        <Sparkles className="absolute inset-0 m-auto h-6 w-6 text-violet-400 animate-pulse" />
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-sm font-bold text-white">Generating AI Portrait</p>
+                        <p className="text-xs text-slate-500 animate-pulse">{pipelineState || 'Calling gpt-image-1 API...'}</p>
+                      </div>
+                    </div>
+                  ) : previewImageUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={previewImageUrl}
+                      alt="AI portrait headshot preview"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="text-center p-6 text-slate-500 text-sm space-y-2">
+                      <Sparkles className="h-8 w-8 text-slate-700 mx-auto" />
+                      <p>No preview generated yet.</p>
+                      <p className="text-xs text-slate-600 max-w-[200px] mx-auto">Select traits and click "Generate Portrait" on the left to generate your avatar.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Action Buttons below image (Save Avatar / Regenerate) */}
+              {!previewLoading && previewImageUrl && (
+                <div className="space-y-3">
+                  <button
+                    type="button"
+                    onClick={handleSaveAvatar}
+                    disabled={loading}
+                    className="w-full py-4 bg-gradient-to-r from-emerald-600 to-green-500 hover:opacity-95 text-white font-bold rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 active:scale-[0.98] cursor-pointer"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                        <span>Saving Avatar...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Save className="h-5 w-5 text-white" />
+                        <span>Save Avatar</span>
+                      </>
+                    )}
+                  </button>
+                  
+                  <button
+                    type="button"
+                    onClick={handleGeneratePreview}
+                    disabled={previewLoading}
+                    className="w-full py-3 bg-slate-900 border border-slate-800 hover:border-violet-500/40 text-slate-200 font-bold rounded-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 text-sm cursor-pointer"
+                  >
+                    <RefreshCw className="h-4 w-4 text-violet-450" />
+                    <span>Regenerate</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Prompt Suffix Info Card */}
+            <div className="p-5 rounded-3xl bg-slate-950/40 border border-slate-900/50 backdrop-blur-xl text-slate-400 text-xs leading-relaxed space-y-1.5">
+              <span className="font-extrabold text-[10px] uppercase tracking-wide text-slate-200 block">Automatic Generation Style:</span>
+              <p>
+                Every avatar is generated as a lifestyle close-up headshot with natural candid lighting, natural pose looking slightly away, and professional editorial blur.
               </p>
             </div>
-          )}
 
-        </form>
+          </div>
+
+        </div>
 
       </main>
 
       {showSuccess && (
-        <div className="fixed inset-0 bg-[#0A0F1E]/95 backdrop-blur-md z-[100] flex flex-col items-center justify-center space-y-6">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-violet-600 to-[#EC4899] flex items-center justify-center shadow-lg shadow-violet-500/30 animate-bounce">
+        <div className="fixed inset-0 bg-[#060814]/95 backdrop-blur-md z-[100] flex flex-col items-center justify-center space-y-6">
+          <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-violet-600 to-blue-500 flex items-center justify-center shadow-lg shadow-violet-500/30 animate-bounce">
             <Check className="h-10 w-10 text-white stroke-[3px]" />
           </div>
           <div className="text-center space-y-2">
