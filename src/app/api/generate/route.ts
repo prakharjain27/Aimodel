@@ -189,16 +189,19 @@ export async function POST(request: Request) {
       const characterPrompt = generatedPrompt
 
       const response = await openai.images.generate({
-        model: "dall-e-3",
+        model: "gpt-image-1",
         prompt: characterPrompt,
         n: 1,
         size: "1024x1024",
-        quality: "standard",
       })
 
-      finalImageUrl = response.data?.[0]?.url || ''
+      const imgData = response.data?.[0]
+      if (imgData) {
+        finalImageUrl = imgData.url || (imgData.b64_json ? `data:image/png;base64,${imgData.b64_json}` : '')
+      }
+
       if (!finalImageUrl) {
-        throw new Error('No image URL returned from DALL-E.')
+        throw new Error('No image URL or base64 data returned from OpenAI.')
       }
     } catch (dalleErr: any) {
       console.error('OpenAI DALL-E generation failed:', dalleErr)
