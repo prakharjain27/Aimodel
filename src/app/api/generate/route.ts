@@ -157,7 +157,7 @@ export async function POST(request: Request) {
           messages: [
             {
               role: 'system',
-              content: 'You are an AI Influencer prompt engineering assistant. Your task is to output a single, detailed image-generation prompt for a model based on their physical traits and the specified scene description, incorporating their facial attributes from the reference image. Output ONLY the raw text prompt. Do not add any conversational text or markdown.',
+              content: 'You are an AI Influencer prompt engineering assistant. Your task is to output a single, detailed image-generation prompt for a model based on their physical traits and the specified scene description, incorporating their facial attributes from the reference image. Output ONLY the raw text prompt. Do not add any conversational text or markdown. Ensure the prompt describes a natural, candid, non-perfect human portrait. Do NOT use forbidden terms like "cinematic lighting", "perfect skin", "studio", "symmetrical", "8k ultra sharp", or "professional photography". Instead, focus on natural daylight, slight asymmetry, subtle skin textures, and candid lifestyle settings.',
             },
             {
               role: 'user',
@@ -174,7 +174,7 @@ export async function POST(request: Request) {
                   - Skin Tone: ${skinToneString}
                   - Body Type: ${character.body_type}
                   - Face Shape: ${character.face_shape || 'Oval'}
-                  - Face Features: ${character.face_features || 'symmetrical'}
+                  - Face Features: ${character.face_features || 'natural features'}
                   - Hair Style & Color: ${character.hair_color_style}
                   - Eye Color & Shape: ${character.eye_color} ${character.eye_shape ? `(${character.eye_shape} shape)` : ''}
                   - Tattoos: ${character.tattoos || 'None'}
@@ -232,7 +232,7 @@ export async function POST(request: Request) {
       const faceShapeString = `a clear and distinct ${(character.face_shape || 'Oval').toLowerCase()} face shape`
       const hairString = `hair specifically colored ${hairColor} and styled in a ${hairStyle} haircut`
 
-      generatedPrompt = `A photorealistic image of ${character.name}, a ${character.gender || 'Female'} model, ${character.age} years old, height ${character.height || 170}cm, ${toneString}, body type: ${character.body_type}, ${faceShapeString}, face details: ${character.face_features || 'symmetrical'}, ${hairString}, eye color: ${character.eye_color}, tattoos: ${character.tattoos || 'None'}, scene/action: ${scenePrompt}`
+      generatedPrompt = `A photorealistic image of ${character.name}, a ${character.gender || 'Female'} model, ${character.age} years old, height ${character.height || 170}cm, ${toneString}, body type: ${character.body_type}, ${faceShapeString}, face details: ${character.face_features || 'natural features'}, ${hairString}, eye color: ${character.eye_color}, tattoos: ${character.tattoos || 'None'}, scene/action: ${scenePrompt}`
     }
 
     // Helper to sanitize prompts from plastic/AI keywords
@@ -241,8 +241,13 @@ export async function POST(request: Request) {
       cleaned = cleaned.replace(/\bperfect\s+skin\b/gi, '');
       cleaned = cleaned.replace(/\bflawless\b/gi, '');
       cleaned = cleaned.replace(/\bsmooth\s+skin\b/gi, '');
-      cleaned = cleaned.replace(/\b8k\s+ultra\s+sharp\b/gi, '35mm film photography');
-      cleaned = cleaned.replace(/\b8k\b/gi, '35mm film photography');
+      cleaned = cleaned.replace(/\bcinematic\s+lighting\b/gi, '');
+      cleaned = cleaned.replace(/\bstudio\b/gi, '');
+      cleaned = cleaned.replace(/\bsymmetrical\b/gi, '');
+      cleaned = cleaned.replace(/\b8k\s+ultra\s+sharp\b/gi, '');
+      cleaned = cleaned.replace(/\b8k\b/gi, '');
+      cleaned = cleaned.replace(/\bprofessional\s+photography\b/gi, '');
+      cleaned = cleaned.replace(/\bprofessional\b/gi, '');
       cleaned = cleaned.replace(/,\s*,/g, ',');
       cleaned = cleaned.replace(/\s+/g, ' ');
       return cleaned.trim();
@@ -252,7 +257,7 @@ export async function POST(request: Request) {
     let finalImageUrl = ''
     try {
       const sanitizedPrompt = cleanPrompt(generatedPrompt);
-      const suffix = `, close-up portrait, face and shoulders only, looking slightly to camera with natural candid expression, editorial photography style, shallow depth of field, warm cinematic lighting, photorealistic face, professional camera, natural skin texture with subtle pores, slight skin imperfections, natural skin variation, realistic human skin, not plastic, not perfect, subtle blemishes, natural skin tone variation, film grain, shot on Canon 5D Mark IV, 85mm f/1.4 lens, natural light, not overprocessed, no heavy retouching, raw natural beauty, hyperrealistic skin texture, 35mm film photography, detailed facial features, cinematic color grading, no blur on face`;
+      const suffix = `, close-up portrait, face and shoulders only, person slightly looking away or caught mid-moment, not staring directly at camera, candid natural expression, caught in a moment, slight natural smile or thoughtful look, not posing, unposed natural moment, candid lifestyle photography, real human moment, iPhone candid or DSLR street photography style, looks like iPhone or DSLR candid shot, casual snap, natural daylight or window light or cafe light, natural ambient illumination, no orange grading, f/1.8 natural light, natural clothing matching lifestyle - casual top, shirt, everyday outfit, lifestyle scene background - cafe, street, home, office, real-world setting, wheatish olive Indian skin tone, naturally South Asian appearance, real skin texture with varied pores, subtle blemishes, uneven skin tone, natural redness on cheeks and nose, natural imperfections, deep dark brown eyes, naturally dark iris, no blue or grey eyes, slight natural facial asymmetry, one side slightly different from other, natural random curly hair with flyaways, frizz, broken curl groups, not every curl perfectly defined, film grain, detailed facial features, no blur on face`;
       const characterPrompt = `${sanitizedPrompt}${suffix}`;
 
       const response = await openai.images.generate({
