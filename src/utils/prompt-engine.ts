@@ -154,15 +154,12 @@ export function assemblePrompt(character: Partial<Character>, sceneDescription: 
   return sanitizeScenePrompt(compiledPrompt);
 }
 
-/**
- * Maps the Next.js frontend aspect ratio parameter to the OpenAI DALL-E size string.
- */
-export function mapAspectRatioToSize(ratio: string): "1024x1024" | "1024x1792" | "1792x1024" {
+export function mapAspectRatioToSize(ratio: string): "1024x1024" | "1024x1536" | "1536x1024" {
   switch (ratio) {
     case '9:16':
-      return "1024x1792";
+      return "1024x1536";
     case '16:9':
-      return "1792x1024";
+      return "1536x1024";
     case '1:1':
     case '4:3':
     default:
