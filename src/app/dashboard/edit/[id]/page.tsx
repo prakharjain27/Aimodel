@@ -14,12 +14,16 @@ const GENDERS = [
 ]
 
 const SKIN_TONES = [
-  { name: 'Fair', hex: '#FDF0D5' },
-  { name: 'Pale/Peach', hex: '#F3C6A3' },
-  { name: 'Olive', hex: '#D5A982' },
-  { name: 'Bronze', hex: '#BA8E68' },
-  { name: 'Tan/Brown', hex: '#9C6644' },
-  { name: 'Deep', hex: '#472F22' }
+  { name: 'Porcelain', description: 'Very fair, cool undertone (Northern European)', hex: '#f6ede4' },
+  { name: 'Ivory', description: 'Fair, neutral undertone (European)', hex: '#f3e0d3' },
+  { name: 'Sand', description: 'Light, warm undertone (Mediterranean, Latin)', hex: '#eec0a6' },
+  { name: 'Beige', description: 'Light medium, neutral (East Asian, Middle Eastern)', hex: '#d5a982' },
+  { name: 'Honey', description: 'Medium, warm golden (South Asian, Latino)', hex: '#be8763' },
+  { name: 'Wheatish', description: 'Medium brown, warm (Indian, Southeast Asian)', hex: '#a27756' },
+  { name: 'Caramel', description: 'Medium dark, warm (Hispanic, Middle Eastern)', hex: '#855b41' },
+  { name: 'Bronze', description: 'Dark medium, warm (African, South Asian)', hex: '#6a4632' },
+  { name: 'Mahogany', description: 'Dark, cool undertone (African)', hex: '#523629' },
+  { name: 'Ebony', description: 'Deep dark (West African)', hex: '#291c1b' }
 ]
 
 const HAIR_COLORS = [
@@ -345,7 +349,12 @@ export default function EditCharacterPage({ params }: { params: Promise<{ id: st
       ? `, with ${freckleDensity.toLowerCase()} density freckles across the ${freckleLocations.join(', ')}`
       : ''
 
-    const constructedPrompt = `A high-fidelity photo of ${name || 'an AI Influencer'}, a ${age}-year-old ${genderTerm} model. Physical traits: ${bodyType.toLowerCase()} body type, ${height}cm tall, ${skinTone.toLowerCase()} skin tone, ${faceShape.toLowerCase()} face shape, ${hairColor.toLowerCase()} ${hairStyle.toLowerCase()} hair, and ${eyeColor.toLowerCase()} ${eyeShape.toLowerCase()}-shaped eyes. Style Details: ${faceFeaturesDesc}${frecklesDesc}, and ${tattooDesc}. Styled in signature ${styleVibe.toLowerCase()} aesthetic, captured in a ${selectedPose.toLowerCase()} pose.`
+    const selectedToneObj = SKIN_TONES.find(t => t.name === skinTone)
+    const toneString = selectedToneObj 
+      ? `${selectedToneObj.name} skin tone (${selectedToneObj.description})` 
+      : `${skinTone} skin tone`
+
+    const constructedPrompt = `A high-fidelity photo of ${name || 'an AI Influencer'}, a ${age}-year-old ${genderTerm} model. Physical traits: ${bodyType.toLowerCase()} body type, ${height}cm tall, ${toneString.toLowerCase()}, ${faceShape.toLowerCase()} face shape, ${hairColor.toLowerCase()} ${hairStyle.toLowerCase()} hair, and ${eyeColor.toLowerCase()} ${eyeShape.toLowerCase()}-shaped eyes. Style Details: ${faceFeaturesDesc}${frecklesDesc}, and ${tattooDesc}. Styled in signature ${styleVibe.toLowerCase()} aesthetic, captured in a ${selectedPose.toLowerCase()} pose.`
     setRealtimePrompt(constructedPrompt)
   }, [name, gender, age, height, skinTone, bodyType, faceShape, hairStyle, hairColor, eyeShape, eyeColor, styleVibe, hasTattoos, selectedTattooLocs, tattooStyle, tattooSize, selectedFaceFeatures, freckleDensity, freckleLocations, selectedPose])
 
@@ -813,7 +822,7 @@ export default function EditCharacterPage({ params }: { params: Promise<{ id: st
             {/* SKIN TONE */}
             <div className="space-y-3">
               <label className="text-xs font-bold text-slate-350 tracking-wide uppercase">3. Skin Tone Swatch</label>
-              <div className="flex flex-wrap gap-4 items-center">
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                 {SKIN_TONES.map((s) => {
                   const isSelected = skinTone === s.name
                   return (
@@ -821,15 +830,24 @@ export default function EditCharacterPage({ params }: { params: Promise<{ id: st
                       key={s.name}
                       type="button"
                       onClick={() => setSkinTone(s.name)}
-                      className={`w-11 h-11 rounded-full relative transition-transform hover:scale-105 active:scale-95 shadow-lg border border-slate-900/40`}
-                      style={{ backgroundColor: s.hex }}
-                      title={s.name}
+                      className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all ${
+                        isSelected 
+                          ? 'border-violet-500 bg-violet-950/20 text-violet-400' 
+                          : 'border-violet-900/10 bg-[#0A0F1E]/60 text-slate-500 hover:border-slate-800 hover:text-slate-350'
+                      }`}
+                      title={s.description}
                     >
-                      {isSelected && (
-                        <div className="absolute inset-0 m-auto w-6 h-6 rounded-full bg-slate-950/70 flex items-center justify-center border border-white/20">
-                          <Check className="h-3.5 w-3.5 text-white" />
-                        </div>
-                      )}
+                      <div
+                        className="w-10 h-10 rounded-full relative shadow-lg border border-slate-900/40 mb-2 transition-transform"
+                        style={{ backgroundColor: s.hex }}
+                      >
+                        {isSelected && (
+                          <div className="absolute inset-0 m-auto w-6 h-6 rounded-full bg-slate-950/70 flex items-center justify-center border border-white/20">
+                            <Check className="h-3.5 w-3.5 text-white" />
+                          </div>
+                        )}
+                      </div>
+                      <span className="text-[11px] font-bold tracking-wide">{s.name}</span>
                     </button>
                   )
                 })}

@@ -63,6 +63,23 @@ export async function POST(request: Request) {
       }
     }
 
+    const SKIN_TONE_DESCRIPTIONS: Record<string, string> = {
+      'Porcelain': 'Very fair, cool undertone (Northern European)',
+      'Ivory': 'Fair, neutral undertone (European)',
+      'Sand': 'Light, warm undertone (Mediterranean, Latin)',
+      'Beige': 'Light medium, neutral (East Asian, Middle Eastern)',
+      'Honey': 'Medium, warm golden (South Asian, Latino)',
+      'Wheatish': 'Medium brown, warm (Indian, Southeast Asian)',
+      'Caramel': 'Medium dark, warm (Hispanic, Middle Eastern)',
+      'Bronze': 'Dark medium, warm (African, South Asian)',
+      'Mahogany': 'Dark, cool undertone (African)',
+      'Ebony': 'Deep dark (West African)'
+    }
+
+    const skinToneName = character.skin_tone || 'Olive'
+    const skinToneDescription = SKIN_TONE_DESCRIPTIONS[skinToneName]
+    const skinToneString = skinToneDescription ? `${skinToneName} (${skinToneDescription})` : skinToneName
+
     // 4. Verify user credits (only for existing character image generations - character creation/preview is FREE)
     const isCharacterCreation = !characterId || characterId === 'new'
 
@@ -151,7 +168,7 @@ export async function POST(request: Request) {
                 - Gender: ${character.gender || 'Female'}
                 - Age: ${character.age} years old
                 - Height: ${character.height || 170} cm tall
-                - Skin Tone: ${character.skin_tone}
+                - Skin Tone: ${skinToneString}
                 - Body Type: ${character.body_type}
                 - Face Shape: ${character.face_shape || 'Oval'}
                 - Face Features: ${character.face_features || 'symmetrical'}
@@ -180,13 +197,13 @@ export async function POST(request: Request) {
       }
     } catch (visionErr) {
       console.error('OpenAI Vision prompt enhancement failed, falling back to raw prompt:', visionErr)
-      generatedPrompt = `A photorealistic image of a person, ${character.gender || 'Female'}, ${character.age} years old, height ${character.height || 170}cm, skin tone: ${character.skin_tone}, body type: ${character.body_type}, face shape: ${character.face_shape || 'Oval'}, hair style: ${character.hair_color_style}, eye color: ${character.eye_color}, tattoos: ${character.tattoos || 'None'}, style vibe: ${character.style_vibe}, in the following scene: ${scenePrompt}`
+      generatedPrompt = `A photorealistic image of a person, ${character.gender || 'Female'}, ${character.age} years old, height ${character.height || 170}cm, skin tone: ${skinToneString}, body type: ${character.body_type}, face shape: ${character.face_shape || 'Oval'}, hair style: ${character.hair_color_style}, eye color: ${character.eye_color}, tattoos: ${character.tattoos || 'None'}, style vibe: ${character.style_vibe}, in the following scene: ${scenePrompt}`
     }
 
     // 7. Call OpenAI DALL-E 3 API to generate the image
     let finalImageUrl = ''
     try {
-      const characterPrompt = generatedPrompt
+      const characterPrompt = `${generatedPrompt}, close-up portrait, face focused, chest up, professional photography, sharp facial details, neutral background, photorealistic, 8k quality, sharp facial features, professional studio lighting`
 
       const response = await openai.images.generate({
         model: "gpt-image-1",
