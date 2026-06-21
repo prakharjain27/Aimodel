@@ -164,7 +164,7 @@ export async function POST(request: Request) {
               content: [
                 {
                   type: 'text',
-                  text: `Write a high-quality, photorealistic text-to-image prompt.
+                  text: `Write a high-quality, photorealistic text-to-image prompt. Do NOT use plastic-looking words like "perfect skin", "flawless", "smooth skin", or "8k". Describe the character with natural skin texture, subtle pores, and realistic human variations.
                   Target Scene/Action: ${scenePrompt}
                   The character has these properties:
                   - Name: ${character.name}
@@ -235,10 +235,25 @@ export async function POST(request: Request) {
       generatedPrompt = `A photorealistic image of ${character.name}, a ${character.gender || 'Female'} model, ${character.age} years old, height ${character.height || 170}cm, ${toneString}, body type: ${character.body_type}, ${faceShapeString}, face details: ${character.face_features || 'symmetrical'}, ${hairString}, eye color: ${character.eye_color}, tattoos: ${character.tattoos || 'None'}, scene/action: ${scenePrompt}`
     }
 
+    // Helper to sanitize prompts from plastic/AI keywords
+    const cleanPrompt = (prompt: string): string => {
+      let cleaned = prompt;
+      cleaned = cleaned.replace(/\bperfect\s+skin\b/gi, '');
+      cleaned = cleaned.replace(/\bflawless\b/gi, '');
+      cleaned = cleaned.replace(/\bsmooth\s+skin\b/gi, '');
+      cleaned = cleaned.replace(/\b8k\s+ultra\s+sharp\b/gi, '35mm film photography');
+      cleaned = cleaned.replace(/\b8k\b/gi, '35mm film photography');
+      cleaned = cleaned.replace(/,\s*,/g, ',');
+      cleaned = cleaned.replace(/\s+/g, ' ');
+      return cleaned.trim();
+    };
+
     // 7. Call OpenAI DALL-E 3 API to generate the image
     let finalImageUrl = ''
     try {
-      const characterPrompt = `${generatedPrompt}, close-up portrait, face and shoulders only, looking slightly to camera with natural candid expression, editorial photography style, shallow depth of field, warm cinematic lighting, ultra realistic, 8k, photorealistic face, professional camera, 85mm lens portrait, natural skin texture, detailed facial features, cinematic color grading, shot on Sony A7R, no blur on face`
+      const sanitizedPrompt = cleanPrompt(generatedPrompt);
+      const suffix = `, close-up portrait, face and shoulders only, looking slightly to camera with natural candid expression, editorial photography style, shallow depth of field, warm cinematic lighting, photorealistic face, professional camera, natural skin texture with subtle pores, slight skin imperfections, natural skin variation, realistic human skin, not plastic, not perfect, subtle blemishes, natural skin tone variation, film grain, shot on Canon 5D Mark IV, 85mm f/1.4 lens, natural light, not overprocessed, no heavy retouching, raw natural beauty, hyperrealistic skin texture, 35mm film photography, detailed facial features, cinematic color grading, no blur on face`;
+      const characterPrompt = `${sanitizedPrompt}${suffix}`;
 
       const response = await openai.images.generate({
         model: "gpt-image-1",
