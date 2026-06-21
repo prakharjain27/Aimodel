@@ -186,22 +186,17 @@ export async function POST(request: Request) {
     // 7. Call OpenAI DALL-E 3 API to generate the image
     let finalImageUrl = ''
     try {
-      let dalleSize: '1024x1024' | '1024x1792' | '1792x1024' = '1024x1024'
-      if (aspectRatio === '9:16') {
-        dalleSize = '1024x1792'
-      } else if (aspectRatio === '16:9' || aspectRatio === '4:3') {
-        dalleSize = '1792x1024'
-      }
+      const characterPrompt = generatedPrompt
 
-      const dalleResponse = await openai.images.generate({
+      const response = await openai.images.generate({
         model: "dall-e-3",
-        prompt: generatedPrompt,
+        prompt: characterPrompt,
         n: 1,
-        size: dalleSize,
+        size: "1024x1024",
         quality: "standard",
       })
 
-      finalImageUrl = dalleResponse.data?.[0]?.url || ''
+      finalImageUrl = response.data?.[0]?.url || ''
       if (!finalImageUrl) {
         throw new Error('No image URL returned from DALL-E.')
       }
