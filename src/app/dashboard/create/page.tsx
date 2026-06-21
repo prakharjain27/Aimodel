@@ -12,12 +12,28 @@ const GENDERS = [
     id: 'Male', 
     name: 'Male', 
     svg: (
-      <svg viewBox="0 0 100 100" className="w-16 h-16 stroke-slate-300 fill-slate-800" strokeWidth="2.5">
-        <circle cx="50" cy="48" r="28" />
-        <path d="M50,14 C36,14 30,22 30,30 L70,30 C70,22 64,14 50,14 Z" className="fill-slate-600 stroke-none" />
-        <circle cx="40" cy="48" r="3" className="fill-slate-200 stroke-none" />
-        <circle cx="60" cy="48" r="3" className="fill-slate-200 stroke-none" />
-        <path d="M42,60 Q50,65 58,60" className="fill-none stroke-slate-200" strokeWidth="2.5" />
+      <svg viewBox="0 0 100 100" className="w-24 h-24 stroke-slate-350 fill-none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        {/* Hair */}
+        <path d="M32 30 Q50 15 68 30 Q70 25 65 20 Q50 10 35 20 Q30 25 32 30" className="fill-slate-700 stroke-none" />
+        {/* Ears */}
+        <path d="M28 45 Q24 45 28 53" />
+        <path d="M72 45 Q76 45 72 53" />
+        {/* Face Outline with Strong Jawline */}
+        <path d="M30 35 L28 50 Q28 65 38 72 L50 82 L62 72 Q72 65 72 50 L70 35 Z" className="fill-slate-800/40" />
+        {/* Neck */}
+        <path d="M42 80 L42 90 M58 80 L58 90" />
+        {/* Strong Eyebrows */}
+        <path d="M35 44 L45 42 M55 42 L65 44" strokeWidth="3" />
+        {/* Eyes */}
+        <path d="M36 49 C36 49 40 46 44 49 C44 49 40 51 36 49 Z" className="fill-slate-400 stroke-none" />
+        <path d="M56 49 C56 49 60 46 64 49 C64 49 60 51 56 49 Z" className="fill-slate-400 stroke-none" />
+        <circle cx="40" cy="49" r="1.5" className="fill-slate-100" />
+        <circle cx="60" cy="49" r="1.5" className="fill-slate-100" />
+        {/* Sharp Nose */}
+        <path d="M50 44 L48 60 L52 60" />
+        {/* Lips */}
+        <path d="M42 68 Q50 66 58 68" />
+        <path d="M44 68 Q50 71 56 68" />
       </svg>
     ) 
   },
@@ -25,12 +41,26 @@ const GENDERS = [
     id: 'Female', 
     name: 'Female', 
     svg: (
-      <svg viewBox="0 0 100 100" className="w-16 h-16 stroke-slate-300 fill-slate-850" strokeWidth="2.5">
-        <circle cx="50" cy="50" r="26" />
-        <path d="M22,50 C22,25 35,18 50,18 C65,18 78,25 78,50 C78,75 75,80 75,80 L25,80 Z" className="fill-slate-650 stroke-none" />
-        <circle cx="41" cy="50" r="3" className="fill-slate-200 stroke-none" />
-        <circle cx="59" cy="50" r="3" className="fill-slate-200 stroke-none" />
-        <path d="M44,61 Q50,66 56,61" className="fill-none stroke-slate-200" strokeWidth="2.5" />
+      <svg viewBox="0 0 100 100" className="w-24 h-24 stroke-slate-350 fill-none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        {/* Hair Background */}
+        <path d="M22 45 C15 70 24 92 24 92 C24 92 50 82 76 92 C76 92 85 70 78 45 C78 20 65 15 50 15 C35 15 22 20 22 45 Z" className="fill-slate-800" />
+        {/* Soft Face Outline */}
+        <path d="M32 38 C32 55 35 73 50 73 C65 73 68 55 68 38 C68 28 65 24 50 24 C35 24 32 28 32 38 Z" className="fill-slate-900/90" />
+        {/* Soft Eyebrows */}
+        <path d="M37 42 C40 39 43 39 45 42" strokeWidth="1.5" />
+        <path d="M55 42 C57 39 60 39 63 42" strokeWidth="1.5" />
+        {/* Eyes with Lashes */}
+        <path d="M36 48 C39 46 42 46 44 48" />
+        <path d="M35 47 L33 45 M45 47 L47 45" />
+        <path d="M56 48 C58 46 61 46 64 48" />
+        <path d="M55 47 L53 45 M65 47 L67 45" />
+        <circle cx="40" cy="48.5" r="1.5" className="fill-slate-100" />
+        <circle cx="60" cy="48.5" r="1.5" className="fill-slate-100" />
+        {/* Soft Nose */}
+        <path d="M49 53 C49 57 51 57 51 53" />
+        {/* Soft Fuller Lips */}
+        <path d="M43 62 Q50 60 57 62" />
+        <path d="M43 62 Q50 67 57 62" />
       </svg>
     ) 
   }
@@ -53,48 +83,54 @@ const FACE_SHAPES = [
   {
     id: 'Oval',
     svg: (
-      <svg viewBox="0 0 100 100" className="w-12 h-12 stroke-current fill-none" strokeWidth="2.5">
-        <path d="M50,15 C28,15 28,45 28,68 C28,84 38,86 50,86 C62,86 72,84 72,68 C72,45 72,15 50,15 Z" />
+      <svg viewBox="0 0 100 100" className="w-16 h-16 stroke-slate-350 fill-none" strokeWidth="2">
+        <path d="M50 15 C32 15 32 45 32 68 C32 82 40 85 50 85 C60 85 68 82 68 68 C68 45 68 15 50 15 Z" className="fill-slate-900/60" />
+        <path d="M40 40 L44 40 M56 40 L60 40 M50 45 L48 55 L52 55 M44 65 Q50 68 56 65" className="stroke-slate-500" strokeWidth="1.5" />
       </svg>
     )
   },
   {
     id: 'Round',
     svg: (
-      <svg viewBox="0 0 100 100" className="w-12 h-12 stroke-current fill-none" strokeWidth="2.5">
-        <path d="M50,16 C31,16 30,34 30,52 C30,70 38,80 50,80 C62,80 70,70 70,52 C70,34 69,16 50,16 Z" />
+      <svg viewBox="0 0 100 100" className="w-16 h-16 stroke-slate-350 fill-none" strokeWidth="2">
+        <path d="M50 18 C30 18 26 34 26 50 C26 66 34 82 50 82 C66 82 74 66 74 50 C74 34 70 18 50 18 Z" className="fill-slate-900/60" />
+        <path d="M40 40 L44 40 M56 40 L60 40 M50 45 L48 55 L52 55 M43 63 Q50 69 57 63" className="stroke-slate-500" strokeWidth="1.5" />
       </svg>
     )
   },
   {
     id: 'Square',
     svg: (
-      <svg viewBox="0 0 100 100" className="w-12 h-12 stroke-current fill-none" strokeWidth="2.5">
-        <path d="M50,16 C31,16 29,26 29,66 C29,81 36,82 50,82 C64,82 71,81 71,66 C71,26 69,16 50,16 Z" />
+      <svg viewBox="0 0 100 100" className="w-16 h-16 stroke-slate-350 fill-none" strokeWidth="2">
+        <path d="M50 16 C32 16 28 26 28 64 C28 78 34 80 50 80 C66 80 72 78 72 64 C72 26 68 16 50 16 Z" className="fill-slate-900/60" />
+        <path d="M40 40 L44 40 M56 40 L60 40 M50 45 L48 55 L52 55 M42 64 Q50 67 58 64" className="stroke-slate-500" strokeWidth="1.5" />
       </svg>
     )
   },
   {
     id: 'Heart',
     svg: (
-      <svg viewBox="0 0 100 100" className="w-12 h-12 stroke-current fill-none" strokeWidth="2.5">
-        <path d="M50,16 C27,13 25,34 25,54 C25,68 38,79 50,85 C62,79 75,68 75,54 C75,34 73,13 50,16 Z" />
+      <svg viewBox="0 0 100 100" className="w-16 h-16 stroke-slate-350 fill-none" strokeWidth="2">
+        <path d="M50 18 C26 15 24 36 24 54 C24 66 38 78 50 84 C62 78 76 66 76 54 C76 36 74 15 50 18 Z" className="fill-slate-900/60" />
+        <path d="M40 40 L44 40 M56 40 L60 40 M50 45 L48 55 L52 55 M44 65 Q50 67 56 65" className="stroke-slate-500" strokeWidth="1.5" />
       </svg>
     )
   },
   {
     id: 'Diamond',
     svg: (
-      <svg viewBox="0 0 100 100" className="w-12 h-12 stroke-current fill-none" strokeWidth="2.5">
-        <path d="M50,16 C33,34 26,48 26,60 C26,73 38,83 50,85 C62,83 74,73 74,60 C74,48 67,34 50,16 Z" />
+      <svg viewBox="0 0 100 100" className="w-16 h-16 stroke-slate-350 fill-none" strokeWidth="2">
+        <path d="M50 16 C30 32 26 46 26 58 C26 70 38 80 50 83 C62 80 74 70 74 58 C74 46 70 32 50 16 Z" className="fill-slate-900/60" />
+        <path d="M40 42 L44 42 M56 42 L60 42 M50 46 L48 56 L52 56 M44 65 Q50 67 56 65" className="stroke-slate-500" strokeWidth="1.5" />
       </svg>
     )
   },
   {
     id: 'Oblong',
     svg: (
-      <svg viewBox="0 0 100 100" className="w-12 h-12 stroke-current fill-none" strokeWidth="2.5">
-        <path d="M50,10 C32,10 32,24 32,74 C32,87 40,89 50,89 C60,89 68,87 68,74 C68,24 68,10 50,10 Z" />
+      <svg viewBox="0 0 100 100" className="w-16 h-16 stroke-slate-350 fill-none" strokeWidth="2">
+        <path d="M50 10 C34 10 34 24 34 74 C34 85 41 87 50 87 C59 87 66 85 66 74 C66 24 66 10 50 10 Z" className="fill-slate-900/60" />
+        <path d="M40 38 L44 38 M56 38 L60 38 M50 44 L48 56 L52 56 M43 68 Q50 71 57 68" className="stroke-slate-500" strokeWidth="1.5" />
       </svg>
     )
   }
@@ -380,105 +416,50 @@ const BODY_TYPES = [
   {
     id: 'Slim',
     svg: (
-      <svg viewBox="0 0 100 150" className="w-10 h-14 stroke-current fill-none" strokeWidth="2.5">
-        <circle cx="50" cy="20" r="9" />
-        <path d="M50,29 L50,42 M41,42 C45,45 44,70 43,90 L41,140 M59,42 C55,45 56,70 57,90 L59,140 M41,42 L59,42" />
+      <svg viewBox="0 0 100 150" className="w-12 h-18 stroke-slate-300 fill-slate-800/40" strokeWidth="2">
+        <circle cx="50" cy="20" r="8" />
+        <path d="M48 28 C45 35 44 45 44 60 C44 75 46 85 45 105 L42 145 H48 L50 110 L52 145 H58 L55 105 C54 85 56 75 56 60 C56 45 55 35 52 28 Z" />
+        <path d="M44 38 Q38 60 38 80 M56 38 Q62 60 62 80" />
       </svg>
     )
   },
   {
     id: 'Athletic',
     svg: (
-      <svg viewBox="0 0 100 150" className="w-10 h-14 stroke-current fill-none" strokeWidth="2.5">
-        <circle cx="50" cy="20" r="9" />
-        <path d="M50,29 L50,42 M38,42 Q48,47 43,80 L42,140 M62,42 Q52,47 57,80 L58,140 M38,42 L62,42" />
+      <svg viewBox="0 0 100 150" className="w-12 h-18 stroke-slate-300 fill-slate-800/40" strokeWidth="2">
+        <circle cx="50" cy="20" r="8" />
+        <path d="M48 28 C42 33 40 45 42 60 C43 72 45 80 44 105 L41 145 H47 L50 110 L53 145 H59 L56 105 C55 80 57 72 58 60 C60 45 58 33 52 28 Z" />
+        <path d="M40 33 Q34 55 35 78 M60 33 Q66 55 65 78" />
       </svg>
     )
   },
   {
     id: 'Curvy',
     svg: (
-      <svg viewBox="0 0 100 150" className="w-10 h-14 stroke-current fill-none" strokeWidth="2.5">
-        <circle cx="50" cy="20" r="9" />
-        <path d="M50,29 L50,42 M37,42 C45,45 38,72 44,92 L41,140 M63,42 C55,45 62,72 56,92 L59,140" />
+      <svg viewBox="0 0 100 150" className="w-12 h-18 stroke-slate-300 fill-slate-800/40" strokeWidth="2">
+        <circle cx="50" cy="20" r="8" />
+        <path d="M48 28 C45 35 42 45 46 65 C41 78 40 88 42 105 L39 145 H45 L50 110 L55 145 H61 L58 105 C60 88 59 78 54 65 C58 45 55 35 52 28 Z" />
+        <path d="M43 36 Q36 55 38 78 M57 36 Q64 55 62 78" />
       </svg>
     )
   },
   {
     id: 'Plus size',
     svg: (
-      <svg viewBox="0 0 100 150" className="w-10 h-14 stroke-current fill-none" strokeWidth="2.5">
-        <circle cx="50" cy="20" r="9" />
-        <path d="M50,29 L50,42 M38,42 C42,45 35,90 44,140 M62,42 C58,45 65,90 56,140" />
+      <svg viewBox="0 0 100 150" className="w-12 h-18 stroke-slate-300 fill-slate-800/40" strokeWidth="2">
+        <circle cx="50" cy="20" r="8" />
+        <path d="M48 28 C45 35 40 45 40 68 C40 85 41 98 43 110 L40 145 H47 L50 115 L53 145 H60 L57 110 C59 98 60 85 60 68 C60 45 55 35 52 28 Z" />
+        <path d="M40 38 Q34 60 36 82 M60 38 Q66 60 64 82" />
       </svg>
     )
   },
   {
     id: 'Petite',
     svg: (
-      <svg viewBox="0 0 100 150" className="w-10 h-14 stroke-current fill-none" strokeWidth="2.5">
-        <circle cx="50" cy="24" r="8.5" />
-        <path d="M50,32.5 L50,45 M41,45 C44,48 43,72 43,90 L41,130 M59,45 C56,48 57,72 57,90 L59,130" />
-      </svg>
-    )
-  }
-]
-
-const STYLE_VIBES = [
-  {
-    id: 'Cyberpunk Techwear',
-    label: 'Cyberpunk',
-    svg: (
-      <svg viewBox="0 0 100 100" className="w-12 h-12 stroke-current fill-none" strokeWidth="2.5">
-        <rect x="20" y="35" width="60" height="30" rx="6" />
-        <line x1="20" y1="50" x2="80" y2="50" />
-        <circle cx="35" cy="50" r="6" className="fill-current" />
-        <circle cx="65" cy="50" r="6" className="fill-current" />
-      </svg>
-    )
-  },
-  {
-    id: 'High-Fashion Streetwear',
-    label: 'Streetwear',
-    svg: (
-      <svg viewBox="0 0 100 100" className="w-12 h-12 stroke-current fill-none" strokeWidth="2.5">
-        <path d="M15,75 L35,55 L65,55 L85,75 Z" />
-        <circle cx="35" cy="75" r="10" />
-        <circle cx="65" cy="75" r="10" />
-      </svg>
-    )
-  },
-  {
-    id: 'Bohemian Beach',
-    label: 'Bohemian',
-    svg: (
-      <svg viewBox="0 0 100 100" className="w-12 h-12 stroke-current fill-none" strokeWidth="2">
-        <circle cx="50" cy="50" r="18" />
-        <line x1="50" y1="15" x2="50" y2="25" />
-        <line x1="50" y1="75" x2="50" y2="85" />
-        <line x1="15" y1="50" x2="25" y2="50" />
-        <line x1="75" y1="50" x2="85" y2="50" />
-      </svg>
-    )
-  },
-  {
-    id: 'Classic Minimalist',
-    label: 'Minimalist',
-    svg: (
-      <svg viewBox="0 0 100 100" className="w-12 h-12 stroke-current fill-none" strokeWidth="2.5">
-        <rect x="25" y="25" width="50" height="50" rx="4" />
-        <line x1="25" y1="25" x2="75" y2="75" />
-      </svg>
-    )
-  },
-  {
-    id: 'Y2K Retro',
-    label: 'Retro Y2K',
-    svg: (
-      <svg viewBox="0 0 100 100" className="w-12 h-12 stroke-current fill-none" strokeWidth="2">
-        <circle cx="50" cy="50" r="30" />
-        <path d="M30,50 A20,20 0 0,0 70,50" />
-        <circle cx="50" cy="50" r="8" className="fill-current" />
+      <svg viewBox="0 0 100 150" className="w-12 h-18 stroke-slate-300 fill-slate-800/40" strokeWidth="2">
+        <circle cx="50" cy="26" r="7" />
+        <path d="M48 33 C45 39 44 48 44 61 C44 74 46 82 45 100 L42 135 H48 L50 104 L52 135 H58 L55 100 C54 82 56 74 56 61 C56 48 55 39 52 33 Z" />
+        <path d="M44 42 Q39 61 39 79 M56 42 Q61 61 61 79" />
       </svg>
     )
   }
@@ -544,14 +525,14 @@ export default function CreateCharacterPage() {
       ? `, with ${freckleDensity.toLowerCase()} freckles on ${freckleLocations.join(', ')}`
       : ''
 
-    const selectedToneObj = SKIN_TONES.find(t => t.name === skinTone)
-    const toneString = selectedToneObj 
-      ? `${selectedToneObj.name} skin tone (${selectedToneObj.description})` 
-      : `${skinTone} skin tone`
+    const toneString = `extremely detailed ${skinTone.toLowerCase()} skin tone, natural skin texture with realistic ${skinTone.toLowerCase()} pigmentation`
 
-    const constructedPrompt = `A portrait photography shot of ${name || 'AI Model'}, a ${age}-year-old ${genderTerm}. Traits: ${bodyType.toLowerCase()} build, ${height}cm, ${toneString.toLowerCase()}, ${faceShape.toLowerCase()} face shape, ${hairColor.toLowerCase()} ${hairStyle.toLowerCase()} hair, and ${eyeColor.toLowerCase()} ${eyeShape.toLowerCase()} eyes. Face Details: ${faceFeaturesDesc}${frecklesDesc}, ${tattooDesc}. Styled in signature ${styleVibe.toLowerCase()} fashion.`
+    const faceShapeString = `a clear and distinct ${faceShape.toLowerCase()} face shape`
+    const hairString = `hair specifically colored ${hairColor.toLowerCase()} and styled in a ${hairStyle.toLowerCase()} haircut`
+
+    const constructedPrompt = `A portrait photography shot of ${name || 'AI Model'}, a ${age}-year-old ${genderTerm}. Traits: ${bodyType.toLowerCase()} build, ${height}cm, ${toneString}, ${faceShapeString}, ${hairString}, and ${eyeColor.toLowerCase()} ${eyeShape.toLowerCase()} eyes. Face Details: ${faceFeaturesDesc}${frecklesDesc}, ${tattooDesc}.`
     setRealtimePrompt(constructedPrompt)
-  }, [name, gender, age, height, skinTone, bodyType, faceShape, hairStyle, hairColor, eyeShape, eyeColor, eyebrows, nose, lips, styleVibe, hasTattoos, selectedTattooLocs, tattooStyle, tattooSize, selectedFaceFeatures, freckleDensity, freckleLocations])
+  }, [name, gender, age, height, skinTone, bodyType, faceShape, hairStyle, hairColor, eyeShape, eyeColor, eyebrows, nose, lips, hasTattoos, selectedTattooLocs, tattooStyle, tattooSize, selectedFaceFeatures, freckleDensity, freckleLocations])
 
   useEffect(() => {
     const checkUser = async () => {
@@ -790,9 +771,9 @@ export default function CreateCharacterPage() {
           <div className="lg:col-span-7 space-y-8 bg-slate-950/40 border border-slate-900/50 p-6 rounded-3xl backdrop-blur-xl">
             
             {/* 1. GENDER */}
-            <div className="space-y-2">
+            <div className="space-y-3">
               <label className="text-xs font-bold text-slate-400 tracking-wide uppercase">1. Gender Selection</label>
-              <div className="flex overflow-x-auto gap-4 pb-2 scrollbar-thin scrollbar-thumb-violet-900/20 scrollbar-track-transparent">
+              <div className="grid grid-cols-2 gap-4 w-full">
                 {GENDERS.map((g) => {
                   const isSelected = gender === g.id
                   return (
@@ -800,14 +781,20 @@ export default function CreateCharacterPage() {
                       key={g.id}
                       type="button"
                       onClick={() => setGender(g.id)}
-                      className={`flex-shrink-0 w-24 h-24 rounded-2xl bg-slate-900/90 border flex flex-col items-center justify-center gap-1.5 transition-all duration-300 ${
+                      className={`w-full rounded-2xl p-[2px] transition-all duration-300 ${
                         isSelected 
-                          ? 'border-violet-500 bg-violet-950/20 text-violet-400 shadow-[0_0_15px_rgba(139,92,246,0.35)] ring-2 ring-violet-500/50' 
-                          : 'border-slate-800/80 hover:border-slate-700 hover:bg-slate-900 text-slate-400'
+                          ? 'bg-gradient-to-tr from-violet-600 via-fuchsia-500 to-blue-500 shadow-[0_0_20px_rgba(139,92,246,0.4)]' 
+                          : 'bg-transparent'
                       }`}
                     >
-                      {g.svg}
-                      <span className="text-[10px] font-bold tracking-wide">{g.name}</span>
+                      <div className={`w-full rounded-2xl bg-[#0b0f1d] border flex flex-col items-center justify-center py-6 gap-3 transition-all duration-300 ${
+                        isSelected
+                          ? 'border-transparent text-white'
+                          : 'border-slate-800/80 hover:border-slate-700 text-slate-400'
+                      }`}>
+                        {g.svg}
+                        <span className="text-sm font-extrabold tracking-wide uppercase">{g.name}</span>
+                      </div>
                     </button>
                   )
                 })}
@@ -817,7 +804,7 @@ export default function CreateCharacterPage() {
             {/* 2. SKIN TONE */}
             <div className="space-y-2">
               <label className="text-xs font-bold text-slate-400 tracking-wide uppercase">2. Skin Tone</label>
-              <div className="flex overflow-x-auto gap-4 pb-2 scrollbar-thin scrollbar-thumb-violet-900/20 scrollbar-track-transparent">
+              <div className="grid grid-cols-5 gap-3 w-full">
                 {SKIN_TONES.map((s) => {
                   const isSelected = skinTone === s.name
                   return (
@@ -825,15 +812,15 @@ export default function CreateCharacterPage() {
                       key={s.name}
                       type="button"
                       onClick={() => setSkinTone(s.name)}
-                      className={`flex-shrink-0 w-20 h-20 rounded-2xl bg-slate-900/90 border flex flex-col items-center justify-center gap-1.5 transition-all duration-300 ${
+                      className={`w-full rounded-2xl py-3 border flex flex-col items-center justify-center gap-2 transition-all duration-300 ${
                         isSelected 
-                          ? 'border-violet-500 bg-violet-950/20 text-violet-400 shadow-[0_0_15px_rgba(139,92,246,0.35)] ring-2 ring-violet-500/50' 
-                          : 'border-slate-800/80 hover:border-slate-700 hover:bg-slate-900 text-slate-400'
+                          ? 'border-violet-500 bg-violet-955/20 text-violet-400 shadow-[0_0_15px_rgba(139,92,246,0.35)] ring-2 ring-violet-500/50' 
+                          : 'border-slate-800/80 bg-slate-900/90 hover:border-slate-700 text-slate-400'
                       }`}
                       title={s.description}
                     >
-                      <div className="w-8 h-8 rounded-full border border-slate-950 shadow-md" style={{ backgroundColor: s.hex }} />
-                      <span className="text-[9px] font-semibold">{s.name}</span>
+                      <div className="w-12 h-12 rounded-full border border-slate-950 shadow-md" style={{ backgroundColor: s.hex }} />
+                      <span className="text-[10px] font-extrabold text-slate-300 tracking-wide">{s.name}</span>
                     </button>
                   )
                 })}
@@ -851,9 +838,9 @@ export default function CreateCharacterPage() {
                       key={f.id}
                       type="button"
                       onClick={() => setFaceShape(f.id)}
-                      className={`flex-shrink-0 w-20 h-20 rounded-2xl bg-slate-900/90 border flex flex-col items-center justify-center gap-1.5 transition-all duration-300 ${
+                      className={`flex-shrink-0 w-24 h-24 rounded-2xl bg-slate-900/90 border flex flex-col items-center justify-center gap-1.5 transition-all duration-300 ${
                         isSelected 
-                          ? 'border-violet-500 bg-violet-950/20 text-violet-450 shadow-[0_0_15px_rgba(139,92,246,0.35)] ring-2 ring-violet-500/50' 
+                          ? 'border-violet-500 bg-violet-955/20 text-violet-450 shadow-[0_0_15px_rgba(139,92,246,0.35)] ring-2 ring-violet-500/50' 
                           : 'border-slate-800/80 hover:border-slate-700 hover:bg-slate-900 text-slate-400'
                       }`}
                     >
@@ -1018,7 +1005,7 @@ export default function CreateCharacterPage() {
             {/* 10. HAIR COLOR */}
             <div className="space-y-2">
               <label className="text-xs font-bold text-slate-400 tracking-wide uppercase">10. Hair Color</label>
-              <div className="flex overflow-x-auto gap-4 pb-2 scrollbar-thin scrollbar-thumb-violet-900/20 scrollbar-track-transparent">
+              <div className="grid grid-cols-4 gap-3 w-full">
                 {HAIR_COLORS.map((hc) => {
                   const isSelected = hairColor === hc.name
                   return (
@@ -1026,14 +1013,14 @@ export default function CreateCharacterPage() {
                       key={hc.name}
                       type="button"
                       onClick={() => setHairColor(hc.name)}
-                      className={`flex-shrink-0 w-20 h-20 rounded-2xl bg-slate-900/90 border flex flex-col items-center justify-center gap-1.5 transition-all duration-300 ${
+                      className={`w-full rounded-2xl py-3 border flex flex-col items-center justify-center gap-2 transition-all duration-300 ${
                         isSelected 
-                          ? 'border-violet-500 bg-violet-950/20 text-violet-400 shadow-[0_0_15px_rgba(139,92,246,0.35)] ring-2 ring-violet-500/50' 
-                          : 'border-slate-800/80 hover:border-slate-700 hover:bg-slate-900 text-slate-400'
+                          ? 'border-violet-500 bg-violet-955/20 text-violet-400 shadow-[0_0_15px_rgba(139,92,246,0.35)] ring-2 ring-violet-500/50' 
+                          : 'border-slate-800/80 bg-slate-900/90 hover:border-slate-700 text-slate-400'
                       }`}
                     >
-                      <div className="w-8 h-8 rounded-full border border-slate-950 shadow-md" style={{ backgroundColor: hc.hex }} />
-                      <span className="text-[10px] font-bold">{hc.name}</span>
+                      <div className="w-12 h-12 rounded-full border border-slate-950 shadow-md" style={{ backgroundColor: hc.hex }} />
+                      <span className="text-[10px] font-extrabold text-slate-300 tracking-wide">{hc.name}</span>
                     </button>
                   )
                 })}
@@ -1051,7 +1038,7 @@ export default function CreateCharacterPage() {
                       key={b.id}
                       type="button"
                       onClick={() => setBodyType(b.id)}
-                      className={`flex-shrink-0 w-20 h-20 rounded-2xl bg-slate-900/90 border flex flex-col items-center justify-center gap-1.5 transition-all duration-300 ${
+                      className={`flex-shrink-0 w-24 h-28 rounded-2xl bg-slate-900/90 border flex flex-col items-center justify-center gap-1.5 transition-all duration-300 ${
                         isSelected 
                           ? 'border-violet-500 bg-violet-955/20 text-violet-400 shadow-[0_0_15px_rgba(139,92,246,0.35)] ring-2 ring-violet-500/50' 
                           : 'border-slate-800/80 hover:border-slate-700 hover:bg-slate-900 text-slate-400'
@@ -1059,31 +1046,6 @@ export default function CreateCharacterPage() {
                     >
                       {b.svg}
                       <span className="text-[10px] font-bold">{b.id}</span>
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* 12. STYLE/VIBE */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-400 tracking-wide uppercase">12. Style & Vibe</label>
-              <div className="flex overflow-x-auto gap-4 pb-2 scrollbar-thin scrollbar-thumb-violet-900/20 scrollbar-track-transparent">
-                {STYLE_VIBES.map((vib) => {
-                  const isSelected = styleVibe === vib.id
-                  return (
-                    <button
-                      key={vib.id}
-                      type="button"
-                      onClick={() => setStyleVibe(vib.id)}
-                      className={`flex-shrink-0 w-24 h-24 rounded-2xl bg-slate-900/90 border flex flex-col items-center justify-center gap-1.5 transition-all duration-300 ${
-                        isSelected 
-                          ? 'border-violet-500 bg-violet-950/20 text-violet-400 shadow-[0_0_15px_rgba(139,92,246,0.35)] ring-2 ring-violet-500/50' 
-                          : 'border-slate-800/80 hover:border-slate-700 hover:bg-slate-900 text-slate-400'
-                      }`}
-                    >
-                      {vib.svg}
-                      <span className="text-[9px] font-bold text-center tracking-tight px-1">{vib.label}</span>
                     </button>
                   )
                 })}

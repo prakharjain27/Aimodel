@@ -200,17 +200,45 @@ export async function POST(request: Request) {
         }
       } catch (visionErr) {
         console.error('OpenAI Vision prompt enhancement failed, falling back to raw prompt:', visionErr)
-        generatedPrompt = `A photorealistic image of a person, ${character.gender || 'Female'}, ${character.age} years old, height ${character.height || 170}cm, skin tone: ${skinToneString}, body type: ${character.body_type}, face shape: ${character.face_shape || 'Oval'}, hair style: ${character.hair_color_style}, eye color: ${character.eye_color}, tattoos: ${character.tattoos || 'None'}, style vibe: ${character.style_vibe}, in the following scene: ${scenePrompt}`
+        let hairColor = 'Black'
+        let hairStyle = 'Straight'
+        if (character.hair_color_style && character.hair_color_style.includes('/')) {
+          const parts = character.hair_color_style.split('/')
+          hairColor = parts[0].trim().toLowerCase()
+          hairStyle = parts[1].trim().toLowerCase()
+        } else if (character.hair_color_style) {
+          hairStyle = character.hair_color_style.trim().toLowerCase()
+        }
+        const skinToneLower = (character.skin_tone || 'porcelain').toLowerCase()
+        const toneString = `extremely detailed ${skinToneLower} skin tone, natural skin texture with realistic ${skinToneLower} pigmentation`
+        const faceShapeString = `a clear and distinct ${(character.face_shape || 'Oval').toLowerCase()} face shape`
+        const hairString = `hair specifically colored ${hairColor} and styled in a ${hairStyle} haircut`
+
+        generatedPrompt = `A photorealistic image of a person, ${character.gender || 'Female'}, ${character.age} years old, height ${character.height || 170}cm, ${toneString}, body type: ${character.body_type}, ${faceShapeString}, ${hairString}, eye color: ${character.eye_color}, tattoos: ${character.tattoos || 'None'}, in the following scene: ${scenePrompt}`
       }
     } else {
       // Fallback text-based prompt when reference face photo is omitted
-      generatedPrompt = `A photorealistic image of ${character.name}, a ${character.gender || 'Female'} model, ${character.age} years old, height ${character.height || 170}cm, skin tone: ${skinToneString}, body type: ${character.body_type}, face shape: ${character.face_shape || 'Oval'}, face details: ${character.face_features || 'symmetrical'}, hair style: ${character.hair_color_style}, eye color: ${character.eye_color}, tattoos: ${character.tattoos || 'None'}, style vibe: ${character.style_vibe}, scene/action: ${scenePrompt}`
+      let hairColor = 'Black'
+      let hairStyle = 'Straight'
+      if (character.hair_color_style && character.hair_color_style.includes('/')) {
+        const parts = character.hair_color_style.split('/')
+        hairColor = parts[0].trim().toLowerCase()
+        hairStyle = parts[1].trim().toLowerCase()
+      } else if (character.hair_color_style) {
+        hairStyle = character.hair_color_style.trim().toLowerCase()
+      }
+      const skinToneLower = (character.skin_tone || 'porcelain').toLowerCase()
+      const toneString = `extremely detailed ${skinToneLower} skin tone, natural skin texture with realistic ${skinToneLower} pigmentation`
+      const faceShapeString = `a clear and distinct ${(character.face_shape || 'Oval').toLowerCase()} face shape`
+      const hairString = `hair specifically colored ${hairColor} and styled in a ${hairStyle} haircut`
+
+      generatedPrompt = `A photorealistic image of ${character.name}, a ${character.gender || 'Female'} model, ${character.age} years old, height ${character.height || 170}cm, ${toneString}, body type: ${character.body_type}, ${faceShapeString}, face details: ${character.face_features || 'symmetrical'}, ${hairString}, eye color: ${character.eye_color}, tattoos: ${character.tattoos || 'None'}, scene/action: ${scenePrompt}`
     }
 
     // 7. Call OpenAI DALL-E 3 API to generate the image
     let finalImageUrl = ''
     try {
-      const characterPrompt = `${generatedPrompt}, close-up portrait, face and shoulders only, looking slightly to camera with natural candid expression, editorial photography style, shallow depth of field, warm cinematic lighting, photorealistic, 8k quality`
+      const characterPrompt = `${generatedPrompt}, close-up portrait, face and shoulders only, looking slightly to camera with natural candid expression, editorial photography style, shallow depth of field, warm cinematic lighting, ultra realistic, 8k, photorealistic face, professional camera, 85mm lens portrait, natural skin texture, detailed facial features, cinematic color grading, shot on Sony A7R, no blur on face`
 
       const response = await openai.images.generate({
         model: "gpt-image-1",
