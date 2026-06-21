@@ -12,28 +12,28 @@ const GENDERS = [
     id: 'Male', 
     name: 'Male', 
     svg: (
-      <svg viewBox="0 0 100 100" className="w-24 h-24 stroke-slate-350 fill-none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg viewBox="0 0 100 100" className="w-24 h-24 fill-none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         {/* Hair */}
-        <path d="M32 30 Q50 15 68 30 Q70 25 65 20 Q50 10 35 20 Q30 25 32 30" className="fill-slate-700 stroke-none" />
+        <path d="M32 30 Q50 12 68 30 Q72 22 64 18 Q50 8 36 18 Q28 22 32 30" fill="#a855f7" fillOpacity="0.4" stroke="#a855f7" strokeWidth="2" />
         {/* Ears */}
-        <path d="M28 45 Q24 45 28 53" />
-        <path d="M72 45 Q76 45 72 53" />
+        <path d="M28 45 Q23 45 28 53" stroke="#ffffff" />
+        <path d="M72 45 Q77 45 72 53" stroke="#ffffff" />
         {/* Face Outline with Strong Jawline */}
-        <path d="M30 35 L28 50 Q28 65 38 72 L50 82 L62 72 Q72 65 72 50 L70 35 Z" className="fill-slate-800/40" />
+        <path d="M30 35 L28 50 Q28 65 38 72 L50 82 L62 72 Q72 65 72 50 L70 35 Z" fill="#ffffff" fillOpacity="0.05" stroke="#ffffff" strokeWidth="2" />
         {/* Neck */}
-        <path d="M42 80 L42 90 M58 80 L58 90" />
+        <path d="M42 80 L42 90 M58 80 L58 90" stroke="#ffffff" />
         {/* Strong Eyebrows */}
-        <path d="M35 44 L45 42 M55 42 L65 44" strokeWidth="3" />
+        <path d="M35 44 L45 42 M55 42 L65 44" stroke="#c084fc" strokeWidth="3" />
         {/* Eyes */}
-        <path d="M36 49 C36 49 40 46 44 49 C44 49 40 51 36 49 Z" className="fill-slate-400 stroke-none" />
-        <path d="M56 49 C56 49 60 46 64 49 C64 49 60 51 56 49 Z" className="fill-slate-400 stroke-none" />
-        <circle cx="40" cy="49" r="1.5" className="fill-slate-100" />
-        <circle cx="60" cy="49" r="1.5" className="fill-slate-100" />
+        <path d="M36 49 C36 49 40 46 44 49 C44 49 40 51 36 49 Z" fill="#ffffff" fillOpacity="0.2" stroke="#ffffff" strokeWidth="1.5" />
+        <path d="M56 49 C56 49 60 46 64 49 C64 49 60 51 56 49 Z" fill="#ffffff" fillOpacity="0.2" stroke="#ffffff" strokeWidth="1.5" />
+        <circle cx="40" cy="49" r="1.5" fill="#ffffff" />
+        <circle cx="60" cy="49" r="1.5" fill="#ffffff" />
         {/* Sharp Nose */}
-        <path d="M50 44 L48 60 L52 60" />
+        <path d="M50 44 L48 60 L52 60" stroke="#ffffff" />
         {/* Lips */}
-        <path d="M42 68 Q50 66 58 68" />
-        <path d="M44 68 Q50 71 56 68" />
+        <path d="M42 68 Q50 65 58 68" stroke="#c084fc" />
+        <path d="M44 68 Q50 71 56 68" stroke="#c084fc" />
       </svg>
     ) 
   },
@@ -41,26 +41,28 @@ const GENDERS = [
     id: 'Female', 
     name: 'Female', 
     svg: (
-      <svg viewBox="0 0 100 100" className="w-24 h-24 stroke-slate-350 fill-none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg viewBox="0 0 100 100" className="w-24 h-24 fill-none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         {/* Hair Background */}
-        <path d="M22 45 C15 70 24 92 24 92 C24 92 50 82 76 92 C76 92 85 70 78 45 C78 20 65 15 50 15 C35 15 22 20 22 45 Z" className="fill-slate-800" />
+        <path d="M22 45 C15 70 24 92 24 92 C24 92 50 82 76 92 C76 92 85 70 78 45 C78 20 65 15 50 15 C35 15 22 20 22 45 Z" fill="#a855f7" fillOpacity="0.3" stroke="#a855f7" strokeWidth="1.5" />
+        {/* Hair Front highlights */}
+        <path d="M30 24 Q50 12 70 24" stroke="#c084fc" strokeWidth="2" />
         {/* Soft Face Outline */}
-        <path d="M32 38 C32 55 35 73 50 73 C65 73 68 55 68 38 C68 28 65 24 50 24 C35 24 32 28 32 38 Z" className="fill-slate-900/90" />
+        <path d="M32 38 C32 55 35 73 50 73 C65 73 68 55 68 38 C68 28 65 24 50 24 C35 24 32 28 32 38 Z" fill="#ffffff" fillOpacity="0.05" stroke="#ffffff" strokeWidth="2" />
         {/* Soft Eyebrows */}
-        <path d="M37 42 C40 39 43 39 45 42" strokeWidth="1.5" />
-        <path d="M55 42 C57 39 60 39 63 42" strokeWidth="1.5" />
+        <path d="M37 42 C40 39 43 39 45 42" stroke="#c084fc" strokeWidth="2" />
+        <path d="M55 42 C57 39 60 39 63 42" stroke="#c084fc" strokeWidth="2" />
         {/* Eyes with Lashes */}
-        <path d="M36 48 C39 46 42 46 44 48" />
-        <path d="M35 47 L33 45 M45 47 L47 45" />
-        <path d="M56 48 C58 46 61 46 64 48" />
-        <path d="M55 47 L53 45 M65 47 L67 45" />
-        <circle cx="40" cy="48.5" r="1.5" className="fill-slate-100" />
-        <circle cx="60" cy="48.5" r="1.5" className="fill-slate-100" />
+        <path d="M36 48 C39 46 42 46 44 48" stroke="#ffffff" />
+        <path d="M35 47 L33 45 M45 47 L47 45" stroke="#ffffff" />
+        <path d="M56 48 C58 46 61 46 64 48" stroke="#ffffff" />
+        <path d="M55 47 L53 45 M65 47 L67 45" stroke="#ffffff" />
+        <circle cx="40" cy="48.5" r="1.5" fill="#ffffff" />
+        <circle cx="60" cy="48.5" r="1.5" fill="#ffffff" />
         {/* Soft Nose */}
-        <path d="M49 53 C49 57 51 57 51 53" />
+        <path d="M49 53 C49 57 51 57 51 53" stroke="#ffffff" />
         {/* Soft Fuller Lips */}
-        <path d="M43 62 Q50 60 57 62" />
-        <path d="M43 62 Q50 67 57 62" />
+        <path d="M43 62 Q50 60 57 62" stroke="#c084fc" fill="#c084fc" fillOpacity="0.3" />
+        <path d="M43 62 Q50 67 57 62" stroke="#c084fc" fill="#c084fc" fillOpacity="0.3" />
       </svg>
     ) 
   }
@@ -83,54 +85,58 @@ const FACE_SHAPES = [
   {
     id: 'Oval',
     svg: (
-      <svg viewBox="0 0 100 100" className="w-16 h-16 stroke-slate-350 fill-none" strokeWidth="2">
-        <path d="M50 15 C32 15 32 45 32 68 C32 82 40 85 50 85 C60 85 68 82 68 68 C68 45 68 15 50 15 Z" className="fill-slate-900/60" />
-        <path d="M40 40 L44 40 M56 40 L60 40 M50 45 L48 55 L52 55 M44 65 Q50 68 56 65" className="stroke-slate-500" strokeWidth="1.5" />
+      <svg viewBox="0 0 100 100" className="w-16 h-16 fill-none" strokeWidth="2">
+        <path d="M50 15 C32 15 32 45 32 68 C32 82 40 85 50 85 C60 85 68 82 68 68 C68 45 68 15 50 15 Z" fill="#a855f7" fillOpacity="0.1" stroke="#ffffff" />
+        <path d="M40 42 H44 M56 42 H60 M50 47 L48 55 H52 M43 65 Q50 68 57 65" stroke="#c084fc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     )
   },
   {
     id: 'Round',
     svg: (
-      <svg viewBox="0 0 100 100" className="w-16 h-16 stroke-slate-350 fill-none" strokeWidth="2">
-        <path d="M50 18 C30 18 26 34 26 50 C26 66 34 82 50 82 C66 82 74 66 74 50 C74 34 70 18 50 18 Z" className="fill-slate-900/60" />
-        <path d="M40 40 L44 40 M56 40 L60 40 M50 45 L48 55 L52 55 M43 63 Q50 69 57 63" className="stroke-slate-500" strokeWidth="1.5" />
+      <svg viewBox="0 0 100 100" className="w-16 h-16 fill-none" strokeWidth="2">
+        <path d="M50 15 C26 15 24 35 24 50 C24 65 30 85 50 85 C70 85 76 65 76 50 C76 35 74 15 50 15 Z" fill="#a855f7" fillOpacity="0.1" stroke="#ffffff" />
+        <path d="M29 55 Q35 62 42 62 M71 55 Q65 62 58 62" stroke="#c084fc" strokeWidth="1" opacity="0.7" />
+        <path d="M40 42 H44 M56 42 H60 M50 47 L48 55 H52 M43 65 Q50 68 57 65" stroke="#c084fc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     )
   },
   {
     id: 'Square',
     svg: (
-      <svg viewBox="0 0 100 100" className="w-16 h-16 stroke-slate-350 fill-none" strokeWidth="2">
-        <path d="M50 16 C32 16 28 26 28 64 C28 78 34 80 50 80 C66 80 72 78 72 64 C72 26 68 16 50 16 Z" className="fill-slate-900/60" />
-        <path d="M40 40 L44 40 M56 40 L60 40 M50 45 L48 55 L52 55 M42 64 Q50 67 58 64" className="stroke-slate-500" strokeWidth="1.5" />
+      <svg viewBox="0 0 100 100" className="w-16 h-16 fill-none" strokeWidth="2">
+        <path d="M50 16 C32 16 30 26 30 55 L30 74 Q30 82 40 82 L50 82 L60 82 Q70 82 70 74 L70 55 C70 26 68 16 50 16 Z" fill="#a855f7" fillOpacity="0.1" stroke="#ffffff" />
+        <path d="M30 65 L36 74 M70 65 L64 74" stroke="#c084fc" strokeWidth="1.5" opacity="0.8" />
+        <path d="M40 42 H44 M56 42 H60 M50 47 L48 55 H52 M43 65 Q50 68 57 65" stroke="#c084fc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     )
   },
   {
     id: 'Heart',
     svg: (
-      <svg viewBox="0 0 100 100" className="w-16 h-16 stroke-slate-350 fill-none" strokeWidth="2">
-        <path d="M50 18 C26 15 24 36 24 54 C24 66 38 78 50 84 C62 78 76 66 76 54 C76 36 74 15 50 18 Z" className="fill-slate-900/60" />
-        <path d="M40 40 L44 40 M56 40 L60 40 M50 45 L48 55 L52 55 M44 65 Q50 67 56 65" className="stroke-slate-500" strokeWidth="1.5" />
+      <svg viewBox="0 0 100 100" className="w-16 h-16 fill-none" strokeWidth="2">
+        <path d="M50 18 C26 14 24 35 24 50 C24 64 38 78 50 85 C62 78 76 64 76 50 C76 35 74 14 50 18 Z" fill="#a855f7" fillOpacity="0.1" stroke="#ffffff" />
+        <path d="M40 76 Q50 80 60 76" stroke="#c084fc" strokeWidth="1" opacity="0.6" />
+        <path d="M40 42 H44 M56 42 H60 M50 47 L48 55 H52 M43 65 Q50 68 57 65" stroke="#c084fc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     )
   },
   {
     id: 'Diamond',
     svg: (
-      <svg viewBox="0 0 100 100" className="w-16 h-16 stroke-slate-350 fill-none" strokeWidth="2">
-        <path d="M50 16 C30 32 26 46 26 58 C26 70 38 80 50 83 C62 80 74 70 74 58 C74 46 70 32 50 16 Z" className="fill-slate-900/60" />
-        <path d="M40 42 L44 42 M56 42 L60 42 M50 46 L48 56 L52 56 M44 65 Q50 67 56 65" className="stroke-slate-500" strokeWidth="1.5" />
+      <svg viewBox="0 0 100 100" className="w-16 h-16 fill-none" strokeWidth="2">
+        <path d="M50 15 C38 28 26 40 26 52 C26 64 38 76 50 85 C62 76 74 64 74 52 C74 40 62 28 50 15 Z" fill="#a855f7" fillOpacity="0.1" stroke="#ffffff" />
+        <path d="M26 52 L34 52 M74 52 L66 52" stroke="#c084fc" strokeWidth="1.5" opacity="0.8" />
+        <path d="M40 42 H44 M56 42 H60 M50 47 L48 55 H52 M43 65 Q50 68 57 65" stroke="#c084fc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     )
   },
   {
     id: 'Oblong',
     svg: (
-      <svg viewBox="0 0 100 100" className="w-16 h-16 stroke-slate-350 fill-none" strokeWidth="2">
-        <path d="M50 10 C34 10 34 24 34 74 C34 85 41 87 50 87 C59 87 66 85 66 74 C66 24 66 10 50 10 Z" className="fill-slate-900/60" />
-        <path d="M40 38 L44 38 M56 38 L60 38 M50 44 L48 56 L52 56 M43 68 Q50 71 57 68" className="stroke-slate-500" strokeWidth="1.5" />
+      <svg viewBox="0 0 100 100" className="w-16 h-16 fill-none" strokeWidth="2">
+        <path d="M50 10 C34 10 34 24 34 74 C34 85 41 87 50 87 C59 87 66 85 66 74 C66 24 66 10 50 10 Z" fill="#a855f7" fillOpacity="0.1" stroke="#ffffff" />
+        <path d="M40 38 H44 M56 38 H60 M50 44 L48 56 H52 M43 68 Q50 71 57 68" stroke="#c084fc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     )
   }
@@ -250,40 +256,44 @@ const NOSES = [
   {
     id: 'Straight',
     svg: (
-      <svg viewBox="0 0 40 40" className="w-8 h-8 stroke-current fill-none" strokeWidth="2.5">
-        <path d="M16,10 L16,28 Q16,32 20,32 L24,32" />
+      <svg viewBox="0 0 40 40" className="w-8 h-8 fill-none" strokeWidth="2.5">
+        <path d="M16 10 L16 28 Q16 32 20 32 L24 32" stroke="#ffffff" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     )
   },
   {
     id: 'Button',
     svg: (
-      <svg viewBox="0 0 40 40" className="w-8 h-8 stroke-current fill-none" strokeWidth="2.5">
-        <path d="M18,15 L18,28 Q20,32 22,30 Q24,28 26,28" />
+      <svg viewBox="0 0 40 40" className="w-8 h-8 fill-none" strokeWidth="2.5">
+        <path d="M18 12 L18 26 Q18 32 22 30 Q26 28 26 24" stroke="#ffffff" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="22" cy="29" r="2" stroke="#c084fc" fill="#c084fc" />
       </svg>
     )
   },
   {
     id: 'Turned Up',
     svg: (
-      <svg viewBox="0 0 40 40" className="w-8 h-8 stroke-current fill-none" strokeWidth="2.5">
-        <path d="M15,10 L15,26 Q15,30 20,29 Q25,27 25,24" />
+      <svg viewBox="0 0 40 40" className="w-8 h-8 fill-none" strokeWidth="2.5">
+        <path d="M15 10 L15 26 Q15 31 20 30 Q25 28 25 24" stroke="#ffffff" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M20 30 Q22 26 24 28" stroke="#c084fc" strokeLinecap="round" />
       </svg>
     )
   },
   {
     id: 'Hooked',
     svg: (
-      <svg viewBox="0 0 40 40" className="w-8 h-8 stroke-current fill-none" strokeWidth="2.5">
-        <path d="M16,10 Q20,18 16,26 Q15,30 22,30" />
+      <svg viewBox="0 0 40 40" className="w-8 h-8 fill-none" strokeWidth="2.5">
+        <path d="M16 10 Q22 18 16 26 Q15 30 22 30" stroke="#ffffff" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M16 22 Q18 24 16 26" stroke="#c084fc" strokeLinecap="round" />
       </svg>
     )
   },
   {
     id: 'Flat',
     svg: (
-      <svg viewBox="0 0 40 40" className="w-8 h-8 stroke-current fill-none" strokeWidth="2.5">
-        <path d="M14,15 L14,28 L26,28" />
+      <svg viewBox="0 0 40 40" className="w-8 h-8 fill-none" strokeWidth="2.5">
+        <path d="M14 15 L14 28 L26 28" stroke="#ffffff" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M18 28 L18 22" stroke="#c084fc" strokeLinecap="round" />
       </svg>
     )
   }
@@ -337,65 +347,69 @@ const HAIR_STYLES = [
   {
     id: 'Straight',
     svg: (
-      <svg viewBox="0 0 100 100" className="w-10 h-10 stroke-current fill-none" strokeWidth="2.5">
-        <path d="M50,15 C30,15 25,30 25,60 M75,60 C75,30 70,15 50,15" />
-        <line x1="35" y1="35" x2="35" y2="75" />
-        <line x1="50" y1="20" x2="50" y2="80" />
-        <line x1="65" y1="35" x2="65" y2="75" />
+      <svg viewBox="0 0 100 100" className="w-10 h-10 fill-none" strokeWidth="2.5">
+        <path d="M50 15 C30 15 25 30 25 60 M75 60 C75 30 70 15 50 15" stroke="#ffffff" />
+        <line x1="35" y1="35" x2="35" y2="75" stroke="#c084fc" />
+        <line x1="50" y1="20" x2="50" y2="80" stroke="#ffffff" />
+        <line x1="65" y1="35" x2="65" y2="75" stroke="#c084fc" />
       </svg>
     )
   },
   {
     id: 'Wavy',
     svg: (
-      <svg viewBox="0 0 100 100" className="w-10 h-10 stroke-current fill-none" strokeWidth="2.5">
-        <path d="M50,15 C30,15 25,30 25,50 C25,65 30,70 30,80" />
-        <path d="M75,50 C75,30 70,15 50,15 C50,15 55,40 55,55 C55,70 50,75 50,80" />
-        <path d="M40,30 Q35,45 42,60 T35,80" />
+      <svg viewBox="0 0 100 100" className="w-10 h-10 fill-none" strokeWidth="2.5">
+        <path d="M50 15 C30 15 25 30 25 50 C25 65 30 70 30 80" stroke="#ffffff" />
+        <path d="M75 50 C75 30 70 15 50 15 C50 15 55 40 55 55 C55 70 50 75 50 80" stroke="#ffffff" />
+        <path d="M40 30 Q35 45 42 60 T35 80" stroke="#c084fc" />
       </svg>
     )
   },
   {
     id: 'Curly',
     svg: (
-      <svg viewBox="0 0 100 100" className="w-10 h-10 stroke-current fill-none" strokeWidth="2.5">
-        <path d="M50,15 C35,15 32,25 32,35 Q32,45 35,48 T32,60 Q32,70 36,75" />
-        <path d="M68,35 Q68,45 65,48 T68,60 Q68,70 64,75" />
+      <svg viewBox="0 0 100 100" className="w-10 h-10 fill-none" strokeWidth="2.5">
+        <path d="M50 15 C35 15 32 25 32 35 Q32 45 35 48 T32 60 Q32 70 36 75" stroke="#ffffff" strokeLinecap="round" />
+        <path d="M68 35 Q68 45 65 48 T68 60 Q68 70 64 75" stroke="#ffffff" strokeLinecap="round" />
+        <path d="M50 25 Q45 35 48 45 T46 65" stroke="#c084fc" strokeLinecap="round" />
       </svg>
     )
   },
   {
     id: 'Bun',
     svg: (
-      <svg viewBox="0 0 100 100" className="w-10 h-10 stroke-current fill-none" strokeWidth="2.5">
-        <circle cx="50" cy="22" r="11" />
-        <path d="M50,36 C32,36 28,45 28,70 C28,82 35,84 50,84 C65,84 72,82 72,70 Z" />
+      <svg viewBox="0 0 100 100" className="w-10 h-10 fill-none" strokeWidth="2.5">
+        <circle cx="50" cy="22" r="11" stroke="#c084fc" fill="#c084fc" fillOpacity="0.2" />
+        <path d="M50 36 C32 36 28 45 28 70 C28 82 35 84 50 84 C65 84 72 82 72 70 Z" stroke="#ffffff" />
+        <path d="M40 50 C45 45 55 45 60 50" stroke="#c084fc" />
       </svg>
     )
   },
   {
     id: 'Ponytail',
     svg: (
-      <svg viewBox="0 0 100 100" className="w-10 h-10 stroke-current fill-none" strokeWidth="2.5">
-        <path d="M50,20 C32,20 28,30 28,55 C28,68 38,70 50,70 C62,70 72,68 72,55 Z" />
-        <path d="M50,68 C50,68 62,75 58,90 C54,80 50,75 50,68 Z" />
+      <svg viewBox="0 0 100 100" className="w-10 h-10 fill-none" strokeWidth="2.5">
+        <path d="M50 20 C32 20 28 30 28 55 C28 68 38 70 50 70 C62 70 72 68 72 55 Z" stroke="#ffffff" />
+        <path d="M50 68 C50 68 65 75 60 90 C55 80 50 75 50 68 Z" stroke="#c084fc" fill="#c084fc" fillOpacity="0.2" />
       </svg>
     )
   },
   {
     id: 'Short',
     svg: (
-      <svg viewBox="0 0 100 100" className="w-10 h-10 stroke-current fill-none" strokeWidth="2.5">
-        <path d="M50,18 C35,18 32,25 32,45 C38,40 42,42 50,38 C58,42 62,40 68,45 C68,25 65,18 50,18 Z" />
+      <svg viewBox="0 0 100 100" className="w-10 h-10 fill-none" strokeWidth="2.5">
+        <path d="M50 18 C35 18 32 25 32 45 C38 40 42 42 50 38 C58 42 62 40 68 45 C68 25 65 18 50 18 Z" stroke="#ffffff" />
+        <path d="M42 28 Q50 33 58 28" stroke="#c084fc" />
       </svg>
     )
   },
   {
     id: 'Bob',
     svg: (
-      <svg viewBox="0 0 100 100" className="w-10 h-10 stroke-current fill-none" strokeWidth="2.5">
-        <path d="M50,18 C30,18 25,30 25,62 M75,62 C75,30 70,18 50,18" />
-        <path d="M25,50 C30,55 35,50 35,62" />
+      <svg viewBox="0 0 100 100" className="w-10 h-10 fill-none" strokeWidth="2.5">
+        <path d="M50 18 C30 18 25 30 25 62 M75 62 C75 30 70 18 50 18" stroke="#ffffff" />
+        <path d="M25 50 C30 55 35 50 35 62" stroke="#c084fc" />
+        <path d="M75 50 C70 55 65 50 65 62" stroke="#c084fc" />
       </svg>
     )
   }
@@ -416,50 +430,55 @@ const BODY_TYPES = [
   {
     id: 'Slim',
     svg: (
-      <svg viewBox="0 0 100 150" className="w-12 h-18 stroke-slate-300 fill-slate-800/40" strokeWidth="2">
-        <circle cx="50" cy="20" r="8" />
-        <path d="M48 28 C45 35 44 45 44 60 C44 75 46 85 45 105 L42 145 H48 L50 110 L52 145 H58 L55 105 C54 85 56 75 56 60 C56 45 55 35 52 28 Z" />
-        <path d="M44 38 Q38 60 38 80 M56 38 Q62 60 62 80" />
+      <svg viewBox="0 0 100 150" className="w-12 h-18 fill-none" strokeWidth="2">
+        <circle cx="50" cy="20" r="8" stroke="#ffffff" />
+        <path d="M48 28 C46 32 45 42 45 60 C45 75 46 85 45 105 L43 145 H48 L50 110 L52 145 H57 L55 105 C54 85 55 75 55 60 C55 42 54 32 52 28 Z" stroke="#ffffff" fill="#a855f7" fillOpacity="0.1" />
+        <path d="M45 34 Q40 55 40 75 M55 34 Q60 55 60 75" stroke="#c084fc" />
       </svg>
     )
   },
   {
     id: 'Athletic',
     svg: (
-      <svg viewBox="0 0 100 150" className="w-12 h-18 stroke-slate-300 fill-slate-800/40" strokeWidth="2">
-        <circle cx="50" cy="20" r="8" />
-        <path d="M48 28 C42 33 40 45 42 60 C43 72 45 80 44 105 L41 145 H47 L50 110 L53 145 H59 L56 105 C55 80 57 72 58 60 C60 45 58 33 52 28 Z" />
-        <path d="M40 33 Q34 55 35 78 M60 33 Q66 55 65 78" />
+      <svg viewBox="0 0 100 150" className="w-12 h-18 fill-none" strokeWidth="2">
+        <circle cx="50" cy="20" r="8" stroke="#ffffff" />
+        <path d="M48 28 C45 30 36 33 36 48 C36 60 43 70 43 85 L41 145 H46 L50 110 L54 145 H59 L57 85 C57 70 64 60 64 48 C64 33 55 30 52 28 Z" stroke="#ffffff" fill="#a855f7" fillOpacity="0.1" />
+        <path d="M36 38 Q32 58 32 78 M64 38 Q68 58 68 78" stroke="#ffffff" />
+        <path d="M40 45 Q50 50 60 45" stroke="#c084fc" strokeWidth="1.5" />
+        <path d="M46 55 H54 M45 62 H55 M46 69 H54" stroke="#c084fc" strokeWidth="1.5" />
       </svg>
     )
   },
   {
     id: 'Curvy',
     svg: (
-      <svg viewBox="0 0 100 150" className="w-12 h-18 stroke-slate-300 fill-slate-800/40" strokeWidth="2">
-        <circle cx="50" cy="20" r="8" />
-        <path d="M48 28 C45 35 42 45 46 65 C41 78 40 88 42 105 L39 145 H45 L50 110 L55 145 H61 L58 105 C60 88 59 78 54 65 C58 45 55 35 52 28 Z" />
-        <path d="M43 36 Q36 55 38 78 M57 36 Q64 55 62 78" />
+      <svg viewBox="0 0 100 150" className="w-12 h-18 fill-none" strokeWidth="2">
+        <circle cx="50" cy="20" r="8" stroke="#ffffff" />
+        <path d="M48 28 C45 31 38 35 38 46 C38 54 44 60 44 68 C44 76 36 86 36 102 L38 145 H43 L50 110 L57 145 H62 L64 102 C64 86 56 76 56 68 C56 60 62 54 62 46 C62 35 55 31 52 28 Z" stroke="#ffffff" fill="#a855f7" fillOpacity="0.1" />
+        <path d="M38 36 Q32 55 35 75 M62 36 Q68 55 65 75" stroke="#ffffff" />
+        <path d="M42 46 Q50 51 58 46" stroke="#c084fc" strokeWidth="1.5" />
       </svg>
     )
   },
   {
     id: 'Plus size',
     svg: (
-      <svg viewBox="0 0 100 150" className="w-12 h-18 stroke-slate-300 fill-slate-800/40" strokeWidth="2">
-        <circle cx="50" cy="20" r="8" />
-        <path d="M48 28 C45 35 40 45 40 68 C40 85 41 98 43 110 L40 145 H47 L50 115 L53 145 H60 L57 110 C59 98 60 85 60 68 C60 45 55 35 52 28 Z" />
-        <path d="M40 38 Q34 60 36 82 M60 38 Q66 60 64 82" />
+      <svg viewBox="0 0 100 150" className="w-12 h-18 fill-none" strokeWidth="2">
+        <circle cx="50" cy="20" r="8" stroke="#ffffff" />
+        <path d="M48 28 C44 31 35 36 35 52 C35 70 38 88 38 106 L39 145 H44 L50 112 L56 145 H61 L62 106 C62 88 65 70 65 52 C65 36 56 31 52 28 Z" stroke="#ffffff" fill="#a855f7" fillOpacity="0.1" />
+        <path d="M35 38 Q28 60 32 80 M65 38 Q72 60 68 80" stroke="#ffffff" />
+        <path d="M39 65 Q50 74 61 65" stroke="#c084fc" strokeWidth="1.5" />
       </svg>
     )
   },
   {
     id: 'Petite',
     svg: (
-      <svg viewBox="0 0 100 150" className="w-12 h-18 stroke-slate-300 fill-slate-800/40" strokeWidth="2">
-        <circle cx="50" cy="26" r="7" />
-        <path d="M48 33 C45 39 44 48 44 61 C44 74 46 82 45 100 L42 135 H48 L50 104 L52 135 H58 L55 100 C54 82 56 74 56 61 C56 48 55 39 52 33 Z" />
-        <path d="M44 42 Q39 61 39 79 M56 42 Q61 61 61 79" />
+      <svg viewBox="0 0 100 150" className="w-12 h-18 fill-none" strokeWidth="2">
+        <circle cx="50" cy="26" r="8" stroke="#ffffff" />
+        <path d="M48 35 C46 39 44 46 44 58 C44 70 45 78 45 96 L43 132 H47 L50 101 L53 132 H57 L55 96 C55 78 56 70 56 58 C56 46 54 39 52 35 Z" stroke="#ffffff" fill="#a855f7" fillOpacity="0.1" />
+        <path d="M44 40 Q39 58 39 74 M56 40 Q61 58 61 74" stroke="#ffffff" />
+        <path d="M45 46 Q50 50 55 46" stroke="#c084fc" strokeWidth="1.5" />
       </svg>
     )
   }
