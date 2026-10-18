@@ -33,3 +33,37 @@ natural texture. Par ye abhi tak final nahi hai: full-res pe
 - **03 aur 05 abhi bhi thode "street-style fashion shoot" lagte hain**, candid snap nahi
 - Kaan ki piercings (left 2 / right 1), pores, catchlights, ungliyan — **preview pe verify
   nahi ho sakte**, full-res download karke dekhna padega
+
+---
+
+## Round 2 — depth of field fix
+
+Feedback: *"blur nahi hai"* — background out of focus nahi tha, sab flat sharp tha.
+
+| # | File | Canva link | Reference used? |
+|---|---|---|---|
+| 06 | `06-hero-DOF-cafe.jpg` | https://www.canva.com/M/MAHYVRLz2Ts | — (text only) |
+| 07 | `07-hero-DOF-tight-BEST.jpg` | https://www.canva.com/M/MAHYVcReCk0 | — (text only) |
+| 08 | `08-full-body-DOF.jpg` | https://www.canva.com/M/MAHYVhZNjXo | ✅ 07 as reference |
+
+### Natural blur vs portrait-mode blur
+
+Ye distinction zaroori hai:
+
+- **Natural optical blur = real.** Blur distance ke saath **gradually** badhta hai. Paas ki
+  cheez halki soft, door ki poori dissolved. Baal ke flyaway strands dheere-dheere background
+  mein ghul jaate hain.
+- **Portrait-mode fake bokeh = giveaway.** Baal ke around ek **sharp cutout edge** hota hai,
+  aur poora background uniformly blur hota hai depth ke hisaab se nahi.
+
+Prompt mein maangna hai: focal plane kahan hai, kya sharp hai, kya soft hai, aur **explicitly
+mana karna hai** cutout edge / portrait mode. Sirf "blurred background" likhne se Round 1
+wala flat result aata hai.
+
+### Status
+
+**`07-hero-DOF-tight-BEST.jpg` ab hero candidate hai** — background poora dissolve hua,
+skin texture saaf, mole dikh raha hai, expression flat aur natural.
+`01` ko replace karta hai.
+
+Full-res download karke `03-realism-checklist.md` chalana abhi bhi baaki hai.
